@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30.0)
 project(SMTP)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 find_package(GTest 1.15.2 CONFIG)
 if(NOT GTest_FOUND)
