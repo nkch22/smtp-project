@@ -1,0 +1,41 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 30
+  },
+  "configurePresets": [
+    {
+      "name": "DebugASan",
+      "description": "Debug build with address sanitizers",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "hidden": false,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ASAN": "TRUE"
+      }
+    },
+    {
+      "name": "DebugTSan",
+      "description": "Debug build with thread sanitizers",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "hidden": false,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TSAN": "TRUE"
+      }
+    },
+    {
+      "name": "Release",
+      "description": "Release build",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "hidden": false,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}
