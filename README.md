@@ -29,3 +29,20 @@ This will configure the Git hooks and make the pre-commit hook executable.
 - Make the pre-commit hook executable, ensuring linter and formatter are run before each commit.
 
 Once the setup is complete, the pre-commit hook will automatically trigger the linters (such as `clang-tidy` and `clang-format`) whenever you try to commit changes to the repository.
+
+## Available Build Presets
+
+### DebugASan
+- Debug build with address sanitizers (ASan).
+
+### DebugTSan
+- Debug build with thread sanitizers (TSan).
+
+### Release
+- Release build with no sanitizers enabled. 
+
+To build with a specific preset, you can run the following command:
+```bash
+cmake --preset <PresetName>
+cmake --build build/<PresetName>
+```
