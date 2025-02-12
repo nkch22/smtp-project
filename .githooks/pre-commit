@@ -18,7 +18,8 @@ done
 # Run clang-tidy (modify this command according to your project setup)
 clang_tidy_errors=0
 for file in $FILES; do
-    clang-tidy "$file" -- -I./include -std=c++20 || clang_tidy_errors=1
+    echo "$file"
+    clang-tidy "$file" || clang_tidy_errors=1
 done
 
 if [[ $clang_tidy_errors -ne 0 ]]; then

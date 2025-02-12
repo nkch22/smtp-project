@@ -1,34 +1,3 @@
-
-Skip to content
-GitLab
-
-    Why GitLab
-    Pricing
-    Explore
-
-    Sign in
-
-Primary navigation
-Project
-
-    C
-    concurrency-course
-
-    Roman Lipovsky
-    concurrency-course
-
-    concurrency-course
-    .clang-tidy
-
-.clang-tidy
-Roman Lipovsky's avatar
-workaround for https://github.com/llvm/llvm-project/issues/46097
-Roman Lipovsky authored 2 years ago
-2cab032e
-.clang-tidy
-1.97 KiB
-
----
 Checks: '-*,cppcoreguidelines-avoid-goto,cppcoreguidelines-pro-type-const-cast, google-runtime-int, modernize-use-nullptr, readability-braces-around-statements, readability-container-size-empty, readability-redundant-control-flow, readability-identifier-naming, readability-simplify-boolean-expr, google-build-using-namespace, readability-implicit-bool-conversion, google-explicit-constructor'
 HeaderFilterRegex: '\.hpp$'
 WarningsAsErrors: '*'
