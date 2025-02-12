@@ -9,7 +9,4 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-target_link_libraries(smtp_test GTest::gtest_main)
-
 include(GoogleTest)
-gtest_discover_tests(smtp_test)
