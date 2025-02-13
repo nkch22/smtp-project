@@ -15,7 +15,6 @@ include(FetchContent)
 
 project_log("FetchContent: asio")
 
-set(FETCHCONTENT_QUIET FALSE)
 FetchContent_Declare(
         asio
         GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
