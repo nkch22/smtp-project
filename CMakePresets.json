@@ -55,17 +55,32 @@
         }
     },
     {
-        "name": "x64-debug",
-        "displayName": "x64 Debug",
-        "inherits": "windows-base",
-        "architecture": {
-            "value": "x64",
-            "strategy": "external"
-        },
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Debug"
-        }
+      "name": "x64-debug-asan",
+      "displayName": "x64 Debug",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ASAN": "TRUE"
+      }
     },
+    {
+      "name": "x64-debug-tsan",
+      "displayName": "x64 Debug",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TSAN": "TRUE"
+      }
+    },
+
     {
         "name": "x64-release",
         "displayName": "x64 Release",
@@ -75,7 +90,7 @@
         }
     },
     {
-        "name": "x86-debug",
+        "name": "x86-debug-asan",
         "displayName": "x86 Debug",
         "inherits": "windows-base",
         "architecture": {
@@ -83,8 +98,22 @@
             "strategy": "external"
         },
         "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Debug"
+            "CMAKE_BUILD_TYPE": "Debug",
+            "ASAN": "TRUE"
         }
+    },
+    {
+      "name": "x86-debug-tsan",
+      "displayName": "x86 Debug",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TSAN": "TRUE"
+      }
     },
     {
         "name": "x86-release",
