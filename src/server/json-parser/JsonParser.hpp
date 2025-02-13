@@ -34,6 +34,9 @@ class JSON {
   const Object& AsObject() const;
   const Value& GetValue() const;
 
+ public:
+  const JSON& operator[](const std::string& key) const;
+
  private:
   Value value_;
 };

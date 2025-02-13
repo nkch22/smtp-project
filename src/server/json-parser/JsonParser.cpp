@@ -353,3 +353,12 @@ void JSONParser::PrintJSON(const JSON& value, int indent) const {
     }
   }
 }
+
+const JSON& JSON::operator[](const std::string& key) const {
+  const Object& obj = AsObject();
+  auto it = obj.find(key);
+  if (it == obj.end()) {
+    throw std::runtime_error("Key not found: " + key);
+  }
+  return it->second;
+}
