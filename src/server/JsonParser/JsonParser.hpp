@@ -45,9 +45,7 @@ class JSONParser {
  public:
   explicit JSONParser(const std::string& file_path);
 
- public:
   JSON Parse();
-  void PrintJSON(const JSON& value, int indent) const;
 
  private:
   void SkipWhitespace();

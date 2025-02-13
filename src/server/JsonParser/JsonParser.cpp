@@ -302,65 +302,6 @@ JSON JSONParser::Parse() {
   return result;
 }
 
-void JSONParser::PrintJSON(const JSON& value, int indent) const {
-  std::string indent_str(indent, ' ');
-
-  switch (value.GetType()) {
-    case JSON::Type::Null: {
-      std::cout << "null";
-      break;
-    }
-    case JSON::Type::Bool: {
-      std::cout << (value.AsBool() ? "true" : "false");
-      break;
-    }
-    case JSON::Type::Number: {
-      std::cout << value.AsNumber();
-      break;
-    }
-    case JSON::Type::String: {
-      std::cout << "\"" << value.AsString() << "\"";
-      break;
-    }
-    case JSON::Type::Array: {
-      std::cout << "[\n";
-      const auto& arr = value.AsArray();
-
-      for (size_t i = 0; i < arr.size(); i++) {
-        std::cout << indent_str << "  ";
-        PrintJSON(arr[i], indent + 2);
-
-        if (i != arr.size() - 1) {
-          std::cout << ",";
-        }
-        std::cout << "\n";
-      }
-      std::cout << indent_str << "]";
-      break;
-    }
-    case JSON::Type::Object: {
-      std::cout << "{\n";
-
-      const auto& obj = value.AsObject();
-      bool first = true;
-
-      for (const auto& pair : obj) {
-        if (!first) {
-          std::cout << ",\n";
-        }
-        std::cout << indent_str << "  \"" << pair.first << "\": ";
-        PrintJSON(pair.second, indent + 2);
-        first = false;
-      }
-      std::cout << "\n" << indent_str << "}";
-      break;
-    }
-    default: {
-      throw std::runtime_error("Unknown JSON type encountered");
-    }
-  }
-}
-
 const JSON& JSON::operator[](const std::string& key) const {
   const Object& obj = AsObject();
   auto it = obj.find(key);
