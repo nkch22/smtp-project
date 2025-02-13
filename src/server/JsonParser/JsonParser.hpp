@@ -43,7 +43,7 @@ class JSON {
 
 class JSONParser {
  public:
-  explicit JSONParser(const std::string& inp);
+  explicit JSONParser(const std::string& file_path);
 
  public:
   JSON Parse();
