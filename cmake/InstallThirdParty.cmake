@@ -13,14 +13,18 @@ include(FetchContent)
 
 # --------------------------------------------------------------------
 
-project_log("FetchContent: asio")
+project_log("FetchContent: boost")
 
-FetchContent_Declare(
-        asio
-        GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-        GIT_TAG asio-1-29-0
+find_package(Boost 1.86.0 COMPONENTS asio)
+if(NOT Boost_FOUND)
+
+set(BOOST_INCLUDE_LIBRARIES asio)
+set(BOOST_ENABLE_CMAKE ON)
+
+FetchContent_Declare(Boost
+GIT_REPOSITORY https://github.com/boostorg/boost.git
+GIT_TAG boost-1.86.0
+GIT_SHALLOW TRUE
 )
-FetchContent_MakeAvailable(asio)
-
-add_library(asio INTERFACE)
-target_include_directories(asio INTERFACE ${asio_SOURCE_DIR}/asio/include)
+FetchContent_MakeAvailable(Boost)
+endif()
