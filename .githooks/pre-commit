@@ -15,12 +15,51 @@ for file in $FILES; do
     git add "$file"
 done
 
+# Build directory containing Linux* subdirectories
+BUILD_DIR="build"
+
+# File name to look for
+FILE_NAME="compile_commands.json"
+
+# Flag to track if the file was found
+FOUND=0
+
+# Loop through all Linux* directories in the build folder
+for DIR in "$BUILD_DIR"/Linux*; do
+    # Check if the directory exists and is a directory
+    if [[ -d "$DIR" ]]; then
+        # Use find to search for the file only at level 1 (directly inside the Linux* directory)
+        FOUND_FILE=$(find "$DIR" -maxdepth 1 -name "$FILE_NAME" -type f)
+
+        # If the file is found
+        if [[ -n "$FOUND_FILE" ]]; then
+            echo "Found $FILE_NAME in $DIR"
+
+            # Copy the file to the root directory
+            cp "$FOUND_FILE" "$BUILD_DIR/"
+            echo "Copied $FILE_NAME to $BUILD_DIR/"
+
+            # Set the flag to indicate the file was found
+            FOUND=1
+            break  # Exit the loop after finding the first file
+        fi
+    fi
+done
+
+# If the file was not found, print a message
+if [[ $FOUND -eq 0 ]]; then
+    echo "No $FILE_NAME found in any Linux* directory under $BUILD_DIR."
+    exit 1
+fi
+
 # Run clang-tidy (modify this command according to your project setup)
 clang_tidy_errors=0
 for file in $FILES; do
     echo "$file"
-    clang-tidy "$file" || clang_tidy_errors=1
+    clang-tidy "$file" -p=build/ || clang_tidy_errors=1
 done
+
+rm $BUILD_DIR/$FILE_NAME
 
 if [[ $clang_tidy_errors -ne 0 ]]; then
     echo "Clang-tidy found issues. Commit aborted."
