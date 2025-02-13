@@ -32,14 +32,26 @@ Once the setup is complete, the pre-commit hook will automatically trigger the l
 
 ## Available Build Presets
 
-### DebugASan
-- Debug build with address sanitizers (ASan).
+### Linux Specific Build Presets:
+- #### LinuxDebugASan
+  - Debug build with address sanitizers (ASan).
 
-### DebugTSan
-- Debug build with thread sanitizers (TSan).
+- #### LinuxDebugTSan
+  - Debug build with thread sanitizers (TSan).
 
-### Release
-- Release build with no sanitizers enabled. 
+- #### LinuxRelease
+  - Release build with no sanitizers enabled. 
+
+### Windows Specific Build Presets:
+- #### WindowsDebugASan
+   - Debug build with address sanitizers (ASan).
+
+- #### WindowDebugTSan
+   - Debug build with thread sanitizers (TSan).
+
+- #### WindowsRelease
+   - Release build with no sanitizers enabled.
+
 
 To build with a specific preset, you can run the following command:
 ```bash
