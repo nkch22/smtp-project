@@ -58,3 +58,7 @@ To build with a specific preset, you can run the following command:
 cmake --preset <PresetName>
 cmake --build build/<PresetName>
 ```
+
+### Info about sanitizers:
+-  [Address Sanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
+-  [Thread Sanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html)
