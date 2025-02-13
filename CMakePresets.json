@@ -52,7 +52,7 @@
       },
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang.exe",
-        "CMAKE_CXX_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang.exe"
       },
       "condition": {
         "type": "equals",
