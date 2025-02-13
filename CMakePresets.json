@@ -6,7 +6,7 @@
   },
   "configurePresets": [
     {
-      "name": "DebugASan",
+      "name": "LinuxDebugASan",
       "description": "Debug build with address sanitizers",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
@@ -18,7 +18,7 @@
       }
     },
     {
-      "name": "DebugTSan",
+      "name": "LinuxDebugTSan",
       "description": "Debug build with thread sanitizers",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
@@ -30,7 +30,7 @@
       }
     },
     {
-      "name": "Release",
+      "name": "LinuxRelease",
       "description": "Release build",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
@@ -53,7 +53,6 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang.exe",
         "CMAKE_CXX_COMPILER": "clang.exe",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       },
       "condition": {
         "type": "equals",
@@ -62,8 +61,8 @@
       }
     },
     {
-      "name": "x64-debug-asan",
-      "displayName": "x64 Debug",
+      "name": "WindowsDebugASan",
+      "displayName": "Debug build with address sanitizers",
       "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -71,16 +70,16 @@
       }
     },
     {
-      "name": "x64-release",
-      "displayName": "x64 Release",
+      "name": "WindowsRelease",
+      "displayName": "Release build",
       "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
-      "name": "x64-debug-tsan",
-      "displayName": "x64 Debug Tsan",
+      "name": "WindowsDebugTsan",
+      "displayName": "Debug build with thread sanitizers",
       "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
