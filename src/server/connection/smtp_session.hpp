@@ -1,8 +1,7 @@
 #pragma once
 
-#include <memory>
-
 #include <asio.hpp>
+#include <memory>
 
 namespace connection {
 class SMTPSession : public std::enable_shared_from_this<SMTPSession> {

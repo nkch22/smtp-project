@@ -9,8 +9,8 @@
 namespace connection {
 SMTPConnection::SMTPConnection(asio::io_context& io_context,
                                const port_type port_num)
-    : acceptor_{io_context, asio::ip::tcp::endpoint{
-                                asio::ip::tcp::v4(), port_num}} {
+    : acceptor_{io_context,
+                asio::ip::tcp::endpoint{asio::ip::tcp::v4(), port_num}} {
   DoAccept();
 }
 
