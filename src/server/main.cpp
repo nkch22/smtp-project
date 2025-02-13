@@ -5,7 +5,7 @@
 
 int main() {
 
-  boost::asio::io_context io_context{};
+  asio::io_context io_context{};
   connection::SMTPConnection connection{io_context};
   io_context.run();
 

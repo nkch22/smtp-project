@@ -5,7 +5,7 @@
 
 namespace connection
 {
-    SMTPSession::SMTPSession(boost::asio::ip::tcp::socket socket)
+    SMTPSession::SMTPSession(asio::ip::tcp::socket socket)
         : socket_{std::move(socket)}
     {
     }
@@ -19,7 +19,7 @@ namespace connection
     {
         auto self{shared_from_this()};
 
-        boost::asio::async_read_until(socket_, buffer_, "\0", [this, self](boost::system::error_code error, std::size_t)
+        asio::async_read_until(socket_, buffer_, "\0", [this, self](asio::error_code error, std::size_t)
         {
             if(!error)
             {
