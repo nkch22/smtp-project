@@ -23,6 +23,7 @@
   log.save_return(value); \
   return value
 
+
 enum LogLevels {
   LOG_LEVEL_NO,
   LOG_LEVEL_PROD,
@@ -30,7 +31,7 @@ enum LogLevels {
   LOG_LEVEL_TRACE
 };
 
-class DECL Buffer {
+class Buffer {
  private:
   std::string* real_buff;
 
@@ -55,7 +56,7 @@ class DECL Buffer {
   void operator<<(const T&);
 };
 
-class DECL Logger {
+class Logger {
  private:
   class RealLogger {
    private:
