@@ -33,7 +33,7 @@ Checks: >
   -performance-avoid-endl,
   -bugprone-exception-escape
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
+HeaderFilterRegex: '^(?!.*_deps).*\.(hpp|h)$'
 FormatStyle: file
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
