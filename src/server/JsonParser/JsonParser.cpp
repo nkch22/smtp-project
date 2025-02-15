@@ -6,307 +6,294 @@
 #include <stdexcept>
 #include <string>
 
-JSON::JSON()
-    : value_(nullptr) {
+JSON::JSON() : m_value(nullptr) {}
+
+JSON::JSON(bool b) : m_value(b) {}
+
+JSON::JSON(double num) : m_value(num) {}
+
+JSON::JSON(const std::string& s) : m_value(s) {}
+
+JSON::JSON(const char* s) : m_value(std::string(s)) {}
+
+JSON::JSON(const Array& arr) : m_value(arr) {}
+JSON::JSON(Array&& arr) : m_value(std::move(arr)) {}
+
+JSON::JSON(const Object& obj) : m_value(obj) {}
+JSON::JSON(Object&& obj) : m_value(std::move(obj)) {}
+
+JSON::Type JSON::GetType() const
+{
+	switch (m_value.index())
+	{
+	case 0:
+		return Type::NUL;
+	case 1:
+		return Type::BOOL;
+	case 2:
+		return Type::NUMBER;
+	case 3:
+		return Type::STRING;
+	case 4:
+		return Type::ARRAY;
+	case 5:
+		return Type::OBJECT;
+	default:
+		throw std::runtime_error("Invalid JSON type encountered");
+	}
 }
 
-JSON::JSON(bool b)
-    : value_(b) {
+bool JSON::AsBool() const
+{
+	if (GetType() != Type::BOOL) throw std::runtime_error("Not a boolean");
+
+	return std::get<bool>(m_value);
 }
 
-JSON::JSON(double num)
-    : value_(num) {
+double JSON::AsNumber() const
+{
+	if (GetType() != Type::NUMBER) throw std::runtime_error("Not a number");
+
+	return std::get<double>(m_value);
 }
 
-JSON::JSON(const std::string& s)
-    : value_(s) {
+const std::string& JSON::AsString() const
+{
+	if (GetType() != Type::STRING) throw std::runtime_error("Not a string");
+
+	return std::get<std::string>(m_value);
 }
 
-JSON::JSON(const char* s)
-    : value_(std::string(s)) {
+const JSON::Array& JSON::AsArray() const
+{
+	if (GetType() != Type::ARRAY) throw std::runtime_error("Not an array");
+
+	return std::get<Array>(m_value);
 }
 
-JSON::JSON(const Array& arr)
-    : value_(arr) {
+const JSON::Object& JSON::AsObject() const
+{
+	if (GetType() != Type::OBJECT) throw std::runtime_error("Not an object");
+
+	return std::get<Object>(m_value);
 }
 
-JSON::JSON(const Object& obj)
-    : value_(obj) {
+const JSON::Value& JSON::GetValue() const
+{
+	return m_value;
 }
 
-JSON::Type JSON::GetType() const {
-  if (std::holds_alternative<std::nullptr_t>(value_)) {
-    return Type::Null;
-  } else if (std::holds_alternative<bool>(value_)) {
-    return Type::Bool;
-  } else if (std::holds_alternative<double>(value_)) {
-    return Type::Number;
-  } else if (std::holds_alternative<std::string>(value_)) {
-    return Type::String;
-  } else if (std::holds_alternative<Array>(value_)) {
-    return Type::Array;
-  } else if (std::holds_alternative<Object>(value_)) {
-    return Type::Object;
-  }
-  throw std::runtime_error("Invalid JSON type encountered");
+JSONParser::JSONParser(const std::string& file_path)
+{
+	std::ifstream file(file_path);
+	if (!file) throw std::runtime_error("Could not open file: " + file_path);
+
+	m_input = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	m_pos = 0;
 }
 
-bool JSON::AsBool() const {
-  if (GetType() != Type::Bool) {
-    throw std::runtime_error("Not a boolean");
-  }
-  return std::get<bool>(value_);
+void JSONParser::SkipWhitespace()
+{
+	while (m_pos < m_input.size() && (std::isspace(static_cast<unsigned char>(m_input[m_pos])) != 0)) m_pos++;
 }
 
-double JSON::AsNumber() const {
-  if (GetType() != Type::Number) {
-    throw std::runtime_error("Not a number");
-  }
-  return std::get<double>(value_);
+char JSONParser::Peek() const
+{
+	return m_pos < m_input.size() ? m_input[m_pos] : '\0';
 }
 
-const std::string& JSON::AsString() const {
-  if (GetType() != Type::String) {
-    throw std::runtime_error("Not a string");
-  }
-  return std::get<std::string>(value_);
+char JSONParser::Get()
+{
+	if (m_pos >= m_input.size())
+		throw std::runtime_error("Unexpected end of input at position " + std::to_string(m_pos));
+
+	return m_input[m_pos++];
 }
 
-const JSON::Array& JSON::AsArray() const {
-  if (GetType() != Type::Array) {
-    throw std::runtime_error("Not an array");
-  }
-  return std::get<Array>(value_);
+JSON JSONParser::ParseValue()
+{
+	SkipWhitespace();
+
+	char c = Peek();
+	switch (c)
+	{
+	case '"':
+		return ParseString();
+	case '{':
+		return ParseObject();
+	case '[':
+		return ParseArray();
+	case 't':
+	case 'f':
+		return ParseBool();
+	case 'n':
+		return ParseNull();
+	default:
+		if (c == '-' || (std::isdigit(static_cast<unsigned char>(c)) != 0)) return ParseNumber();
+		throw std::runtime_error("Unexpected character: " + std::string(1, c));
+	}
 }
 
-const JSON::Object& JSON::AsObject() const {
-  if (GetType() != Type::Object) {
-    throw std::runtime_error("Not an object");
-  }
-  return std::get<Object>(value_);
+JSON JSONParser::ParseString()
+{
+	std::string value;
+
+	if (Get() != '"') throw std::runtime_error("Expected opening quote");
+
+	while (Peek() != '"')
+	{
+		if (Peek() == '\\')
+		{
+			Get(); // backslash
+			value += ParseEscapeSequence();
+		}
+		else
+		{
+			value += Get();
+		}
+	}
+	Get(); // closing quote
+	return JSON(value);
 }
 
-const JSON::Value& JSON::GetValue() const {
-  return value_;
+JSON JSONParser::ParseNumber()
+{
+	size_t start = m_pos;
+
+	if (Peek() == '-') Get();
+
+	while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
+
+	if (Peek() == '.')
+	{
+		Get();
+		while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
+	}
+	if (Peek() == 'e' || Peek() == 'E')
+	{
+		Get();
+
+		if (Peek() == '+' || Peek() == '-') Get();
+
+		while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
+	}
+
+	return JSON(std::stod(m_input.substr(start, m_pos - start)));
 }
 
-JSONParser::JSONParser(const std::string& file_path) {
-  std::ifstream file(file_path);
-  if (!file) {
-    throw std::runtime_error("Could not open file: " + file_path);
-  }
-  input_ = std::string((std::istreambuf_iterator<char>(file)),
-                       std::istreambuf_iterator<char>());
-  pos_ = 0;
+JSON JSONParser::ParseBool()
+{
+	if (m_input.compare(m_pos, 4, "true") == 0)
+	{
+		m_pos += 4;
+		return JSON(true);
+	}
+
+	if (m_input.compare(m_pos, 5, "false") == 0)
+	{
+		m_pos += 5;
+		return JSON(false);
+	}
+	throw std::runtime_error("Invalid boolean value");
 }
 
-void JSONParser::SkipWhitespace() {
-  while (pos_ < input_.size() &&
-         (std::isspace(static_cast<unsigned char>(input_[pos_])) != 0)) {
-    pos_++;
-  }
+JSON JSONParser::ParseNull()
+{
+	if (m_input.compare(m_pos, 4, "null") == 0)
+	{
+		m_pos += 4;
+		return JSON();
+	}
+	throw std::runtime_error("Invalid null value");
 }
 
-char JSONParser::Peek() const {
-  return pos_ < input_.size() ? input_[pos_] : '\0';
+JSON JSONParser::ParseArray()
+{
+	std::vector<JSON> elements;
+	Get(); // '['
+
+	while (Peek() != ']')
+	{
+		elements.push_back(ParseValue());
+		SkipWhitespace();
+
+		if (Peek() == ',') Get();
+	}
+	Get(); // ']'
+	return JSON(std::move(elements));
 }
 
-char JSONParser::Get() {
-  if (pos_ >= input_.size()) {
-    throw std::runtime_error("Unexpected end of input at position " +
-                             std::to_string(pos_));
-  }
-  return input_[pos_++];
+JSON JSONParser::ParseObject()
+{
+	JSON::Object obj;
+	Get(); // '{'
+	SkipWhitespace();
+
+	while (Peek() != '}')
+	{
+		SkipWhitespace();
+		auto key = ParseString().AsString();
+		SkipWhitespace();
+
+		if (Get() != ':') throw std::runtime_error("Expected colon");
+
+		SkipWhitespace();
+		obj.emplace(std::move(key), ParseValue());
+		SkipWhitespace();
+
+		if (Peek() == ',')
+		{
+			Get();
+			SkipWhitespace();
+		}
+	}
+	Get(); // '}'
+	return JSON(obj);
 }
 
-JSON JSONParser::ParseValue() {
-  SkipWhitespace();
-
-  char c = Peek();
-  switch (c) {
-    case '"':
-      return ParseString();
-    case '{':
-      return ParseObject();
-    case '[':
-      return ParseArray();
-    case 't':
-    case 'f':
-      return ParseBool();
-    case 'n':
-      return ParseNull();
-    default:
-      if (c == '-' || (std::isdigit(static_cast<unsigned char>(c)) != 0)) {
-        return ParseNumber();
-      }
-      throw std::runtime_error("Unexpected character: " + std::string(1, c));
-  }
+std::string JSONParser::ParseEscapeSequence()
+{
+	char esc = Get();
+	switch (esc)
+	{
+	case '"':
+		return "\"";
+	case '\\':
+		return "\\";
+	case '/':
+		return "/";
+	case 'b':
+		return "\b";
+	case 'f':
+		return "\f";
+	case 'n':
+		return "\n";
+	case 'r':
+		return "\r";
+	case 't':
+		return "\t";
+	case 'u':
+		throw std::runtime_error("Unicode escape sequences are not supported");
+	default:
+		throw std::runtime_error("Invalid escape character in string");
+	}
 }
 
-JSON JSONParser::ParseString() {
-  std::string value;
-  if (Get() != '"') {
-    throw std::runtime_error("Expected opening quote");
-  }
+JSON JSONParser::Parse()
+{
+	JSON result = ParseValue();
+	SkipWhitespace();
 
-  while (Peek() != '"') {
-    if (Peek() == '\\') {
-      Get();  // backslash
-      value += ParseEscapeSequence();
-    } else {
-      value += Get();
-    }
-  }
-  Get();  // closing quote
-  return JSON(value);
+	if (m_pos != m_input.size()) throw std::runtime_error("Unexpected trailing characters");
+
+	return result;
 }
 
-JSON JSONParser::ParseNumber() {
-  size_t start = pos_;
-  if (Peek() == '-') {
-    Get();
-  }
+const JSON& JSON::operator[](const std::string& key) const
+{
+	const Object& obj = AsObject();
+	auto it = obj.find(key);
+	if (it == obj.end()) throw std::runtime_error("Key not found: " + key);
 
-  while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) {
-    Get();
-  }
-
-  if (Peek() == '.') {
-    Get();
-    while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) {
-      Get();
-    }
-  }
-  if (Peek() == 'e' || Peek() == 'E') {
-    Get();
-
-    if (Peek() == '+' || Peek() == '-') {
-      Get();
-    }
-
-    while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) {
-      Get();
-    }
-  }
-
-  return JSON(std::stod(input_.substr(start, pos_ - start)));
-}
-
-JSON JSONParser::ParseBool() {
-  if (input_.compare(pos_, 4, "true") == 0) {
-    pos_ += 4;
-    return JSON(true);
-  }
-
-  if (input_.compare(pos_, 5, "false") == 0) {
-    pos_ += 5;
-    return JSON(false);
-  }
-  throw std::runtime_error("Invalid boolean value");
-}
-
-JSON JSONParser::ParseNull() {
-  if (input_.compare(pos_, 4, "null") == 0) {
-    pos_ += 4;
-    return JSON();
-  }
-  throw std::runtime_error("Invalid null value");
-}
-
-JSON JSONParser::ParseArray() {
-  std::vector<JSON> elements;
-  Get();  // '['
-
-  while (Peek() != ']') {
-    elements.push_back(ParseValue());
-    SkipWhitespace();
-
-    if (Peek() == ',') {
-      Get();
-    }
-  }
-  Get();  // ']'
-  return JSON(std::move(elements));
-}
-
-JSON JSONParser::ParseObject() {
-  JSON::Object obj;
-  Get();  // '{'
-  SkipWhitespace();
-
-  while (Peek() != '}') {
-    SkipWhitespace();
-    auto key = ParseString().AsString();
-    SkipWhitespace();
-
-    if (Get() != ':') {
-      throw std::runtime_error("Expected colon");
-    }
-
-    SkipWhitespace();
-    obj.emplace(std::move(key), ParseValue());
-    SkipWhitespace();
-
-    if (Peek() == ',') {
-      Get();
-      SkipWhitespace();
-    }
-  }
-  Get();  // '}'
-  return JSON(obj);
-}
-
-std::string JSONParser::ParseEscapeSequence() {
-  char esc = Get();
-  switch (esc) {
-    case '"': {
-      return "\"";
-    }
-    case '\\': {
-      return "\\";
-    }
-    case '/': {
-      return "/";
-    }
-    case 'b': {
-      return "\b";
-    }
-    case 'f': {
-      return "\f";
-    }
-    case 'n': {
-      return "\n";
-    }
-    case 'r': {
-      return "\r";
-    }
-    case 't': {
-      return "\t";
-    }
-    case 'u': {
-      throw std::runtime_error("Unicode escape sequences are not supported");
-    }
-    default: {
-      throw std::runtime_error("Invalid escape character in string");
-    }
-  }
-}
-
-JSON JSONParser::Parse() {
-  JSON result = ParseValue();
-  SkipWhitespace();
-
-  if (pos_ != input_.size()) {
-    throw std::runtime_error("Unexpected trailing characters");
-  }
-  return result;
-}
-
-const JSON& JSON::operator[](const std::string& key) const {
-  const Object& obj = AsObject();
-  auto it = obj.find(key);
-  if (it == obj.end()) {
-    throw std::runtime_error("Key not found: " + key);
-  }
-  return it->second;
+	return it->second;
 }
