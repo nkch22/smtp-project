@@ -8,6 +8,8 @@ Checks: >
   bugprone-*,
   -modernize-use-trailing-return-type,
   -readability-identifier-naming,
+  -readability-identifier-length,
+  -readability-redundant-access-specifiers,
   readability-identifier-naming,
   modernize-use-using,
   readability-make-member-function-const,
