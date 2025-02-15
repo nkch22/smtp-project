@@ -1,46 +1,107 @@
-Checks: '-*,cppcoreguidelines-avoid-goto,cppcoreguidelines-pro-type-const-cast, google-runtime-int, modernize-use-nullptr, readability-braces-around-statements, readability-container-size-empty, readability-redundant-control-flow, readability-identifier-naming, readability-simplify-boolean-expr, google-build-using-namespace, readability-implicit-bool-conversion, google-explicit-constructor'
-HeaderFilterRegex: '^(?!.*_deps).*\.(hpp|h)$'
+---
+Checks: >
+  -*,
+  clang-analyzer-*,
+  modernize-*,
+  readability-*,
+  performance-*,
+  bugprone-*,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-naming,
+  readability-identifier-naming,
+  modernize-use-using,
+  readability-make-member-function-const,
+  readability-qualified-auto,
+  readability-simplify-boolean-expr,
+  readability-redundant-member-init,
+  readability-container-size-empty,
+  readability-inconsistent-declaration-parameter-name,
+  readability-non-const-parameter,
+  misc-definitions-in-headers,
+  misc-unused-parameters,
+  misc-unused-using-decls,
+  misc-static-assert,
+  misc-throw-by-value-catch-by-reference,
+  misc-unused-alias-decls,
+  misc-unused-parameters,
+  -hicpp-no-endl,
+  -modernize-use-nodiscard,
+  -modernize-use-enum-base,
+  -readability-braces-around-statements,
+  -performance-enum-size,
+  -readability-magic-numbers,
+  -performance-avoid-endl,
+  -bugprone-exception-escape
 WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+FormatStyle: file
 CheckOptions:
-  - key: readability-identifier-naming.NamespaceCase
-    value: lower_case
   - key: readability-identifier-naming.ClassCase
     value: CamelCase
-  - key: readability-identifier-naming.StructCase
+  - key: readability-identifier-naming.ClassPattern
+    value: ^[A-Z][a-zA-Z0-9]+$
+  - key: readability-identifier-naming.EnumCase
     value: CamelCase
-  - key: readability-identifier-naming.TypedefCase
-    value: CamelCase
-  - key: readability-identifier-naming.TypeAliasCase
-    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.EnumConstantPattern
+    value: ^[A-Z][A-Z0-9_]*$
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.ConstexprVariablePattern
+    value: ^[A-Z][A-Z0-9_]*$
   - key: readability-identifier-naming.FunctionCase
     value: CamelCase
-  - key: readability-identifier-naming.ParameterCase
-    value: lower_case
+  - key: readability-identifier-naming.FunctionPattern
+    value: ^[A-Z][a-zA-Z0-9]*$
+  - key: readability-identifier-naming.GlobalFunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalFunctionPattern
+    value: ^[A-Z][a-zA-Z0-9]*$
+  - key: readability-identifier-naming.MemberFunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.MemberFunctionPattern
+    value: ^[A-Z][a-zA-Z0-9]*$
   - key: readability-identifier-naming.VariableCase
     value: lower_case
-  - key: readability-identifier-naming.PrivateMemberCase
+  - key: readability-identifier-naming.VariablePattern
+    value: ^[a-z][a-z0-9_]*$
+  - key: readability-identifier-naming.MemberCase
     value: lower_case
-  - key: readability-identifier-naming.PrivateMemberSuffix
-    value: '_'
-  - key: readability-identifier-naming.GlobalConstantCase
+  - key: readability-identifier-naming.MemberPrefix
+    value: m_
+  - key: readability-identifier-naming.StaticMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.StaticMemberPrefix
+    value: s_
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: g_
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.ConstantPattern
+    value: ^[A-Z][A-Z0-9_]*$
+  - key: readability-identifier-naming.NamespaceCase
     value: CamelCase
-  - key: readability-identifier-naming.GlobalConstantPrefix
-    value: k
-  - key: readability-identifier-naming.StaticConstantCase
+  - key: readability-identifier-naming.NamespacePattern
+    value: ^ISX[A-Z][a-zA-Z0-9]*$
+  - key: readability-identifier-naming.InterfaceCase
     value: CamelCase
-  - key: readability-identifier-naming.StaticConstantPrefix
-    value: k
-  - key: readability-identifier-naming.ConstexprVariableCase
+  - key: readability-identifier-naming.InterfacePattern
+    value: ^I[A-Z][a-zA-Z0-9]*$
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroDefinitionPattern
+    value: ^[A-Z][A-Z0-9_]*$
+  - key: readability-identifier-naming.TypedefCase
     value: CamelCase
-  - key: readability-identifier-naming.ConstexprVariablePrefix
-    value: k
-  - key: readability-identifier-naming.TypeTemplateParameterCase
+  - key: readability-identifier-naming.TypedefPattern
+    value: ^[A-Z][a-zA-Z0-9]*$
+  - key: readability-identifier-naming.StructCase
     value: CamelCase
-  - key: readability-simplify-boolean-expr.ChainedConditionalReturn
-    value: '1'
-  - key: readability-simplify-boolean-expr.ChainedConditionalAssignment
-    value: '1'
-  - key: readability-identifier-naming.TypeTemplateParameterIgnoredRegexp
-    value: expr-type
-
-
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key: IncludeOrder
+    value: "system, third-party, project"
+  - key: readability-identifier-naming.GlobalVariablePattern
+    value: '^(g_|s_)[a-z][a-z0-9_]*$'
+...
