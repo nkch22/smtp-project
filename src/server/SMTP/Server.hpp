@@ -19,8 +19,9 @@ namespace SMTP
         using Port = asio::ip::port_type;
 
         Server();
-        
-        void Listen(const Port port);
+
+        void SetHost(const std::string& hostname);
+        void SetPort(const Port port);
         void Run();
 
     private:
@@ -35,8 +36,9 @@ namespace SMTP
         void SendResponse(ConnectionHandler connection_handler, std::string response);
         std::string ReceiveRequest(ConnectionHandler connection_handler);
 
-        asio::io_service io_service_;
-        asio::ip::tcp::acceptor acceptor_;
-        std::list<Connection> connections_;
+        asio::io_service m_io_service;
+        asio::ip::tcp::acceptor m_acceptor;
+        std::list<Connection> m_connections;
+        std::string m_hostname;
     };
 }

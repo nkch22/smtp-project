@@ -6,7 +6,8 @@
 int main() 
 {
     SMTP::Server server{};
-    server.Listen(25);
+    server.SetHost("smtp.gmail.com");
+    server.SetPort(25);
     server.Run();
     return EXIT_SUCCESS;
 }

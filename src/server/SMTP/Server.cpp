@@ -1,26 +1,33 @@
+#include "Protocol/HeloCommand.hpp"
+
 #include "Server.hpp"
 
 namespace SMTP
 {
     Server::Server() 
-        : io_service_{}, acceptor_{io_service_}
-        , connections_{} 
+        : m_io_service{}, m_acceptor{m_io_service}
+        , m_connections{}, m_hostname{}
     {
     }
 
-    void Server::Listen(const Port port) 
+    void Server::SetHost(const std::string& hostname)
+    {
+        m_hostname = hostname;
+    }
+
+    void Server::SetPort(const Port port) 
     {
         const asio::ip::tcp::endpoint endpoint{asio::ip::tcp::v4(), port};
-        acceptor_.open(endpoint.protocol());
-        acceptor_.set_option(asio::ip::tcp::acceptor::reuse_address{true});
-        acceptor_.bind(endpoint);
-        acceptor_.listen();
+        m_acceptor.open(endpoint.protocol());
+        m_acceptor.set_option(asio::ip::tcp::acceptor::reuse_address{true});
+        m_acceptor.bind(endpoint);
+        m_acceptor.listen();
         StartAccept();
     }
 
     void Server::Run() 
     {
-        io_service_.run();
+        m_io_service.run();
     }      
 
     void Server::HandleRead(ConnectionHandler connection, const asio::error_code& err, const std::size_t bytes_transfered) 
@@ -41,7 +48,7 @@ namespace SMTP
         else 
         {
             std::println(std::cerr, "Error: {}", err.message());
-            connections_.erase(connection);
+            m_connections.erase(connection);
         }
     }
 
@@ -57,7 +64,7 @@ namespace SMTP
         else 
         {
             std::println(std::cerr, "Error: {}", err.message());
-            connections_.erase(connection);
+            m_connections.erase(connection);
         }
     }
 
@@ -79,16 +86,16 @@ namespace SMTP
         else 
         {
             std::println(std::cerr, "Error: {}", err.message());
-            connections_.erase(connection);
+            m_connections.erase(connection);
         }
         StartAccept();
     }
 
     void Server::StartAccept() 
     {
-        auto connection{connections_.emplace(connections_.begin(), io_service_)};
+        auto connection{m_connections.emplace(m_connections.begin(), m_io_service)};
         auto handler{std::bind(&Server::HandleAccept, this, connection, asio::placeholders::error)};
-        acceptor_.async_accept(connection->socket, handler);
+        m_acceptor.async_accept(connection->socket, handler);
     }
 
     void Server::SendResponse(ConnectionHandler connection, std::string response)
