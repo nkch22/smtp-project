@@ -1,14 +1,12 @@
 #include <cstdlib>
 #include <print>
 
-#include "connection/smtp_connection.hpp"
+#include "SMTP/Server.hpp"
 
-int main() {
- 
-  asio::io_context io_context{};
-  connection::SMTPConnection connection{io_context};
-
-  io_context.run();
-
-  return EXIT_SUCCESS;
+int main() 
+{
+    SMTP::Server server{};
+    server.Listen(25);
+    server.Run();
+    return EXIT_SUCCESS;
 }

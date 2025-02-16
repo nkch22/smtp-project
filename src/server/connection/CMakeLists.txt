@@ -1,1 +1,0 @@
-target_sources(connection_library PRIVATE smtp_connection.cpp smtp_session.cpp)
