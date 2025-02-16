@@ -13,9 +13,10 @@ namespace SMTP
         public:
             HeloCommand(const std::string& domain_or_address);
             ~HeloCommand(){}
-            Response CreateResponse() override;
+            Response CreateResponse(const CommandContext& context) override;
 
         private:
+            std::string CreateGreetingMessage(const CommandContext& context) const;
             std::string m_domain_of_address;
         }; 
     }

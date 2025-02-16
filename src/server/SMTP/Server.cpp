@@ -10,12 +10,12 @@ namespace SMTP
     {
     }
 
-    void Server::SetHost(const std::string& hostname)
+    void Server::set_host(const std::string& hostname)
     {
         m_hostname = hostname;
     }
 
-    void Server::SetPort(const Port port) 
+    void Server::set_port(const Port port) 
     {
         const asio::ip::tcp::endpoint endpoint{asio::ip::tcp::v4(), port};
         m_acceptor.open(endpoint.protocol());

@@ -20,8 +20,8 @@ namespace SMTP
 
         Server();
 
-        void SetHost(const std::string& hostname);
-        void SetPort(const Port port);
+        void set_host(const std::string& hostname);
+        void set_port(const Port port);
         void Run();
 
     private:

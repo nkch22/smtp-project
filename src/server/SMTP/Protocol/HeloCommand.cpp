@@ -1,5 +1,7 @@
 #include "HeloCommand.hpp"
 
+#include <format>
+
 namespace SMTP
 {
     namespace Protocol
@@ -9,11 +11,15 @@ namespace SMTP
         {
         }
 
-        Response HeloCommand::CreateResponse()
+        Response HeloCommand::CreateResponse(const CommandContext& context)
         {
-            Response response{};
-            response.data = "HELLO";
+            Response response{ReplyCode::Ok, CreateGreetingMessage(context)};
             return response;
+        }
+
+        std::string HeloCommand::CreateGreetingMessage(const CommandContext& context) const
+        {
+            return std::format("{} Hello {}", context.get_server_name(), m_domain_of_address);
         }
     }
 }

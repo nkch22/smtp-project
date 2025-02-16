@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Response.hpp"
+#include "CommandContext.hpp"
 
 namespace SMTP
 {
@@ -10,7 +11,7 @@ namespace SMTP
         {
         public:
             virtual ~Command(){}
-            virtual Response CreateResponse() = 0;
+            virtual Response CreateResponse(const CommandContext& context) = 0;
         };
     }
 }
