@@ -8,6 +8,10 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <algorithm>
+
+#include <chrono>
+#include <format>
 
 #define DECL __declspec(dllexport)
 
@@ -22,6 +26,8 @@
 #define LOG_RETURN(value) \
   log.save_return(value); \
   return value
+
+#define LOG_RETURN_NOTHING log.save_return_nothing()
 
 
 enum LogLevels {
@@ -60,7 +66,7 @@ class Logger {
  private:
   class RealLogger {
    private:
-    enum MessageTypes { ERROR, WARNING, COMMON };
+    enum MessageTypes { ERROR, WARNING, INFORMATION };
 
     static RealLogger* instance;
 
@@ -69,17 +75,18 @@ class Logger {
     static std::ofstream* file;
     static std::mutex* mutex;
 
-    RealLogger(const unsigned short&, const std::string&);
+    RealLogger(const unsigned short&, const std::string&, const unsigned int&);
 
     ~RealLogger() = default;
 
    public:
     static RealLogger* get_instance();
-    static RealLogger* get_instance(const unsigned short&, const std::string&);
+    static RealLogger* get_instance(const unsigned short&, const std::string&,
+                                    const unsigned int&);
 
     static void destroy();
 
-    void real_save(const Buffer&, const MessageTypes&,
+    void real_save(const std::string&, const MessageTypes&,
                    const std::source_location&);
 
     void real_set_level(const unsigned short&);
@@ -102,7 +109,9 @@ class Logger {
   static bool init();
   static bool init(const unsigned short& level);
   static bool init(const std::string& save_path);
-  static bool init(const unsigned short& level, const std::string& save_path);
+  static bool init(const unsigned int& amount);
+  static bool init(const unsigned short& level, const std::string& save_path,
+                   const unsigned int& amount);
 
   static bool destroy();
 
@@ -122,10 +131,12 @@ class Logger {
   template <typename T>
   void save_return(const T&, const std::source_location location =
                                    std::source_location::current());
+  void save_return_nothing(
+      const std::source_location location = std::source_location::current());
 
   template <typename T, typename... Args>
   void save_arguments(
-      const T&&, Args&&... args,
+      const T&, const Args&... args,
       const std::source_location location = std::source_location::current());
 
   void save_func_start(const std::source_location location =
