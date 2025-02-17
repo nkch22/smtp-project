@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <QMainWindow>
+#include <QPointer>
 #include <QValidator>
 
 class QGroupBox;
@@ -34,10 +35,10 @@ private:
 	static QValidator::State GetEmailLineEditState(const QLineEdit* line_edit,
 												   const QRegularExpressionValidator* validator);
 
-	QRegularExpressionValidator* m_email_validator;
+	QPointer<QRegularExpressionValidator> m_email_validator;
 
-	QGridLayout* m_layout;
+	QPointer<QGridLayout> m_layout;
 
-	QLineEdit* m_user_line_edit;
-	QLineEdit* m_password_line_edit;
+	QPointer<QLineEdit> m_user_line_edit;
+	QPointer<QLineEdit> m_password_line_edit;
 };
