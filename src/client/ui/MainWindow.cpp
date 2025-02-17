@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 
 	m_email_validator = new QRegularExpressionValidator{G_EMAIL_REGEX, this};
 
-	auto* central_widget{new QWidget{this}};
+	const QPointer central_widget{new QWidget{this}};
 	setCentralWidget(central_widget);
 
 	m_layout = new QGridLayout{central_widget};
@@ -27,25 +27,25 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 	SetupConfigurationWidgets();
 	SetupMessageWidgets();
 
-	auto* send_button{new QPushButton{"Send mail", central_widget}};
+	const QPointer send_button{new QPushButton{"Send mail", central_widget}};
 	m_layout->addWidget(send_button, 6, 5);
 	connect(send_button, &QPushButton::clicked, this, &MainWindow::OnSendButtonClicked);
 }
 
 void MainWindow::SetupConfigurationWidgets()
 {
-	auto* configuration_group{new QGroupBox{"SMTP Configuration", centralWidget()}};
-	auto* configuration_layout{new QGridLayout{configuration_group}};
-	auto* server_label{new QLabel{"SMTP Server", configuration_group}};
-	auto* server_line_edit{new QLineEdit{configuration_group}};
-	auto* port_label{new QLabel{"Port", configuration_group}};
-	auto* port_line_edit{new QLineEdit{configuration_group}};
-	auto* auth_check_box{new QCheckBox{"Use authentication", configuration_group}};
+	const QPointer configuration_group{new QGroupBox{"SMTP Configuration", centralWidget()}};
+	const QPointer configuration_layout{new QGridLayout{configuration_group}};
+	const QPointer server_label{new QLabel{"SMTP Server", configuration_group}};
+	const QPointer server_line_edit{new QLineEdit{configuration_group}};
+	const QPointer port_label{new QLabel{"Port", configuration_group}};
+	const QPointer port_line_edit{new QLineEdit{configuration_group}};
+	const QPointer auth_check_box{new QCheckBox{"Use authentication", configuration_group}};
 	connect(auth_check_box, &QCheckBox::checkStateChanged, this, &MainWindow::OnAuthCheckBoxStateChanged);
-	auto* user_label{new QLabel{"SMTP User", configuration_group}};
+	const QPointer user_label{new QLabel{"SMTP User", configuration_group}};
 	m_user_line_edit = new QLineEdit{configuration_group};
 	m_user_line_edit->setEnabled(false);
-	auto* password_label{new QLabel{"Password", configuration_group}};
+	const QPointer password_label{new QLabel{"Password", configuration_group}};
 	m_password_line_edit = new QLineEdit{configuration_group};
 	m_password_line_edit->setEnabled(false);
 	m_password_line_edit->setEchoMode(QLineEdit::Password);
@@ -66,27 +66,27 @@ void MainWindow::SetupConfigurationWidgets()
 
 void MainWindow::OnAuthCheckBoxStateChanged(Qt::CheckState NewCheckState)
 {
-	const bool B_CHECKED{NewCheckState == Qt::CheckState::Checked};
-	m_user_line_edit->setEnabled(B_CHECKED);
-	m_password_line_edit->setEnabled(B_CHECKED);
+	const bool CHECKED{NewCheckState == Qt::CheckState::Checked};
+	m_user_line_edit->setEnabled(CHECKED);
+	m_password_line_edit->setEnabled(CHECKED);
 }
 
 void MainWindow::SetupMessageWidgets()
 {
-	auto* email_group{new QGroupBox{"Email", centralWidget()}};
-	auto* email_layout{new QGridLayout{email_group}};
-	auto* from_label{new QLabel{"From", email_group}};
-	auto* from_line_edit{new QLineEdit{email_group}};
+	const QPointer email_group{new QGroupBox{"Email", centralWidget()}};
+	const QPointer email_layout{new QGridLayout{email_group}};
+	const QPointer from_label{new QLabel{"From", email_group}};
+	const QPointer from_line_edit{new QLineEdit{email_group}};
 	connect(from_line_edit, &QLineEdit::editingFinished, this, &MainWindow::OnEmailAddressEditingFinished);
 	connect(from_line_edit, &QLineEdit::textEdited, this, &MainWindow::OnEmailAddressEdited);
-	auto* to_label{new QLabel{"To", email_group}};
-	auto* to_line_edit{new QLineEdit{email_group}};
+	const QPointer to_label{new QLabel{"To", email_group}};
+	const QPointer to_line_edit{new QLineEdit{email_group}};
 	connect(to_line_edit, &QLineEdit::editingFinished, this, &MainWindow::OnEmailAddressEditingFinished);
 	connect(to_line_edit, &QLineEdit::textEdited, this, &MainWindow::OnEmailAddressEdited);
-	auto* subject_label{new QLabel{"Subject", email_group}};
-	auto* subject_line_edit{new QLineEdit{email_group}};
-	auto* body_label{new QLabel{"Body", email_group}};
-	auto* body_text_edit{new QTextEdit{email_group}};
+	const QPointer subject_label{new QLabel{"Subject", email_group}};
+	const QPointer subject_line_edit{new QLineEdit{email_group}};
+	const QPointer body_label{new QLabel{"Body", email_group}};
+	const QPointer body_text_edit{new QTextEdit{email_group}};
 
 	email_layout->addWidget(from_label, 2, 0);
 	email_layout->addWidget(from_line_edit, 2, 1, 1, 5);
@@ -103,8 +103,8 @@ void MainWindow::SetupMessageWidgets()
 
 void MainWindow::OnEmailAddressEditingFinished()
 {
-	QLineEdit* email_line_edit{qobject_cast<QLineEdit*>(sender())};
-	Q_ASSERT(email_line_edit != nullptr);
+	const QPointer email_line_edit{qobject_cast<QLineEdit*>(sender())};
+	Q_ASSERT(!email_line_edit.isNull());
 
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
@@ -119,8 +119,8 @@ void MainWindow::OnEmailAddressEditingFinished()
 
 void MainWindow::OnEmailAddressEdited()
 {
-	QLineEdit* email_line_edit{qobject_cast<QLineEdit*>(sender())};
-	Q_ASSERT(email_line_edit != nullptr);
+	const QPointer email_line_edit{qobject_cast<QLineEdit*>(sender())};
+	Q_ASSERT(!email_line_edit.isNull());
 
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
