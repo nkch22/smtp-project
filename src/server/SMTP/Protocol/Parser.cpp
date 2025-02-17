@@ -10,12 +10,16 @@ namespace SMTP
 {
     namespace Protocol
     {
-        Parser::OptionalCommand Parser::TryParseRequest(const std::string& request) const
+        Parser::OptionalCommand Parser::TryParseRequest(const std::string& request, const SessionContext& context) const
         {
             const auto upper_request{ToUpper(request)};
             if(auto helo{TryParseHelo(upper_request)}; helo.has_value())
             {
                 return helo;
+            }
+            else if(auto ehlo{TryParseEhlo(upper_request, context)}; ehlo.has_value())
+            {
+                return ehlo;
             }
             else if(auto quit{TryParseQuit(upper_request)}; quit.has_value())
             {
@@ -33,9 +37,12 @@ namespace SMTP
             return std::nullopt;
         }
 
-        Parser::OptionalCommand Parser::TryParseEhlo(const std::string& request) const
+        Parser::OptionalCommand Parser::TryParseEhlo(const std::string& request, const SessionContext& context) const
         {
-
+            if(request.contains(EhloCommand::COMMAND))
+            {
+            }
+            return std::nullopt;
         }
 
         Parser::OptionalCommand Parser::TryParseQuit(const std::string& request) const
