@@ -1,3 +1,11 @@
+/**
+ * @file JsonParser.cpp
+ * @brief Implements JSON parsing and JSON value handling.
+ *
+ * This file contains the implementation of the JSON and JSONParser classes as declared
+ * in JsonParser.hpp. It includes routines for parsing strings, numbers, booleans, arrays,
+ * and objects from JSON input.
+ */
 #include "JsonParser.hpp"
 
 #include <cctype>
@@ -95,41 +103,48 @@ JSONParser::JSONParser(const std::filesystem::path& file_path)
 
 void JSONParser::SkipWhitespace()
 {
+	// Advance m_pos until a non-whitespace character is found.
 	while (m_pos < m_input.size() && (std::isspace(static_cast<unsigned char>(m_input[m_pos])) != 0)) m_pos++;
 }
 
 char JSONParser::Peek() const
 {
+	// Return the current character without advancing, or '\0' if at the end.
 	return m_pos < m_input.size() ? m_input[m_pos] : '\0';
 }
 
 char JSONParser::Get()
 {
+	// Ensure that we are not reading past the end of the input.
 	if (m_pos >= m_input.size())
 		throw std::runtime_error("Unexpected end of input at position " + std::to_string(m_pos));
 
+	// Return the character at m_pos and then advance the pointer.
 	return m_input[m_pos++];
 }
 
 JSON JSONParser::ParseValue()
 {
+	// Skip any whitespace before parsing the JSON value.
 	SkipWhitespace();
 
 	char c = Peek();
+	// Determine type of JSON value based on the current character.
 	switch (c)
 	{
-	case '"':
+	case '"': // String value.
 		return ParseString();
-	case '{':
+	case '{': // Object value.
 		return ParseObject();
-	case '[':
+	case '[': // Array value.
 		return ParseArray();
-	case 't':
-	case 'f':
+	case 't': // Boolean true.
+	case 'f': // Boolean false.
 		return ParseBool();
-	case 'n':
+	case 'n': // Null value.
 		return ParseNull();
 	default:
+		// If number or negative sign encountered, parse number.
 		if (c == '-' || (std::isdigit(static_cast<unsigned char>(c)) != 0)) return ParseNumber();
 		throw std::runtime_error("Unexpected character: " + std::string(1, c));
 	}
@@ -139,57 +154,72 @@ JSON JSONParser::ParseString()
 {
 	std::string value;
 
+	// Expect an opening quote character.
 	if (Get() != '"') throw std::runtime_error("Expected opening quote");
 
+	// Read characters until the closing quote is encountered.
 	while (Peek() != '"')
 	{
 		if (Peek() == '\\')
 		{
-			Get(); // backslash
+			Get(); // Consume the backslash.
+			// Parse escape sequence following backslash.
 			value += ParseEscapeSequence();
 		}
 		else
 		{
+			// Append the current character to the string.
 			value += Get();
 		}
 	}
-	Get(); // closing quote
+	Get(); // Consume closing quote.
 	return JSON(value);
 }
 
 JSON JSONParser::ParseNumber()
 {
+	// Record the starting position of the number.
 	size_t start = m_pos;
 
+	// Check for a negative sign.
 	if (Peek() == '-') Get();
 
+	// Process integer digits.
 	while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
 
+	// Process fractional part if present.
 	if (Peek() == '.')
 	{
-		Get();
+		Get(); // Consume the dot.
 		while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
 	}
+
+	// Process exponent part if present.
 	if (Peek() == 'e' || Peek() == 'E')
 	{
-		Get();
+		Get(); // Consume 'e' or 'E'.
 
+		// Consume optional '+' or '-' sign.
 		if (Peek() == '+' || Peek() == '-') Get();
 
+		// Process exponent digits.
 		while (std::isdigit(static_cast<unsigned char>(Peek())) != 0) Get();
 	}
 
+	// Convert accumulated substring to a double.
 	return JSON(std::stod(m_input.substr(start, m_pos - start)));
 }
 
 JSON JSONParser::ParseBool()
 {
+	// Check for "true" literal.
 	if (m_input.compare(m_pos, 4, "true") == 0)
 	{
 		m_pos += 4;
 		return JSON(true);
 	}
 
+	// Check for "false" literal.
 	if (m_input.compare(m_pos, 5, "false") == 0)
 	{
 		m_pos += 5;
@@ -200,6 +230,7 @@ JSON JSONParser::ParseBool()
 
 JSON JSONParser::ParseNull()
 {
+	// Check for "null" literal.
 	if (m_input.compare(m_pos, 4, "null") == 0)
 	{
 		m_pos += 4;
@@ -211,50 +242,58 @@ JSON JSONParser::ParseNull()
 JSON JSONParser::ParseArray()
 {
 	std::vector<JSON> elements;
-	Get(); // '['
+	Get(); // Consume '['
 
+	// Parse array elements until closing ']' is encountered.
 	while (Peek() != ']')
 	{
 		elements.push_back(ParseValue());
 		SkipWhitespace();
 
+		// If a comma is present, consume it.
 		if (Peek() == ',') Get();
 	}
-	Get(); // ']'
+	Get(); // Consume closing ']'
 	return JSON(std::move(elements));
 }
 
 JSON JSONParser::ParseObject()
 {
 	JSON::Object obj;
-	Get(); // '{'
+	Get(); // Consume '{'
 	SkipWhitespace();
 
+	// Parse key-value pairs until closing '}' is encountered.
 	while (Peek() != '}')
 	{
 		SkipWhitespace();
+		// Parse the key as a JSON string.
 		auto key = ParseString().AsString();
 		SkipWhitespace();
 
+		// Expect a colon separating key and value.
 		if (Get() != ':') throw std::runtime_error("Expected colon");
 
 		SkipWhitespace();
+		// Associate the parsed value with the key.
 		obj.emplace(std::move(key), ParseValue());
 		SkipWhitespace();
 
+		// If a comma is found, consume it.
 		if (Peek() == ',')
 		{
 			Get();
 			SkipWhitespace();
 		}
 	}
-	Get(); // '}'
+	Get(); // Consume closing '}'
 	return JSON(obj);
 }
 
 std::string JSONParser::ParseEscapeSequence()
 {
 	char esc = Get();
+	// Return corresponding unescaped character based on the escape sequence.
 	switch (esc)
 	{
 	case '"':
@@ -274,6 +313,7 @@ std::string JSONParser::ParseEscapeSequence()
 	case 't':
 		return "\t";
 	case 'u':
+		// Unicode escape sequences are not supported.
 		throw std::runtime_error("Unicode escape sequences are not supported");
 	default:
 		throw std::runtime_error("Invalid escape character in string");
@@ -282,9 +322,11 @@ std::string JSONParser::ParseEscapeSequence()
 
 JSON JSONParser::Parse()
 {
+	// Parse the main JSON value.
 	JSON result = ParseValue();
 	SkipWhitespace();
 
+	// Check that no extra characters remain after the JSON value.
 	if (m_pos != m_input.size()) throw std::runtime_error("Unexpected trailing characters");
 
 	return result;
@@ -292,6 +334,7 @@ JSON JSONParser::Parse()
 
 const JSON& JSON::operator[](const std::string& key) const
 {
+	// Retrieve the underlying object.
 	const Object& obj = AsObject();
 	auto it = obj.find(key);
 	if (it == obj.end()) throw std::runtime_error("Key not found: " + key);
