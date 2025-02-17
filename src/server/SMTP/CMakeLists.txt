@@ -1,3 +1,3 @@
-file(GLOB smtp_library_src CONFIGURE_DEPENDS "*.c" "*.cpp")
-target_sources(smtp_library PRIVATE ${smtp_library_src})
+file(GLOB smtp_src CONFIGURE_DEPENDS "*.c" "*.cpp")
+target_sources(smtp PRIVATE ${smtp_src})
 add_subdirectory(Protocol)

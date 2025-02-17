@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Response.hpp"
-#include "ServerContext.hpp"
+#include "../ServerContext.hpp"
 
 namespace SMTP
 {
