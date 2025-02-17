@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
-#include "Protocol/ServiceReadyCommand.hpp"
-#include "Protocol/HeloCommand.hpp"
+#include "Protocol/Command/ServiceReadyCommand.hpp"
+#include "Protocol/Parser.hpp"
 
 namespace SMTP
 {

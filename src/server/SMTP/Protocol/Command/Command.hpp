@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Response.hpp"
-#include "../SessionContext.hpp"
+#include "../Response.hpp"
+#include "../../SessionContext.hpp"
 
 namespace SMTP
 {

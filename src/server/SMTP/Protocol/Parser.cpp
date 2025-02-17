@@ -13,15 +13,18 @@ namespace SMTP
         Parser::OptionalCommand Parser::TryParseRequest(const std::string& request, const SessionContext& context) const
         {
             const auto upper_request{ToUpper(request)};
-            if(auto helo{TryParseHelo(upper_request)}; helo.has_value())
+            if(auto helo{TryParseHelo(upper_request)}; 
+               helo.has_value())
             {
                 return helo;
             }
-            else if(auto ehlo{TryParseEhlo(upper_request, context)}; ehlo.has_value())
+            else if(auto ehlo{TryParseEhlo(upper_request, context)}; 
+                    ehlo.has_value())
             {
                 return ehlo;
             }
-            else if(auto quit{TryParseQuit(upper_request)}; quit.has_value())
+            else if(auto quit{TryParseQuit(upper_request)};
+                    quit.has_value())
             {
                 return quit;
             }

@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "Command.hpp"
-#include "SessionContext.hpp"
 
 namespace SMTP
 {
