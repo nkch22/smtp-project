@@ -10,6 +10,9 @@
 #include <QTextEdit>
 #include <QWidget>
 
+#include "ClientGlobalVariables.inl"
+#include "UiGlobalVariables.inl"
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 {
 	setWindowTitle("SMTP Client");
@@ -106,11 +109,11 @@ void MainWindow::OnEmailAddressEditingFinished()
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
-		email_line_edit->setStyleSheet(VALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(G_VALID_EMAIL_STYLE_SHEET);
 	}
 	else
 	{
-		email_line_edit->setStyleSheet(INVALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(G_INVALID_EMAIL_STYLE_SHEET);
 	}
 }
 
@@ -122,7 +125,7 @@ void MainWindow::OnEmailAddressEdited()
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
-		email_line_edit->setStyleSheet(VALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(G_VALID_EMAIL_STYLE_SHEET);
 	}
 }
 

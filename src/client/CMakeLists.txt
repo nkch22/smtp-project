@@ -10,4 +10,8 @@ qt_add_executable(cmtp_client
         ui/MainWindow.cpp
 )
 
+target_include_directories(cmtp_client PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+
 target_link_libraries(cmtp_client PRIVATE Qt6::Core Qt6::Widgets)
