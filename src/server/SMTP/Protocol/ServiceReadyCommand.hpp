@@ -12,10 +12,10 @@ namespace SMTP
         public:
             ServiceReadyCommand(){}
             ~ServiceReadyCommand(){}
-            Response CreateResponse(const ServerContext& context) override;
+            Response CreateResponse(const SessionContext& context) override;
 
         private:
-            std::string ServiceReadyMessage(const ServerContext& context) const;
+            std::string ServiceReadyMessage(const SessionContext& context) const;
         };
     }
 }

@@ -11,12 +11,14 @@ namespace SMTP
         class HeloCommand : public Command
         {
         public:
+            constexpr static const char* COMMAND{"HELO"};
+
             HeloCommand(){}
             ~HeloCommand(){}
-            Response CreateResponse(const ServerContext& context) override;
+            Response CreateResponse(const SessionContext& context) override;
 
         private:
-            std::string CreateMessage(const ServerContext& context) const;
+            std::string CreateMessage(const SessionContext& context) const;
         }; 
     }
 }

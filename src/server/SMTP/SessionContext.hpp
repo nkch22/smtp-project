@@ -4,8 +4,7 @@
 
 namespace SMTP
 {
-    //TODO: create SessionContext class
-    struct ServerContext
+    struct SessionContext
     {
         std::string server_name;
         //TODO: add server extensions fields

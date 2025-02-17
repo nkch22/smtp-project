@@ -11,13 +11,13 @@ namespace SMTP
         {
         }
 
-        Response EhloCommand::CreateResponse(const ServerContext& context)
+        Response EhloCommand::CreateResponse(const SessionContext& context)
         {
             Response response{ReplyCode::Ok, CreateMessage(context)};
             return response;
         }
 
-        std::string EhloCommand::CreateMessage(const ServerContext& context) const
+        std::string EhloCommand::CreateMessage(const SessionContext& context) const
         {
             return std::format("");
         }

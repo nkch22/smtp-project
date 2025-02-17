@@ -83,7 +83,7 @@ namespace SMTP
             std::println("Connection from: {}", connection->socket.remote_endpoint().address().to_string());
             
             Protocol::ServiceReadyCommand ready{};
-            auto response{ready.CreateResponse(get_server_context())};
+            auto response{ready.CreateResponse(m_context)};
             SendResponse(connection, response.CreateStringResponse());
             DoAsyncRead(connection);
         } 
@@ -116,10 +116,5 @@ namespace SMTP
         std::getline(is, line);
         std::println("Request received: {}", line);
         return line;
-    }
-
-    ServerContext Server::get_server_context() const
-    {
-        return m_context;
     }
 }
