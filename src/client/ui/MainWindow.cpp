@@ -14,9 +14,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 {
 	setWindowTitle("SMTP Client");
 
-	m_email_regex = QRegularExpression{R"(^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$)",
-									   QRegularExpression::CaseInsensitiveOption};
-	m_email_validator = new QRegularExpressionValidator{m_email_regex, this};
+	m_email_validator = new QRegularExpressionValidator{G_EMAIL_REGEX, this};
 
 	auto* central_widget{new QWidget{this}};
 	setCentralWidget(central_widget);
@@ -105,9 +103,7 @@ void MainWindow::OnEmailAddressEditingFinished()
 	QLineEdit* email_line_edit{qobject_cast<QLineEdit*>(sender())};
 	Q_ASSERT(email_line_edit != nullptr);
 
-	int pos{};
-	QString email_text{email_line_edit->text()};
-	QValidator::State state{m_email_validator->validate(email_text, pos)};
+	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
 		email_line_edit->setStyleSheet(VALID_EMAIL_STYLE_SHEET);
@@ -123,13 +119,19 @@ void MainWindow::OnEmailAddressEdited()
 	QLineEdit* email_line_edit{qobject_cast<QLineEdit*>(sender())};
 	Q_ASSERT(email_line_edit != nullptr);
 
-	int pos{};
-	QString email_text{email_line_edit->text()};
-	QValidator::State state = m_email_validator->validate(email_text, pos);
+	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
 		email_line_edit->setStyleSheet(VALID_EMAIL_STYLE_SHEET);
 	}
+}
+
+QValidator::State MainWindow::GetEmailLineEditState(const QLineEdit* line_edit,
+													const QRegularExpressionValidator* validator)
+{
+	int pos{};
+	QString email_text{line_edit->text()};
+	return validator->validate(email_text, pos);
 }
 
 void MainWindow::OnSendButtonClicked() {}
