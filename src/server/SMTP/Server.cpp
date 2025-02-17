@@ -1,18 +1,19 @@
-#include "Protocol/HeloCommand.hpp"
-
 #include "Server.hpp"
+
+#include "Protocol/ServiceReadyCommand.hpp"
+#include "Protocol/HeloCommand.hpp"
 
 namespace SMTP
 {
     Server::Server() 
         : m_io_service{}, m_acceptor{m_io_service}
-        , m_connections{}, m_hostname{}
+        , m_connections{}, m_context{}
     {
     }
 
     void Server::set_host(const std::string& hostname)
     {
-        m_hostname = hostname;
+        m_context.server_name = hostname;
     }
 
     void Server::set_port(const Port port) 
@@ -37,7 +38,7 @@ namespace SMTP
             if(connection->socket.is_open())
             {
                 // Read completed successfully and connection is open
-                SendResponse(connection, ReceiveRequest(connection)); 
+                ReceiveRequest(connection);
             }
         }
 
@@ -81,6 +82,9 @@ namespace SMTP
         {
             std::println("Connection from: {}", connection->socket.remote_endpoint().address().to_string());
             
+            Protocol::ServiceReadyCommand ready{};
+            auto response{ready.CreateResponse(get_server_context())};
+            SendResponse(connection, response.CreateStringResponse());
             DoAsyncRead(connection);
         } 
         else 
@@ -110,7 +114,12 @@ namespace SMTP
         std::istream is{&connection->read_buffer};
         std::string line{};
         std::getline(is, line);
-        std::println("Message Received: {}", line);
+        std::println("Request received: {}", line);
         return line;
+    }
+
+    ServerContext Server::get_server_context() const
+    {
+        return m_context;
     }
 }

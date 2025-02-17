@@ -6,15 +6,15 @@ namespace SMTP
 {
     namespace Protocol
     {
-        Response ServiceReadyCommand::CreateResponse(const CommandContext& context)
+        Response ServiceReadyCommand::CreateResponse(const ServerContext& context)
         {
             Response response{ReplyCode::ServiceReady, ServiceReadyMessage(context)}; 
             return response;
         }
 
-        std::string ServiceReadyCommand::ServiceReadyMessage(const CommandContext& context) const
+        std::string ServiceReadyCommand::ServiceReadyMessage(const ServerContext& context) const
         {
-            return std::format("{} Simple Mail Transfer Service Ready", context.get_server_name());
+            return std::format("{} Simple Mail Transfer Service Ready", context.server_name);
         }
     }
 }

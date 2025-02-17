@@ -6,6 +6,7 @@
 
 #include <asio.hpp>
 
+#include "ServerContext.hpp"
 #include "Connection.hpp"
 
 namespace SMTP
@@ -24,6 +25,8 @@ namespace SMTP
         void set_port(const Port port);
         void Run();
 
+        ServerContext get_server_context() const;
+
     private:
         void HandleRead(ConnectionHandler connection_handler, const asio::error_code& err, 
                         const std::size_t bytes_transfered);
@@ -39,6 +42,7 @@ namespace SMTP
         asio::io_service m_io_service;
         asio::ip::tcp::acceptor m_acceptor;
         std::list<Connection> m_connections;
-        std::string m_hostname;
+
+        ServerContext m_context;
     };
 }

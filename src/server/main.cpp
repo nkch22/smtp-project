@@ -3,10 +3,12 @@
 
 #include "SMTP/Server.hpp"
 
+#include <asio/ssl.hpp>
+
 int main() 
 {
     SMTP::Server server{};
-    server.set_host("smtp.gmail.com");
+    server.set_host("smtp.soft_serve.com");
     server.set_port(25);
     server.Run();
     return EXIT_SUCCESS;

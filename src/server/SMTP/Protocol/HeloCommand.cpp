@@ -11,15 +11,15 @@ namespace SMTP
         {
         }
 
-        Response HeloCommand::CreateResponse(const CommandContext& context)
+        Response HeloCommand::CreateResponse(const ServerContext& context)
         {
-            Response response{ReplyCode::Ok, CreateGreetingMessage(context)};
+            Response response{ReplyCode::Ok, CreateMessage(context)};
             return response;
         }
 
-        std::string HeloCommand::CreateGreetingMessage(const CommandContext& context) const
+        std::string HeloCommand::CreateMessage(const ServerContext& context) const
         {
-            return std::format("{} Hello {}", context.get_server_name(), m_domain_of_address);
+            return std::format("{} Hello {}", context.server_name, m_domain_of_address);
         }
     }
 }

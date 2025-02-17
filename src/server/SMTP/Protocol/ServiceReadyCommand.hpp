@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Command.hpp"
-#include "CommandContext.hpp"
 #include "Response.hpp"
 
 namespace SMTP
@@ -13,9 +12,10 @@ namespace SMTP
         public:
             ServiceReadyCommand(){}
             ~ServiceReadyCommand(){}
-            Response CreateResponse(const CommandContext& context) override;
+            Response CreateResponse(const ServerContext& context) override;
+
         private:
-            std::string ServiceReadyMessage(const CommandContext& context) const;
+            std::string ServiceReadyMessage(const ServerContext& context) const;
         };
     }
 }
