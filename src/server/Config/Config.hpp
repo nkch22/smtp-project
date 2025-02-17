@@ -1,6 +1,9 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
+
+#include "../JsonParser/JsonParser.hpp"
 
 class Config
 {
@@ -19,7 +22,7 @@ public:
 		int socket_timeout;
 	};
 
-	struct Logger
+	struct Logging
 	{
 		std::string filename;
 		int log_level;
@@ -34,12 +37,22 @@ public:
 
 	Server GetServer() const;
 	Communication GetCommunication() const;
-	Logger GetLogger() const;
+	Logging GetLogging() const;
 	Threads GetThreads() const;
+
+public:
+	Config(const std::filesystem::path& file_path);
+
+private:
+	void ParseServer(const JSON& server_json);
+	void ParseCommunication(const JSON& comm_json);
+	void ParseLogging(const JSON& logger_json);
+	void ParseTime(const JSON& time_json);
+	void ParseThreadpool(const JSON& threadpool_json);
 
 private:
 	Server m_server;
 	Communication m_communication;
-	Logger m_logger;
+	Logging m_logging;
 	Threads m_threads;
 };

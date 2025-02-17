@@ -1,6 +1,7 @@
 #include "JsonParser.hpp"
 
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -83,10 +84,10 @@ const JSON::Value& JSON::GetValue() const
 	return m_value;
 }
 
-JSONParser::JSONParser(const std::string& file_path)
+JSONParser::JSONParser(const std::filesystem::path& file_path)
 {
 	std::ifstream file(file_path);
-	if (!file) throw std::runtime_error("Could not open file: " + file_path);
+	if (!file) throw std::runtime_error("Could not open file: " + file_path.string());
 
 	m_input = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	m_pos = 0;

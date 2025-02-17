@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -53,13 +54,12 @@ private:
 class JSONParser
 {
 public:
-	explicit JSONParser(const std::string& file_path);
+	explicit JSONParser(const std::filesystem::path& file_path);
 
 	JSON Parse();
 
 private:
 	void SkipWhitespace();
-	void ConsumeDigits();
 	char Peek() const;
 	char Get();
 
