@@ -1,144 +1,173 @@
 #pragma once
 
+#include <algorithm>
+#include <chrono>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <mutex>
 #include <source_location>
 #include <string>
 #include <thread>
-#include <vector>
-#include <algorithm>
 
-#include <chrono>
-#include <format>
+#define LOG_START_ARGS(...)                                                                                            \
+	Logger log;                                                                                                        \
+	log.save_arguments(__VA_ARGS__)
 
-#define DECL __declspec(dllexport)
+#define LOG_START()                                                                                                    \
+	Logger log;                                                                                                        \
+	log.save_func_start()
 
-#define LOG_START_ARGS(...) \
-  Logger log;               \
-  log.save_arguments(__VA_ARGS__)
+#define LOG_RETURN(value)                                                                                              \
+	log.save_return(value);                                                                                            \
+	return value
 
-#define LOG_START \
-  Logger log;     \
-  log.save_func_start()
+#define LOG_RETURN_NOTHING() log.save_return_nothing()
 
-#define LOG_RETURN(value) \
-  log.save_return(value); \
-  return value
+#define LOG_SAVE_ERROR(value) log.save_error(value)
+#define LOG_SAVE_WARNING(value) log.save_warning(value)
+#define LOG_SAVE_MESSAGE(value) log.save_message(value)
 
-#define LOG_RETURN_NOTHING log.save_return_nothing()
-
-
-enum LogLevels {
-  LOG_LEVEL_NO,
-  LOG_LEVEL_PROD,
-  LOG_LEVEL_DEBUG,
-  LOG_LEVEL_TRACE
+enum LogLevels
+{
+	LOG_LEVEL_NO,
+	LOG_LEVEL_PROD,
+	LOG_LEVEL_DEBUG,
+	LOG_LEVEL_TRACE
 };
 
-class Buffer {
- private:
-  std::string* real_buff;
+class Buffer
+{
+private:
+	std::string* m_real_buff;
 
- public:
-  Buffer();
-  Buffer(const std::string&);
+public:
+	Buffer();
+	Buffer(const std::string&);
 
-  ~Buffer();
+	~Buffer();
 
-  std::string get() const;
+	std::string get() const;
 
-  void operator<<(const std::string&);
+	void clear();
 
-  void operator<<(const int&);
-  void operator<<(const unsigned int&);
-  void operator<<(const double&);
-  void operator<<(const bool&);
+	Buffer& operator<<(const std::string&);
+	Buffer& operator<<(const char*);
 
-  void operator<<(const void*);
+	Buffer& operator<<(const int&);
+	Buffer& operator<<(const unsigned int&);
+	Buffer& operator<<(const double&);
+	Buffer& operator<<(const bool&);
 
-  template <typename T>
-  void operator<<(const T&);
+	template<typename T>
+	Buffer& operator<<(const T&)
+	{
+		throw std::exception{};
+	}
 };
 
-class Logger {
- private:
-  class RealLogger {
-   private:
-    enum MessageTypes { ERROR, WARNING, INFORMATION };
+class Logger
+{
+private:
+	enum MessageTypes
+	{
+		ERROR,
+		WARNING,
+		INFORMATION
+	};
 
-    static RealLogger* instance;
+	class RealLogger
+	{
+	private:
+		static RealLogger* m_instance;
 
-    static unsigned short* level;
-    static std::string* output_path;
-    static std::ofstream* file;
-    static std::mutex* mutex;
+		static unsigned short* m_level;
+		static std::string* m_output_path;
+		static std::ofstream* m_file;
+		static std::mutex* m_mutex;
 
-    RealLogger(const unsigned short&, const std::string&, const unsigned int&);
+		RealLogger(const unsigned short&, const std::string&, const unsigned int&);
 
-    ~RealLogger() = default;
+		~RealLogger() = default;
 
-   public:
-    static RealLogger* get_instance();
-    static RealLogger* get_instance(const unsigned short&, const std::string&,
-                                    const unsigned int&);
+	public:
+		static RealLogger* get_instance();
+		static RealLogger* get_instance(const unsigned short&, const std::string&, const unsigned int&);
 
-    static void destroy();
+		static void destroy();
 
-    void real_save(const std::string&, const MessageTypes&,
-                   const std::source_location&);
+		void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&);
 
-    void real_set_level(const unsigned short&);
-    unsigned short real_get_level() const;
-  };
+		void real_set_level(const unsigned short&);
+		unsigned short real_get_level() const;
+	};
 
-  RealLogger* real;
+	RealLogger* m_real;
 
-  Buffer buff;
+	Buffer m_buff;
 
-  template <typename T>
-  void save_argument(const T&);
+	const std::source_location m_location;
 
-  void save_arguments();
+	template<typename T>
+	void save_argument(const T& value)
+	{
+		m_buff << value;
+	}
 
- public:
-  Logger();
-  ~Logger();
+	void save_arguments();
 
-  static bool init();
-  static bool init(const unsigned short& level);
-  static bool init(const std::string& save_path);
-  static bool init(const unsigned int& amount);
-  static bool init(const unsigned short& level, const std::string& save_path,
-                   const unsigned int& amount);
+public:
+	Logger(const std::source_location location = std::source_location::current());
+	~Logger();
 
-  static bool destroy();
+	static bool init();
+	static bool init(const unsigned short& level);
+	static bool init(const std::string& save_path);
+	static bool init(const unsigned int& amount);
+	static bool init(const unsigned short& level, const std::string& save_path, const unsigned int& amount);
 
-  void save_error(const std::string&,
-                  const std::source_location location =
-                      std::source_location::current());
-  void save_warning(const std::string&,
-                    const std::source_location location =
-                        std::source_location::current());
-  void save_message(const std::string&,
-                    const std::source_location location =
-                        std::source_location::current());
+	static bool destroy();
 
-  void set_level(const unsigned short&);
-  unsigned short get_level() const;
+	void save_error(const std::string&);
+	void save_warning(const std::string&);
+	void save_message(const std::string&);
 
-  template <typename T>
-  void save_return(const T&, const std::source_location location =
-                                   std::source_location::current());
-  void save_return_nothing(
-      const std::source_location location = std::source_location::current());
+	void set_level(const unsigned short&);
+	unsigned short get_level() const;
 
-  template <typename T, typename... Args>
-  void save_arguments(
-      const T&, const Args&... args,
-      const std::source_location location = std::source_location::current());
+	template<typename T>
+	void save_return(const T& value)
+	{
+		m_buff << value;
+		m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location);
+		m_buff.clear();
+	}
 
-  void save_func_start(const std::source_location location =
-                           std::source_location::current());
+	void save_return_nothing();
+
+	template<typename T, typename... Args>
+	void save_arguments(const T& first, Args&... args)
+	{
+		save_argument(first);
+		save_arguments(std::forward<Args>(args)...);
+	}
+
+	void save_func_start();
+};
+
+class MainLogger
+{
+private:
+	Logger* m_log;
+
+public:
+	MainLogger();
+	MainLogger(const unsigned short&);
+	MainLogger(const unsigned short&, const std::string&);
+	MainLogger(const unsigned short&, const std::string&, const unsigned int&);
+
+	~MainLogger();
+
+	Logger& get() const;
 };
