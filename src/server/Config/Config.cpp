@@ -1,3 +1,12 @@
+/**
+ * @file Config.cpp
+ * @brief Implements the Config class to load and parse configuration settings from a JSON file.
+ *
+ * This file contains the implementation of the Config class, including methods to parse
+ * various configuration sections from the JSON file and store them in structured configuration
+ * parameters. It relies on the JSONParser to read and validate the configuration file.
+ */
+
 #include "Config.hpp"
 
 #include <filesystem>
@@ -30,11 +39,15 @@ Config::Config(const std::filesystem::path& file_path)
 {
 	try
 	{
+		// Initialize JSONParser with the configuration file path.
 		JSONParser parser(file_path);
+		// Parse the complete JSON configuration.
 		JSON json = parser.Parse();
 
+		// Retrieve the root object from the configuration.
 		const JSON& root = json["root"];
 
+		// Parse individual configuration sections.
 		ParseServer(root["Server"]);
 		ParseCommunication(root["communicationsettings"]);
 		ParseLogging(root["logging"]);
@@ -49,6 +62,7 @@ Config::Config(const std::filesystem::path& file_path)
 
 void Config::ParseServer(const JSON& server_json)
 {
+	// Map JSON keys to server configuration fields.
 	m_server.server_name = server_json["servername"].AsString();
 	m_server.server_display_name = server_json["serverdisplayname"].AsString();
 	m_server.port = static_cast<int>(server_json["listenerport"].AsNumber());
@@ -57,12 +71,14 @@ void Config::ParseServer(const JSON& server_json)
 
 void Config::ParseCommunication(const JSON& comm_json)
 {
+	// Map JSON keys to communication settings.
 	m_communication.blocking = (static_cast<int>(comm_json["blocking"].AsNumber()) != 0);
 	m_communication.socket_timeout = static_cast<int>(comm_json["socket_timeout"].AsNumber());
 }
 
 void Config::ParseLogging(const JSON& logger_json)
 {
+	// Map JSON keys to logging configuration.
 	m_logging.filename = logger_json["filename"].AsString();
 	m_logging.log_level = static_cast<int>(logger_json["LogLevel"].AsNumber());
 	m_logging.flush = (static_cast<int>(logger_json["flush"].AsNumber()) != 0);
@@ -70,10 +86,12 @@ void Config::ParseLogging(const JSON& logger_json)
 
 void Config::ParseTime(const JSON& time_json)
 {
+	// Map JSON key to thread period configuration.
 	m_threads.period_time = static_cast<int>(time_json["Period_time"].AsNumber());
 }
 
 void Config::ParseThreadpool(const JSON& threadpool_json)
 {
+	// Map JSON key to thread pool maximum working threads configuration.
 	m_threads.max_working_threads = static_cast<int>(threadpool_json["maxworkingthreads"].AsNumber());
 }
