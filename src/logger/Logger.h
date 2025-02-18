@@ -13,17 +13,34 @@
 
 #define LOG_START_ARGS(...)                                                                                            \
 	Logger log;                                                                                                        \
-	log.save_arguments(__VA_ARGS__)
+	switch (log.get_level())                                                                                           \
+	{                                                                                                                  \
+	case LOG_LEVEL_TRACE:                                                                                              \
+		log.save_arguments(__VA_ARGS__);                                                                               \
+		break;                                                                                                         \
+	case LOG_LEVEL_DEBUG:                                                                                              \
+		log.save_func_start();                                                                                         \
+		break;                                                                                                         \
+	}
 
 #define LOG_START()                                                                                                    \
 	Logger log;                                                                                                        \
-	log.save_func_start()
+	if (log.get_level() >= LOG_LEVEL_DEBUG) log.save_func_start()
 
 #define LOG_RETURN(value)                                                                                              \
-	log.save_return(value);                                                                                            \
+	switch (log.get_level())                                                                                           \
+	{                                                                                                                  \
+	case LOG_LEVEL_TRACE:                                                                                              \
+		log.save_return(value);                                                                                        \
+		break;                                                                                                         \
+	case LOG_LEVEL_DEBUG:                                                                                              \
+		log.save_return_nothing();                                                                                     \
+		break;                                                                                                         \
+	}                                                                                                                  \
 	return value
 
-#define LOG_RETURN_NOTHING() log.save_return_nothing()
+#define LOG_RETURN_NOTHING()                                                                                           \
+	if (log.get_level() >= LOG_LEVEL_DEBUG) log.save_return_nothing()
 
 #define LOG_SAVE_ERROR(value) log.save_error(value)
 #define LOG_SAVE_WARNING(value) log.save_warning(value)
