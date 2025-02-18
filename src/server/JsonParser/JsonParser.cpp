@@ -243,6 +243,7 @@ JSON JSONParser::ParseArray()
 {
 	std::vector<JSON> elements;
 	Get(); // Consume '['
+	SkipWhitespace();
 
 	// Parse array elements until closing ']' is encountered.
 	while (Peek() != ']')
