@@ -14,7 +14,7 @@ namespace SMTP
 
         std::string QuitCommand::CreateMessage(const SessionContext& context) const
         {
-            return std::format("{} Service closing transmission channel", context.server_name);
+            return std::format("{} Service closing transmission channel", context.hostname);
         }
     }
 }

@@ -1,3 +1,6 @@
+find_package(GTest 1.15.2 CONFIG)
+if(NOT GTest_FOUND)
+
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -7,6 +10,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+endif()
 enable_testing()
 
 include(GoogleTest)

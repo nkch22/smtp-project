@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "Server.hpp"
 
 #include "Protocol/Command/ServiceReadyCommand.hpp"
@@ -5,18 +7,13 @@
 
 namespace SMTP
 {
-    Server::Server() 
+    Server::Server(const ServerContext server_context) 
         : m_io_service{}, m_acceptor{m_io_service}
-        , m_connections{}, m_context{}
+        , m_connections{}, m_server_context{server_context}
     {
     }
 
-    void Server::set_host(const std::string& hostname)
-    {
-        m_context.server_name = hostname;
-    }
-
-    void Server::set_port(const Port port) 
+    void Server::Listen(const Port port) 
     {
         const asio::ip::tcp::endpoint endpoint{asio::ip::tcp::v4(), port};
         m_acceptor.open(endpoint.protocol());
@@ -31,29 +28,34 @@ namespace SMTP
         m_io_service.run();
     }      
 
-    void Server::HandleRead(ConnectionHandler connection, const asio::error_code& err, const std::size_t bytes_transfered) 
+    const ServerContext& Server::get_server_context() const
+    {
+        return m_server_context;
+    }
+
+    void Server::HandleRead(ConnectionHandler connection, const asio::error_code& error, const std::size_t bytes_transfered) 
     {
         if(bytes_transfered > 0) 
         {
             if(connection->socket.is_open())
             {
                 // Read completed successfully and connection is open
-                ReceiveRequest(connection);
+                ReceiveRequest(connection); 
             }
         }
 
-        if(!err) 
+        if(!error) 
         {
             DoAsyncRead(connection);
         } 
         else 
         {
-            std::println(std::cerr, "Error: {}", err.message());
+            std::println(std::cerr, "Error: {}", error.message());
             m_connections.erase(connection);
         }
     }
 
-    void Server::HandleWrite(ConnectionHandler connection, std::shared_ptr<std::string> /*msg_buffer*/, const asio::error_code& err) 
+    void Server::HandleWrite(ConnectionHandler connection, std::shared_ptr<std::string> msg_buffer, const asio::error_code& err) 
     {
         if(!err) 
         {
@@ -72,24 +74,25 @@ namespace SMTP
     void Server::DoAsyncRead(ConnectionHandler connection) 
     {
         auto handler{std::bind(&Server::HandleRead, this, connection, 
-                                asio::placeholders::error, asio::placeholders::bytes_transferred)};
-        asio::async_read_until(connection->socket, connection->read_buffer, "\n", handler);
+                               asio::placeholders::error, asio::placeholders::bytes_transferred)};
+        asio::async_read_until(connection->socket, connection->read_buffer, "\r\n", handler);
     }
 
-    void Server::HandleAccept(ConnectionHandler connection, asio::error_code const & err) 
+    void Server::HandleAccept(ConnectionHandler connection, const asio::error_code& error) 
     {
-        if(!err) 
+        if(!error) 
         {
             std::println("Connection from: {}", connection->socket.remote_endpoint().address().to_string());
             
-            Protocol::ServiceReadyCommand ready{};
-            auto response{ready.CreateResponse(m_context)};
-            SendResponse(connection, response.CreateStringResponse());
+            Protocol::ServiceReadyCommand service_ready_command{};
+            SendResponse(connection, 
+                service_ready_command.CreateResponse(connection->session_context)
+                    .CreateStringResponse());
             DoAsyncRead(connection);
         } 
         else 
         {
-            std::println(std::cerr, "Error: {}", err.message());
+            std::println(std::cerr, "Error: {}", error.message());
             m_connections.erase(connection);
         }
         StartAccept();
@@ -114,7 +117,7 @@ namespace SMTP
         std::istream is{&connection->read_buffer};
         std::string line{};
         std::getline(is, line);
-        std::println("Request received: {}", line);
+        std::println("Message Received: {}", line);
         return line;
-    }
+    } 
 }

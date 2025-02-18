@@ -14,7 +14,7 @@ namespace SMTP
 
         std::string HeloCommand::CreateMessage(const SessionContext& context) const
         {
-            return std::format("{}", context.server_name);
+            return std::format("{}", context.hostname);
         }
     }
 }

@@ -7,9 +7,10 @@
 
 int main() 
 {
-    SMTP::Server server{};
-    server.set_host("smtp.soft_serve.com");
-    server.set_port(25);
+    SMTP::ServerContext server_context{};
+    server_context.hostname = "smtp_server.com";
+    SMTP::Server server{server_context};
+    server.Listen(25);
     server.Run();
     return EXIT_SUCCESS;
 }

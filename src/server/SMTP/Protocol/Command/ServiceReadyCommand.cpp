@@ -14,7 +14,7 @@ namespace SMTP
 
         std::string ServiceReadyCommand::ServiceReadyMessage(const SessionContext& context) const
         {
-            return std::format("{} Simple Mail Transfer Service Ready", context.server_name);
+            return std::format("{} Simple Mail Transfer Service Ready", context.hostname);
         }
     }
 }

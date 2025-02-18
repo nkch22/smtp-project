@@ -46,44 +46,35 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "installDir": "${sourceDir}/install/${presetName}",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang.exe",
-        "CMAKE_CXX_COMPILER": "clang.exe"
+          "CMAKE_C_COMPILER": "clang.exe",
+          "CMAKE_CXX_COMPILER": "clang.exe",
+          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       },
       "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
+          "type": "equals",
+          "lhs": "${hostSystemName}",
+          "rhs": "Windows"
       }
     },
     {
-      "name": "WindowsDebugASan",
-      "displayName": "Debug build with address sanitizers",
+      "name": "Windows x64-debug",
+      "displayName": "Windows x64 Debug",
       "inherits": "windows-base",
+      "architecture": {
+          "value": "x64",
+          "strategy": "external"
+      },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "ASAN": "TRUE"
+          "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "WindowsRelease",
-      "displayName": "Release build",
-      "inherits": "windows-base",
+      "name": "Windows x64-release",
+      "displayName": "Windows x64 Release",
+      "inherits": "Windows x64-debug",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "WindowsDebugTsan",
-      "displayName": "Debug build with thread sanitizers",
-      "inherits": "windows-base",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "TSAN": "TRUE"
+          "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]
