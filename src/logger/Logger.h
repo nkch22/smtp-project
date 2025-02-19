@@ -46,6 +46,7 @@
 #define LOG_SAVE_WARNING(value) log.save_warning(value)
 #define LOG_SAVE_MESSAGE(value) log.save_message(value)
 
+//! Enum for log levels.
 enum LogLevels
 {
 	LOG_LEVEL_NO,
@@ -54,6 +55,7 @@ enum LogLevels
 	LOG_LEVEL_TRACE
 };
 
+//! Class, that implements transforming values into string 
 class Buffer
 {
 private:
@@ -84,6 +86,7 @@ public:
 	}
 };
 
+//! Main interface class
 class Logger
 {
 private:
@@ -94,6 +97,7 @@ private:
 		INFORMATION
 	};
 
+	//! Singleton (global variable)
 	class RealLogger
 	{
 	private:
@@ -173,6 +177,8 @@ public:
 	void save_func_start();
 };
 
+
+//! Class to automatically control lifecycle of singleton
 class MainLogger
 {
 private:
