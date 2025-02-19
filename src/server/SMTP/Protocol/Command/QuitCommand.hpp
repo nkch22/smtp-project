@@ -10,7 +10,9 @@ namespace SMTP
         {
         public:
             constexpr static const char* COMMAND{"QUIT"};
-            ~QuitCommand(){}
+
+            QuitCommand() = default;
+            ~QuitCommand() = default;
             Response CreateResponse(const SessionContext& context) override;
         private:
             std::string CreateMessage(const SessionContext& context) const;

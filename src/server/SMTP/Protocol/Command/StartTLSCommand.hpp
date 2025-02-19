@@ -6,13 +6,13 @@ namespace SMTP
 {
     namespace Protocol
     {
-        class DataCommand : public Command
+        class StartTLSCommand : public Command
         {
         public:
-            constexpr static const char* COMMAND{"DATA"};
+            constexpr static const char* COMMAND{"STARTTLS"};
 
-            DataCommand() = default;
-            ~DataCommand() = default;
+            StartTLSCommand() = default;
+            ~StartTLSCommand() = default;
             Response CreateResponse(const SessionContext& context) override;
         };
     }

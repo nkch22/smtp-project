@@ -16,7 +16,7 @@ namespace SMTP
    class Server
     {
     private:
-        using ConnectionHandler = std::list<Session>::iterator;
+        using SessionHandler = std::list<Session>::iterator;
         
     public:
         using Port = asio::ip::port_type;
@@ -29,20 +29,20 @@ namespace SMTP
         const ServerContext& get_server_context() const;
 
     private:
-        void HandleRead(ConnectionHandler connection_handler, const asio::error_code& err, 
+        void HandleRead(SessionHandler connection_handler, const asio::error_code& error, 
                         const std::size_t bytes_transfered);
-        void HandleWrite(ConnectionHandler connection_handler, std::shared_ptr<std::string> msg_buffer, 
+        void HandleWrite(SessionHandler connection_handler, std::shared_ptr<std::string> msg_buffer, 
                          const asio::error_code& err);
-        void DoAsyncRead(ConnectionHandler connection_handler);
-        void HandleAccept(ConnectionHandler connection_handler, asio::error_code const & err);
+        void DoAsyncRead(SessionHandler connection_handler);
+        void HandleAccept(SessionHandler connection_handler, const asio::error_code& error);
         void StartAccept();
 
-        void SendResponse(ConnectionHandler connection_handler, std::string response);
-        std::string ReceiveRequest(ConnectionHandler connection_handler);
+        void SendResponse(SessionHandler connection_handler, std::string response);
+        std::string ReceiveRequest(SessionHandler connection_handler);
 
         asio::io_service m_io_service;
         asio::ip::tcp::acceptor m_acceptor;
-        std::list<Session> m_connections;
+        std::list<Session> m_sessions;
         ServerContext m_server_context;
     }; 
 }

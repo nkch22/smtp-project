@@ -9,8 +9,8 @@ namespace SMTP
         class ServiceReadyCommand : public Command
         {
         public:
-            ServiceReadyCommand(){}
-            ~ServiceReadyCommand(){}
+            ServiceReadyCommand() = default;
+            ~ServiceReadyCommand() = default;
             Response CreateResponse(const SessionContext& context) override;
 
         private:

@@ -10,7 +10,7 @@ namespace SMTP
         class Command
         {
         public:
-            virtual ~Command(){}
+            virtual ~Command() = default;
             virtual Response CreateResponse(const SessionContext& context) = 0;
         };
     }

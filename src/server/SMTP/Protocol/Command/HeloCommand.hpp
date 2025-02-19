@@ -13,8 +13,8 @@ namespace SMTP
         public:
             constexpr static const char* COMMAND{"HELO"};
 
-            HeloCommand(){}
-            ~HeloCommand(){}
+            HeloCommand() = default;
+            ~HeloCommand() = default;
             Response CreateResponse(const SessionContext& context) override;
 
         private:
