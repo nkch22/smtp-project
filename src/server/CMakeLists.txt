@@ -1,2 +1,3 @@
 add_executable(server main.cpp
-        DatabaseRepository/DatabaseRepository.cpp)
+        Entity/UserRepository.hpp
+        Entity/MessageRepository.hpp)
