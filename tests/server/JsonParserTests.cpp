@@ -4,7 +4,9 @@
 
 #include "../../src/server/JsonParser/JsonParser.hpp"
 
-// Helper function to create temporary JSON file
+namespace
+{
+// Helper function to create temporary JSON file (with internal linkage)
 std::string CreateTempFile(const std::string& content)
 {
 	static int counter = 0;
@@ -16,19 +18,24 @@ std::string CreateTempFile(const std::string& content)
 	return filename;
 }
 
-// Helper to delete temporary file
+// Helper function to delete temporary file
 void DeleteTempFile(const std::string& filename)
 {
 	std::remove(filename.c_str());
 }
+} // namespace
 
+// Test: DefaultConstructor
+// Ensures that a default-constructed JSON object has type NUL.
 TEST(JSONTest, DefaultConstructor)
 {
 	JSON json;
 	EXPECT_EQ(json.GetType(), JSON::Type::NUL);
 }
 
-// Tests boolean constructor and value access
+// Test: BooleanType
+// Verifies that JSON objects constructed with true or false are correctly typed,
+// and that the boolean accessor returns the expected value.
 TEST(JSONTest, BooleanType)
 {
 	JSON json_true(true);
@@ -40,7 +47,8 @@ TEST(JSONTest, BooleanType)
 	EXPECT_FALSE(json_false.AsBool());
 }
 
-// Validates numeric storage and retrieval
+// Test: NumberType
+// Validates that a numeric JSON object stores a number correctly and that the number accessor returns the proper value.
 TEST(JSONTest, NumberType)
 {
 	JSON json(3.14);
@@ -48,7 +56,9 @@ TEST(JSONTest, NumberType)
 	EXPECT_DOUBLE_EQ(json.AsNumber(), 3.14);
 }
 
-// Checks string construction from different sources
+// Test: StringType
+// Confirms that JSON objects constructed from C-style strings and std::string have type STRING
+// and that the stored string can be retrieved correctly.
 TEST(JSONTest, StringType)
 {
 	JSON json_str1("test"); // const char* constructor
@@ -60,7 +70,9 @@ TEST(JSONTest, StringType)
 	EXPECT_EQ(json_str2.AsString(), "another");
 }
 
-// Verifies array construction (copy and move semantics)
+// Test: ArrayType
+// Verifies that JSON arrays can be constructed both by copy and by move,
+// and that the array accessor returns the correct size.
 TEST(JSONTest, ArrayType)
 {
 	JSON::Array arr = {JSON(1.0), JSON("test")};
@@ -73,7 +85,9 @@ TEST(JSONTest, ArrayType)
 	EXPECT_EQ(json_move.AsArray().size(), 2);
 }
 
-// Verifies object construction (copy and move semantics)
+// Test: ObjectType
+// Ensures that JSON objects can be constructed by copy or move,
+// and that the object accessor provides the correct key-value pairs.
 TEST(JSONTest, ObjectType)
 {
 	JSON::Object obj = {{"key", JSON("value")}};
@@ -86,7 +100,9 @@ TEST(JSONTest, ObjectType)
 	EXPECT_EQ(json_move.AsObject().size(), 1);
 }
 
-// Ensures type-checking works in accessor methods
+// Test: AsMethodsThrow
+// Verifies that attempting to access a JSON value with an inappropriate accessor
+// (for example, treating a number as a string) throws a runtime error.
 TEST(JSONTest, AsMethodsThrow)
 {
 	JSON json_null;
@@ -99,7 +115,9 @@ TEST(JSONTest, AsMethodsThrow)
 	EXPECT_THROW(json_str.AsArray(), std::runtime_error); // String -> array
 }
 
-// Tests object member access and error conditions
+// Test: ObjectAccess
+// Verifies that valid member access on JSON objects returns the expected result,
+// and that accessing a non-existent key or using object access on a non-object triggers an error.
 TEST(JSONTest, ObjectAccess)
 {
 	JSON::Object obj = {{"name", JSON("test")}, {"value", JSON(42.0)}};
@@ -117,7 +135,8 @@ TEST(JSONTest, ObjectAccess)
 	EXPECT_THROW(not_obj["key"], std::runtime_error);
 }
 
-// Tests parsing of null literal
+// Test: ParseNull
+// Ensures that the JSONParser correctly parses the "null" literal and returns a JSON object of type NUL.
 TEST(JSONParserTest, ParseNull)
 {
 	std::string filename = CreateTempFile("null");
@@ -128,7 +147,9 @@ TEST(JSONParserTest, ParseNull)
 	ASSERT_EQ(result.GetType(), JSON::Type::NUL);
 }
 
-// Verifies parsing of true/false literals
+// Test: ParseBoolean
+// Verifies that the JSONParser correctly parses the boolean literals "true" and "false"
+// into JSON objects of type BOOL with the expected values.
 TEST(JSONParserTest, ParseBoolean)
 {
 	// True case
@@ -148,7 +169,9 @@ TEST(JSONParserTest, ParseBoolean)
 	EXPECT_FALSE(result_false.AsBool());
 }
 
-// Validates various number formats (integers, negatives, exponents)
+// Test: ParseNumbers
+// Validates that the JSONParser can handle various numeric formats including integers,
+// negative numbers, and numbers in exponential notation.
 TEST(JSONParserTest, ParseNumbers)
 {
 	std::vector<std::pair<std::string, double>> tests = {
@@ -166,7 +189,8 @@ TEST(JSONParserTest, ParseNumbers)
 	}
 }
 
-// Tests basic string parsing and escape sequences
+// Test: ParseStrings
+// Checks that the JSONParser correctly parses a simple JSON string literal.
 TEST(JSONParserTest, ParseStrings)
 {
 	// Simple string
@@ -178,7 +202,8 @@ TEST(JSONParserTest, ParseStrings)
 	EXPECT_EQ(result.AsString(), "Simple string");
 }
 
-// Verifies handling of JSON escape sequences
+// Test: ParseStringEscapes
+// Ensures that escape sequences within a JSON string are interpreted correctly by the JSONParser.
 TEST(JSONParserTest, ParseStringEscapes)
 {
 	std::string filename = CreateTempFile(R"("Escaped: \\ \" \/ \b \f \n \r \t")");
@@ -191,7 +216,9 @@ TEST(JSONParserTest, ParseStringEscapes)
 	EXPECT_EQ(result.AsString(), expected);
 }
 
-// Tests array parsing with mixed value types
+// Test: ParseArray
+// Verifies that a JSON array containing mixed types (null, boolean, number, string)
+// is parsed correctly into a JSON array with the appropriate element types.
 TEST(JSONParserTest, ParseArray)
 {
 	std::string filename = CreateTempFile(R"([null, true, 42, "test"])");
@@ -208,7 +235,9 @@ TEST(JSONParserTest, ParseArray)
 	EXPECT_EQ(arr[3].AsString(), "test");		  // String
 }
 
-// Verifies object parsing with key-value pairs
+// Test: ParseObject
+// Ensures that the JSONParser correctly parses a JSON object with key-value pairs,
+// and that the values accessed by key match the expected results.
 TEST(JSONParserTest, ParseObject)
 {
 	std::string filename = CreateTempFile(R"({"key": "value", "num": 3.14})");
@@ -222,7 +251,9 @@ TEST(JSONParserTest, ParseObject)
 	EXPECT_DOUBLE_EQ(obj.at("num").AsNumber(), 3.14); // Numeric value
 }
 
-// Tests nested structures (object in array in object)
+// Test: ParseNested
+// Tests that nested JSON structures (such as an object inside an array inside an object)
+// are parsed correctly.
 TEST(JSONParserTest, ParseNested)
 {
 	std::string filename = CreateTempFile(R"({"array": [{"nested": true}], "value": null})");
@@ -236,7 +267,9 @@ TEST(JSONParserTest, ParseNested)
 	EXPECT_EQ(result["value"].GetType(), JSON::Type::NUL); // Top-level null
 }
 
-// Validates error conditions and exception throwing
+// Test: ErrorHandling
+// Validates that the JSONParser throws appropriate exceptions for various types of malformed JSON input
+// or when a file does not exist.
 TEST(JSONParserTest, ErrorHandling)
 {
 	// Invalid file handling
@@ -261,7 +294,8 @@ TEST(JSONParserTest, ErrorHandling)
 	}
 }
 
-// Ensures no trailing characters after JSON root
+// Test: TrailingCharacters
+// Ensures that any unexpected trailing characters after the main JSON value cause a parsing error.
 TEST(JSONParserTest, TrailingCharacters)
 {
 	std::string filename = CreateTempFile("null garbage");
@@ -270,7 +304,8 @@ TEST(JSONParserTest, TrailingCharacters)
 	DeleteTempFile(filename);
 }
 
-// Verifies whitespace handling in various positions
+// Test: WhitespaceHandling
+// Checks that the JSONParser properly ignores extraneous whitespace in various positions.
 TEST(JSONParserTest, WhitespaceHandling)
 {
 	std::string filename = CreateTempFile("\t\n\r{\n\"key\"\n:\n[\n]\n}\n");
@@ -279,7 +314,8 @@ TEST(JSONParserTest, WhitespaceHandling)
 	DeleteTempFile(filename);
 }
 
-// Tests unsupported unicode escape handling
+// Test: UnicodeEscapeError
+// Ensures that the JSONParser throws an error when it encounters unsupported Unicode escape sequences.
 TEST(JSONParserTest, UnicodeEscapeError)
 {
 	std::string filename = CreateTempFile(R"("\u2603")"); // Snowman character
