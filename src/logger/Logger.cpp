@@ -296,6 +296,9 @@ Buffer& Buffer::operator<<(const bool& value)
 	return *this;
 }
 
+
+//MainLogger
+
 MainLogger::MainLogger() : MainLogger(default_level, default_path, default_amount) {}
 MainLogger::MainLogger(const unsigned short& level) : MainLogger{level, default_path, default_amount} {}
 MainLogger::MainLogger(const unsigned short& level, const std::string& path) :

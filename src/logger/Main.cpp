@@ -11,6 +11,29 @@ int add(int a, int b) {
 }
 
 
+void func1()
+{
+	throw std::exception();
+	
+}
+void caller()
+{
+	LOG_START();
+	
+	try
+	{
+		func1();
+		
+	}
+	catch (std::exception& e)
+	{
+		LOG_SAVE_ERROR("Error was caught");
+	}
+
+	LOG_RETURN_NOTHING();
+}
+
+
 int main() {
 	MainLogger log;
 
@@ -25,5 +48,5 @@ int main() {
 	add(6, 9);
 	func();
 
-	log.get().set_level(LOG_LEVEL_PROD);
+	caller();
 }
