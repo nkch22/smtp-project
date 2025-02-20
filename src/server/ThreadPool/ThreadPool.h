@@ -42,6 +42,8 @@ private:
 	void JoinWorkerThreads();
 	void WorkerRoutine();
 
+	static size_t GetOptimalNumberOfWorkers(size_t);
+
 	void Invoke(Task& task);
 
 private:

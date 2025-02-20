@@ -2,7 +2,7 @@
 
 namespace tp
 {
-ThreadPool::ThreadPool(size_t threads) : m_workers(threads) {}
+ThreadPool::ThreadPool(size_t threads) : m_workers(GetOptimalNumberOfWorkers(threads)) {}
 
 ThreadPool::~ThreadPool() = default;
 
@@ -48,6 +48,14 @@ void ThreadPool::WorkerRoutine()
 		if (!task) break;
 		Invoke(*task);
 	}
+}
+
+size_t ThreadPool::GetOptimalNumberOfWorkers(size_t count)
+{
+	if (count > 0) return count;
+	unsigned hardware_threads = std::thread::hardware_concurrency();
+	if (hardware_threads == 0) hardware_threads = 2;
+	return hardware_threads;
 }
 
 void ThreadPool::JoinWorkerThreads()
