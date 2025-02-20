@@ -443,4 +443,6 @@ FodyWeavers.xsd
 
 #output folders
 out/
-output/
+
+#documentation folder
+html/
