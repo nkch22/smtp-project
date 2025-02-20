@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Command.hpp"
+#include "ICommand.hpp"
 
 namespace SMTP
 {
     namespace Protocol
     {
-        class StartTLSCommand : public Command
+        class StartTLSCommand : public ICommand
         {
         public:
             constexpr static const char* COMMAND{"STARTTLS"};

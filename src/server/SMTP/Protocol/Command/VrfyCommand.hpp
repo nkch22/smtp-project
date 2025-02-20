@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Command.hpp"
+#include "ICommand.hpp"
 
 namespace SMTP
 {
     namespace Protocol
     {
-        class VrfyCommand : public Command
+        class VrfyCommand : public ICommand
         {
         public:
             constexpr static const char* COMMAND{"VRFY"};

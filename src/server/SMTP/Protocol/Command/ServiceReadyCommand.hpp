@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Command.hpp"
+#include "ICommand.hpp"
 
 namespace SMTP
 {
     namespace Protocol
     {
-        class ServiceReadyCommand : public Command
+        class ServiceReadyCommand : public ICommand
         {
         public:
             ServiceReadyCommand() = default;

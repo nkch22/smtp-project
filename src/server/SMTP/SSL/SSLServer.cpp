@@ -1,5 +1,7 @@
 #include "SSLServer.hpp"
 
+#include <print>
+
 namespace SMTP
 {
     SSLServer::SSLServer(std::shared_ptr<asio::io_context> io_context, std::shared_ptr<asio::ssl::context> ssl_context)
@@ -38,21 +40,41 @@ namespace SMTP
 
     void SSLServer::Stop()
     {
+        if(!IsStarted())
+        {
+            return;
+        }
+
+        m_started = false;
+        for(auto& session : m_sessions)
+        {
+            session->Disconnect();
+        }
     }
 
-    std::shared_ptr<SSLSession> SSLServer::CreateSession()
+    std::shared_ptr<SSLSession> SSLServer::CreateSession(asio::ip::tcp::socket socket)
     {
-        return std::make_shared<SSLSession>();
+        auto session{std::make_shared<SSLSession>(std::move(socket), m_ssl_context)};
+        m_sessions.insert(session);
+        return session;
     }
 
     void SSLServer::Accept()
     {
-        auto async_accept_handler{[this](const asio::error_code error)
+        auto async_accept_handler{[this](const asio::error_code& error, asio::ip::tcp::socket socket)
         {
             if(!error)
             {
-                CreateSession();
+                CreateSession(std::move(socket))->Connect();
             }
+            else
+            {
+                std::println("Error: {}", error.message());
+            }
+
+            Accept();
         }};
+
+        m_acceptor.async_accept(async_accept_handler);
     }
 }

@@ -24,7 +24,6 @@ namespace SMTP
 
     void SSLSession::Connect()
     {
-        get_socket().set_option(asio::ip::tcp::socket::keep_alive(true));
         m_connected = true;
         OnConnected();
         auto self{shared_from_this()};
@@ -43,7 +42,7 @@ namespace SMTP
             }
             else
             {
-                std::println("Error: {}", error);
+                std::println("Error: {}", error.message());
                 Disconnect();
             }
         }};
@@ -138,12 +137,12 @@ namespace SMTP
             }
             else
             {
-                std::println("Error: {}", error);
+                std::println("Error: {}", error.message());
                 Disconnect();
             }
         }};
 
-        m_stream.async_read_some(m_receive_buffer, async_receive_handler);
+        asio::async_read(m_stream, m_receive_buffer, async_receive_handler);
     }
 
     void SSLSession::TrySend()
@@ -175,10 +174,10 @@ namespace SMTP
             }
             else
             {
-                std::println("Error: {}", error);
+                std::println("Error: {}", error.message());
                 Disconnect();
             }
         }};
-        m_stream.async_write_some(m_send_buffer, async_write_handler);
+        asio::async_write(m_stream, m_send_buffer, async_write_handler);
     }
 }

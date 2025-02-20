@@ -7,10 +7,10 @@ namespace SMTP
 {
     namespace Protocol
     {
-        class Command
+        class ICommand
         {
         public:
-            virtual ~Command() = default;
+            virtual ~ICommand() = default;
             virtual Response CreateResponse(const SessionContext& context) = 0;
         };
     }

@@ -3,7 +3,7 @@
 #include <optional>
 #include <memory>
 
-#include "Command.hpp"
+#include "ICommand.hpp"
 
 namespace SMTP
 {
@@ -12,7 +12,7 @@ namespace SMTP
         class Parser
         {
         public:
-            using OptionalCommand = std::optional<std::unique_ptr<Command>>;
+            using OptionalCommand = std::optional<std::unique_ptr<ICommand>>;
 
             OptionalCommand TryParseRequest(const std::string& request) const;
         private:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <list>
+#include <unordered_set>
 
 #include <asio.hpp>
 #include <asio/ssl.hpp>
@@ -23,14 +23,16 @@ namespace SMTP
         virtual void Listen(const Port port);
         virtual void Start();
         virtual void Stop();
+        virtual std::shared_ptr<SSLSession> CreateSession(asio::ip::tcp::socket socket);
+
     private:
         void Accept();
-        std::shared_ptr<SSLSession> CreateSession();
 
         bool m_started;
+
         std::shared_ptr<asio::io_context> m_io_context;
         std::shared_ptr<asio::ssl::context> m_ssl_context;
         asio::ip::tcp::acceptor m_acceptor;
-        std::list<SSLSession> m_sessions;
+        std::unordered_set<std::shared_ptr<SSLSession>> m_sessions;
     };
 }

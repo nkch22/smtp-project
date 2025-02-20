@@ -20,12 +20,11 @@ namespace SMTP
 
         virtual void Connect();
         virtual void Disconnect();
+        virtual void Receive();
+        virtual bool Send(std::string data);
 
         bool IsConnected() const noexcept;
         bool IsHandshaked() const noexcept;
-
-        virtual void Receive();
-        virtual bool Send(std::string data);
 
         virtual void OnConnected();
         virtual void OnDisconnected();
