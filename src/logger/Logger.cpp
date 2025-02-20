@@ -20,7 +20,7 @@ std::mutex* Logger::RealLogger::m_mutex = nullptr;
 Logger::RealLogger::RealLogger(const unsigned short& _level, const std::string& _save, const unsigned int& amount)
 {
 	amount <= 0 ? throw std::exception{} : 0;
-	if (_level <= LOG_LEVEL_NO || _level >= LOG_LEVEL_TRACE) throw std::exception{};
+	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::exception{};
 
 	m_level = new unsigned short{_level};
 	m_output_path = new std::string{_save};
@@ -140,10 +140,12 @@ void Logger::RealLogger::real_save(const std::string& str, const Logger::Message
 
 void Logger::RealLogger::real_set_level(const unsigned short& _level)
 {
+	std::lock_guard<std::mutex> lock{*m_mutex};
 	*m_level = _level;
 }
 unsigned short Logger::RealLogger::real_get_level() const
 {
+	std::lock_guard<std::mutex> lock{*m_mutex};
 	return *m_level;
 }
 
