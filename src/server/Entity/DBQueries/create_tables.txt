@@ -1,0 +1,15 @@
+drop table if exists messages, users;
+
+create table users (
+	name varchar(30) primary key,
+	password varchar(20) not null check(length(password)>=8)
+);
+
+create table messages (
+	id integer primary key,
+	sender varchar(30) references users(name),
+	recepient varchar(30) references users(name),
+	subject varchar(50),
+	body varchar(500),
+	date_time timestamp
+);

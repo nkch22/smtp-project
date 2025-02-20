@@ -1,0 +1,14 @@
+-- add message to db
+INSERT INTO mails(sender, recepient, subject, body, date_time) 
+VALUES 
+(6, 'paul.doe@example.com', 'jane.smith@example.com', 'Meeting Reminder', 'Don’t forget about our meeting tomorrow at 10 AM.', '2025-02-17 09:00:00');
+
+-- get messages
+select * from messages;
+
+-- get messages from
+select recepient, subject, body, date_time from messages where sender = 'jane.smith@example.com';
+
+-- get messages to
+select sender, subject, body, date_time from messages where recepient = 'jane.smith@example.com';
+
