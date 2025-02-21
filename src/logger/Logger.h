@@ -14,136 +14,7 @@
 /*!
 	@file Logger.h
 	@brief Interface of Logger shared library
-
-	Logger is designed to save server workflow with macros
 */
-
-/*! @def LOG_START_ARGS(...)
- *	@brief This macros is designed to save function with parameters start
- *
- *	It will save function with parameters start, if log level is TRACE\n
- *	It will save function start , if log level is DEBUG
- *
- *		Be careful:
- *			This macros should be called in any function or method, except function that uses Logger::init()
- *
- *			If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
- *
- *			And this macros can be replaced with LOG_START()
- *
- *	Usage example:
- *
- *		void func(int a, double b){
- *			LOG_START_ARGS(a, b);
- *			LOG_RETURN_NOTHING();
- *		}
- */
-
-/*! @def LOG_START()
- *	@brief This macros is designed to save function start
- *
- *	It will save function start , if log level is DEBUG or TRACE
- *
- *		Be careful:
- *			This macros should be called in any function or method, except function that uses Logger::init()
- *			And this macros can be replaced with LOG_START_ARGS(...)
- *
- *	Usage example:
- *
- *		void func(){
- *			LOG_START();
- *			LOG_RETURN_NOTHING();
- *		}
- */
-
-/*! @def LOG_RETURN(value)
- *	@brief It will save and return @a value
- *
- *	If log level is TRACE, it will return and save @a value \n
- *	If log level is DEBUG, it will only return @a value
- *
- *		Be careful:
- *			If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
- *
- *	Usage example:
- *
- *		int add(int a, int b){
- *			LOG_START_ARGS(a, b);
- *			LOG_RETURN(a + b);
- *		}
- */
-
-/*! @def LOG_RETURN_NOTHING()
- *	@brief It will save end of function execution
- *
- *	If log level is DEBUG or TRACE, it will only save function end
- *
- *	Usage example:
- *
- *		void func(){
- *			LOG_START();
- *			LOG_RETURN_NOTHING();
- *		}
- */
-
-/*! @def LOG_SAVE_ERROR(value)
- *	@brief It will save error message
- *
- *	It will save message with error flag\n
- *	It ignores log levels, except log level NO
- *
- *		Be careful:
- *			It won't stop function execution!
- *
- *	Usage example:
- *
- *		void func(){
- *			throw std::exception();
- *		}
- *
- *		void caller(){
- *			LOG_START();
- *
- *			try{
- *				func();
- *			}
- *			catch(std::exception& e){
- *				LOG_SAVE_ERROR("Error was caught");
- *			}
- *
- *			LOG_RETURN_NOTHING();
- *		}
- */
-
-/*! @def LOG_SAVE_WARNING(value)
- *	@brief It will save message as warning
- *
- *	It will save message with wargning flag\n
- *	It ignores log levels, except log level NO
- *
- *	Usage example:
- *
- *		void func(){
- *			LOG_START();
- *			LOG_SAVE_WARNING("Warning");
- *			LOG_RETURN_NOTHING();
- *		}
- */
-
-/*! @def LOG_SAVE_MESSAGE(value)
- *	@brief It will save message as message
- *
- *	It will save message with information flag\n
- *	It ignores log levels, except log level NO
- *
- *	Usage example:
- *
- *		void func(){
- *			LOG_START();
- *			LOG_SAVE_MESSAGE("Message");
- *			LOG_RETURN_NOTHING();
- *		}
- */
 
 #define LOG_START_ARGS(...)                                                                                            \
 	Logger log;                                                                                                        \
@@ -266,27 +137,27 @@ public:
 };
 
 /*! @class Logger
-*	@brief Main logger interface
-*	
-*	This class implements saving messages of different types in console and txt file
-* 
-*	Warning:
-* 
-*		It's using inner singleton class as global variable
-* 
-*		So, before using logger, user must initialize it with init(), 
-*			and after using, delete with destoy()
-*		
-*		Init() and destoy() calls can be replaced with MainLogger constructor and destructor
-* 
-*		Every saving method ignores log levels, except log level NO
-* 
-*		Using saving methods or macros without previous init() call in any other place is undefined behavior 
-* 
-*		It is recomended to use macros that calls needed method with respect to log level
-* 
-*	@sa Logger.h, MainLogger
-*/
+ *	@brief Main logger interface
+ *
+ *	This class implements saving messages of different types in console and txt file
+ *
+ *	Warning:
+ *
+ *		It's using inner singleton class as global variable
+ *
+ *		So, before using logger, user must initialize it with init(),
+ *			and after using, delete with destoy()
+ *
+ *		Init() and destoy() calls can be replaced with MainLogger constructor and destructor
+ *
+ *		Every saving method ignores log levels, except log level NO
+ *
+ *		Using saving methods or macros without previous init() call in any other place is undefined behavior
+ *
+ *		It is recomended to use macros that calls needed method with respect to log level
+ *
+ *	@sa Logger.h, MainLogger
+ */
 class Logger
 {
 private:
@@ -337,16 +208,15 @@ private:
 
 	void save_arguments();
 
-
 public:
-	Logger(const std::source_location location = std::source_location::current()); 
+	Logger(const std::source_location location = std::source_location::current());
 	~Logger(); //!< Default destructor
 
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
-	*	@brief Default constructor
-	* 
-	*	It stores location where it was created
-	*/	
+	 *	@brief Default constructor
+	 *
+	 *	It stores location where it was created
+	 */
 
 	static bool init();
 	static bool init(const unsigned short& level);
@@ -354,19 +224,19 @@ public:
 	static bool init(const unsigned int& amount);
 	static bool init(const unsigned short& level, const std::string& save_path, const unsigned int& amount);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
-	*   @brief Singleton initialization method	
-	*	
-	*		level - is log level on start,		default value = 1
-	*		save_path - is path to output directory,		default value = ""
-	*		amount - is amount of how many logs can be in log folder,		default value = 30
-	* 
-	*	It will save message of successful initialization
-	* 
-	*	It return true if initialization is successful, otherwise false
-	*/
+	 *   @brief Singleton initialization method
+	 *
+	 *		level - is log level on start,		default value = 1
+	 *		save_path - is path to output directory,		default value = ""
+	 *		amount - is amount of how many logs can be in log folder,		default value = 30
+	 *
+	 *	It will save message of successful initialization
+	 *
+	 *	It return true if initialization is successful, otherwise false
+	 */
 	/*! @fn init()
-	*	Initialize with all default values
-	*/
+	 *	Initialize with all default values
+	 */
 	/*! @fn init(const unsigned short&)
 	 *	Initialize with partly default values
 	 */
@@ -379,64 +249,68 @@ public:
 
 	static bool destroy();
 	/*! @fn destroy()
-	*	@brief Destroyes singleton valiable
-	*	
-	*	It will save message of destroying singleton
-	*	
-	*	It returns true, if singleton was destroyed successfully, else false
-	*/
-
+	 *	@brief Destroyes singleton valiable
+	 *
+	 *	It will save message of destroying singleton
+	 *
+	 *	It returns true, if singleton was destroyed successfully, else false
+	 */
 
 	void save_error(const std::string&);
 	/*! @fn save_error(const std::string&)
-	*	@brief It saves error
-	*
-	*	Saves messages with error flag
-	*
-	*		Be careful:
-	*			It won`t stop function execution!
-	*/
+	 *	@brief It saves error
+	 *
+	 *	Saves messages with error flag
+	 *
+	 *		Be careful:
+	 *			It won`t stop function execution!
+	 */
 
 	void save_warning(const std::string&);
 	/*! @fn save_warning(const std::string&)
-	*  @brief It saves warning
-	*
-	*  Saves message with warning flag
-	*/
+	 *  @brief It saves warning
+	 *
+	 *  Saves message with warning flag
+	 */
 
 	void save_message(const std::string&);
 	/*! @fn save_message(const std::string&)
-	*  @brief It saves message
-	*
-	*   Saves message with information flag
-	*/
+	 *  @brief It saves message
+	 *
+	 *   Saves message with information flag
+	 */
 
 	void set_level(const unsigned short&);
 	/*! @fn set_level(const unsigned short&)
-	*	@brief It sets log level to new value
-	*
-	*	It checks value to be valid log level, and then set log level to that value
-	*/
+	 *	@brief It sets log level to new value
+	 *
+	 *	It checks value to be valid log level, and then set log level to that value
+	 */
 
 	unsigned short get_level() const;
 	/*! @fn get_level()
-	*	@brief It returns stored log level value
-	*/
+	 *	@brief It returns stored log level value
+	 */
 
 	template<typename T>
 	void save_return(const T& value)
 	{
-		m_buff << value;
-		m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location);
-		m_buff.clear();
+		if (m_real->real_get_level() == LOG_LEVEL_TRACE)
+		{
+			m_buff << value;
+			m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location);
+			m_buff.clear();
+		}
+		else
+			this->save_return_nothing();
 	}
 	/*! @fn save_return(const T&)
-	*	@brief It saves return value of funtion
-	* 
-	*	Be careful:
-	*		
-	*		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
-	*/
+	 *	@brief It saves return value of funtion
+	 *
+	 *	Be careful:
+	 *
+	 *		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 */
 
 	void save_return_nothing();
 	/*! @fn save_return_nothing()
@@ -450,34 +324,39 @@ public:
 	template<typename T, typename... Args>
 	void save_arguments(const T& first, Args&... args)
 	{
-		save_argument(first);
-		save_arguments(std::forward<Args>(args)...);
+		if (m_real->real_get_level() == LOG_LEVEL_TRACE)
+		{
+			save_argument(first);
+			save_arguments(std::forward<Args>(args)...);
+		}
+		else
+			this->save_func_start();
 	}
 	/*! @fn save_arguments(const T& first, Args&... args)
-	*	@brief It save input arguments
-	* 
-	*	Be careful:
-	*		
-	*		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()	
-	*	
-	*	This method should be called at the beginning of parameterized function
-	*/
+	 *	@brief It save input arguments
+	 *
+	 *	Be careful:
+	 *
+	 *		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 *
+	 *	This method should be called at the beginning of parameterized function
+	 */
 
 	void save_func_start();
 	/*! @fn save_func_start()
 		@brief It saves start of function
-		
+
 		It saves message that function has successfully started
 	*/
 };
 
 /*! @class MainLogger
-*   @brief Class that automatically controls lifecycle of Logger singleton
-* 
-*	Be careful:
-*		
-*		There can be only one MainLogger, otherwise its undefined behavior
-*/
+ *   @brief Class that automatically controls lifecycle of Logger singleton
+ *
+ *	Be careful:
+ *
+ *		There can be only one MainLogger, otherwise its undefined behavior
+ */
 class MainLogger
 {
 private:
@@ -489,13 +368,13 @@ public:
 	MainLogger(const unsigned short&, const std::string&);
 	MainLogger(const unsigned short&, const std::string&, const unsigned int&);
 	/*! @fn MainLogger(const unsigned short&, const std::string&, const unsigned int&)
-	*	@brief Full MainLogger constructor
-	*	
-	*	It calls to Logger::init() with given parameters
-	*/
+	 *	@brief Full MainLogger constructor
+	 *
+	 *	It calls to Logger::init() with given parameters
+	 */
 	/*! @fn MainLogger(const unsigned short&, const std::string&)
-	*	It calles full constructor
-	*/
+	 *	It calles full constructor
+	 */
 	/*! @fn MainLogger(const unsigned short&)
 	 *	It calles full constructor
 	 */
@@ -512,6 +391,6 @@ public:
 
 	Logger& get() const;
 	/*! @fn get()
-	*	@brief It returns stored log
-	*/
+	 *	@brief It returns stored log
+	 */
 };

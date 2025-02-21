@@ -226,12 +226,14 @@ unsigned short Logger::get_level() const
 
 void Logger::save_return_nothing()
 {
-	m_real->real_save("successfully executed", INFORMATION, m_location);
+	if (m_real->real_get_level() >= LOG_LEVEL_DEBUG)
+		m_real->real_save("successfully executed", INFORMATION, m_location);
 }
 
 void Logger::save_func_start()
 {
-	m_real->real_save("started", INFORMATION, m_location);
+	if (m_real->real_get_level() >= LOG_LEVEL_DEBUG)
+		m_real->real_save("started", INFORMATION, m_location);
 }
 
 void Logger::save_arguments()
