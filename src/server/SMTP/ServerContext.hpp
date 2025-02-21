@@ -4,8 +4,10 @@
 
 namespace SMTP
 {
-    struct ServerContext
-    {
-        std::string hostname;
-    };    
+
+struct ServerContext
+{
+    std::string hostname;
+};    
+
 }
