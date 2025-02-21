@@ -5,15 +5,19 @@
 #include <cstdint>
 #include <mutex>
 
+namespace tp
+{
 class WaitGroup
 {
 public:
 	// Non-copyable
 	WaitGroup(const WaitGroup&) = delete;
+
 	WaitGroup& operator=(const WaitGroup&) = delete;
 
 	// Non-movable
 	WaitGroup(WaitGroup&&) = delete;
+
 	WaitGroup& operator=(WaitGroup&&) = delete;
 
 	void Add(size_t count);
@@ -28,3 +32,4 @@ private:
 	std::condition_variable m_is_finished;
 	uint32_t m_is_waiting{0};
 };
+} // namespace tp

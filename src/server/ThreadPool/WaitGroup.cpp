@@ -1,5 +1,7 @@
 #include "WaitGroup.h"
 
+namespace tp
+{
 void WaitGroup::Add(size_t count)
 {
 	m_jobs.fetch_add(count);
@@ -22,3 +24,4 @@ void WaitGroup::Wait()
 	m_is_finished.wait(lock, [this] { return m_jobs == 0; });
 	m_is_waiting -= 1;
 }
+} // namespace tp
