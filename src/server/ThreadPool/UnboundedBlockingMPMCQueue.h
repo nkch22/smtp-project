@@ -57,4 +57,4 @@ private:
 	std::atomic<bool> m_is_closed{false};
 };
 
-}; // namespace tp
+} // namespace tp

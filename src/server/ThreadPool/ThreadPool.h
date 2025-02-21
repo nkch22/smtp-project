@@ -52,4 +52,4 @@ private:
 	static thread_local ThreadPool* s_current;
 };
 
-}; // namespace tp
+} // namespace tp

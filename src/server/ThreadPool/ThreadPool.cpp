@@ -72,4 +72,4 @@ void ThreadPool::Invoke(Task& task)
 }
 
 thread_local ThreadPool* ThreadPool::s_current{nullptr};
-}; // namespace tp
+} // namespace tp
