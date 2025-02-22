@@ -2,12 +2,14 @@
 
 namespace SMTP
 {
-    namespace Protocol
-    {
-        Response DataCommand::CreateResponse(const SessionContext& context)
-        {
-            Response response{ReplyCode::Ok};
-            return response;
-        }
-    }
+
+namespace Protocol
+{
+
+void DataCommand::Execute()
+{
+}
+
+}
+
 }

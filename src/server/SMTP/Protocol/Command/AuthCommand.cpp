@@ -6,10 +6,8 @@ namespace SMTP
 namespace Protocol
 {
 
-Response AuthCommand::CreateResponse(const SessionContext& context)
+void AuthCommand::Execute()
 {
-    Response response{ReplyCode::Ok};
-    return response;
 }
 
 }

@@ -4,16 +4,20 @@
 
 namespace SMTP
 {
-    namespace Protocol
-    {
-        class DataCommand : public ICommand
-        {
-        public:
-            constexpr static const char* COMMAND{"DATA"};
 
-            DataCommand() = default;
-            ~DataCommand() = default;
-            Response CreateResponse(const SessionContext& context) override;
-        };
-    }
+namespace Protocol
+{
+
+class DataCommand : public ICommand
+{
+public:
+    constexpr static const char* COMMAND{"DATA"};
+
+    DataCommand() = default;
+    ~DataCommand() = default;
+    void Execute() override;
+};
+
+}
+
 }

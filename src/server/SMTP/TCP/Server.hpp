@@ -43,8 +43,8 @@ private:
     void DisconnectAll();
     void HandleError(const asio::error_code& error);
 
-    bool m_started;
     std::shared_ptr<asio::io_context> m_io_context;
+    bool m_started;
     asio::ip::tcp::endpoint m_endpoint;
     asio::ip::tcp::acceptor m_acceptor;
     std::unordered_set<std::shared_ptr<ISession>> m_sessions;

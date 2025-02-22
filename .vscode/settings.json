@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "xhash": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "*.ipp": "cpp",
+        "cstdlib": "cpp"
     }
 }

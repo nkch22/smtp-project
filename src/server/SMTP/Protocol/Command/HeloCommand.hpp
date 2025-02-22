@@ -6,19 +6,20 @@
 
 namespace SMTP
 {
-    namespace Protocol
-    {
-        class HeloCommand : public ICommand
-        {
-        public:
-            constexpr static const char* COMMAND{"HELO"};
 
-            HeloCommand() = default;
-            ~HeloCommand() = default;
-            Response CreateResponse(const SessionContext& context) override;
+namespace Protocol
+{
 
-        private:
-            std::string CreateMessage(const SessionContext& context) const;
-        }; 
-    }
+class HeloCommand : public ICommand
+{
+public:
+    constexpr static const char* COMMAND{"HELO"};
+
+    HeloCommand() = default;
+    ~HeloCommand() = default;
+    void Execute() override;
+}; 
+
+}
+
 }

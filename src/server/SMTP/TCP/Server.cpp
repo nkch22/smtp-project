@@ -9,10 +9,10 @@ namespace TCP
 {
 
 Server::Server(std::shared_ptr<asio::io_context> io_context, const Port port)
-    : m_io_context{}
+    : m_io_context{io_context}
     , m_started{false}
     , m_endpoint{asio::ip::tcp::v4(), port}
-    , m_acceptor{*io_context}
+    , m_acceptor{*m_io_context}
     , m_sessions{}
 {
 }
@@ -40,8 +40,7 @@ void Server::Start()
         OnStarted();
         Accept();
     }};
-    start_handler();
-    //m_io_context->post(start_handler);
+    m_io_context->post(start_handler);
 }
 
 void Server::Stop() 
@@ -66,8 +65,7 @@ void Server::Stop()
         OnStopped();
     }};
 
-    stop_handler();
-    //m_io_context->post(stop_handler);
+    m_io_context->post(stop_handler);
 }
 
 void Server::Restart() 
@@ -100,27 +98,28 @@ void Server::Accept()
         {
             return;
         }
-
-    }};
-    auto async_accept_handler{[this, self](const asio::error_code& error, asio::ip::tcp::socket socket)
-    {
-        if(!error)
+        
+        auto async_accept_handler{[this, self](const asio::error_code& error, asio::ip::tcp::socket socket)
         {
-            auto session{CreateSession(std::move(socket))};
-            RegisterSession(session);
+            if(!error)
+            {
+                OnAccepted();
 
-            session->Connect();
-        }
-        else
-        {
-            HandleError(error);
-        }
-
-        Accept();
+                auto session{CreateSession(std::move(socket))};
+                RegisterSession(session);
+    
+                session->Connect();
+            }
+            else
+            {
+                HandleError(error);
+            }
+    
+            Accept();
+        }};
+        m_acceptor.async_accept(async_accept_handler);
     }};
-    //accept_handler();
-    m_acceptor.async_accept(async_accept_handler);
-    //m_io_context->dispatch(accept_handler);
+    m_io_context->dispatch(accept_handler);
 }
 
 std::shared_ptr<Session> Server::CreateSession(asio::ip::tcp::socket socket)
@@ -149,8 +148,7 @@ void Server::DisconnectAll()
             session->Disconnect();
         }
     }};
-    disconnect_all_handler();
-    //m_io_context->dispatch(disconnect_all_handler);
+    m_io_context->dispatch(disconnect_all_handler);
 }
 
 void Server::HandleError(const asio::error_code& error)

@@ -11,11 +11,11 @@ namespace Protocol
 class AuthCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"DATA"};
+    constexpr static const char* COMMAND{"AUTH"};
 
     AuthCommand() = default;
     ~AuthCommand() = default;
-    Response CreateResponse(const SessionContext& context) override;
+    void Execute() override;
 };
 
 }

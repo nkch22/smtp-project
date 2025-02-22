@@ -9,10 +9,10 @@ namespace TCP
 {
 
 Session::Session(std::shared_ptr<asio::io_context> io_context, asio::ip::tcp::socket socket)
-    : m_connected{false}
+    : m_io_context{io_context}
+    , m_connected{false}
     , m_receiving{false}
     , m_sending{false}
-    , m_io_context{io_context}
     , m_socket{std::move(socket)}
     , m_receive_buffer{}
 {
@@ -49,8 +49,7 @@ void Session::Disconnect()
         ClearBuffers();
         OnDisconnected();
     }};
-    disconnect_handler();
-    //m_io_context->dispatch(disconnect_handler);
+    m_io_context->dispatch(disconnect_handler);
 }
 
 void Session::Receive()
@@ -78,8 +77,7 @@ bool Session::Send(const std::string_view data)
     {
         TrySend();
     }};
-    send_handler();
-    //m_io_context->dispatch(send_handler);
+    m_io_context->dispatch(send_handler);
     return true;
 }
 
@@ -175,6 +173,11 @@ void Session::ClearBuffers()
     std::scoped_lock lock{m_send_mutex};
     m_send_buffer.consume(std::size(m_send_buffer));
     m_receive_buffer.consume(std::size(m_receive_buffer));
+}
+
+asio::ip::tcp::socket& Session::get_socket() noexcept
+{
+    return m_socket;
 }
 
 void Session::OnConnected()

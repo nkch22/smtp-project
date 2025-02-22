@@ -13,5 +13,17 @@ include(FetchContent)
 
 # --------------------------------------------------------------------
 
-find_package(asio CONFIG REQUIRED)
+project_log("FetchContent: asio")
+
+FetchContent_Declare(
+        asio
+        GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+        GIT_TAG asio-1-32-0
+        GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(asio)
+
+add_library(asio INTERFACE)
+target_include_directories(asio INTERFACE ${asio_SOURCE_DIR}/asio/include)
+
 find_package(OpenSSL REQUIRED)
