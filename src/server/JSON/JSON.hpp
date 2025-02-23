@@ -312,45 +312,25 @@ public:
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const JSON& j);
 
-	/**
-	 * @brief Stream extraction operator for JSON values.
-	 *
-	 * Reads a JSON-formatted string from an input stream and parses it into a JSON object.
-	 *
-	 * @param is The input stream.
-	 * @param j The JSON object to which the parsed content is assigned.
-	 * @return Reference to the input stream.
-	 */
-	friend std::istream& operator>>(std::istream& is, JSON& j);
-
 public:
 	/**
-	 * @brief Returns a JSON-formatted string.
+	 * @brief Serializes the JSON value into a JSON-formatted string.
 	 *
-	 * If indent < 0 the output is compact, otherwise pretty-printed using the given
-	 * indent character.
+	 * If the 'pretty' parameter is true, the output includes newlines and indentation.
 	 *
-	 * @param indent Number of spaces for indentation (default: -1 for compact).
-	 * @param indent_char The character to use for indentation (default: space).
-	 * @return The JSON string.
+	 * @param pretty True to pretty-print the output; false for compact output.
+	 * @param indent The current indentation level (used recursively for nested structures).
+	 * @return A string containing the JSON-formatted representation of the stored value.
+	 *
+	 * @details This method recursively serializes each JSON component. It uses the
+	 * EscapeString() helper method to ensure that special characters in strings are
+	 * properly escaped.
 	 */
-	std::string dump(int indent = -1, char indent_char = ' ') const;
-
-	/**
-	 * @brief Parses a JSON-formatted string and returns a JSON object.
-	 *
-	 * This provides functionality similar to nlohmann::json::parse.
-	 *
-	 * @param input The JSON-formatted string.
-	 * @return A JSON object.
-	 * @throw std::runtime_error if parsing fails.
-	 */
-	static JSON parse(const std::string& input);
+	std::string Serialize(bool pretty = false, int indent = 0) const;
 
 private:
-	std::string Serialize(bool pretty, int indent, char indent_char) const;
-	std::string SerializeArray(bool pretty, int indent, char indent_char) const;
-	std::string SerializeObject(bool pretty, int indent, char indent_char) const;
+	std::string SerializeArray(bool pretty, int indent) const;
+	std::string SerializeObject(bool pretty, int indent) const;
 	static std::string EscapeString(const std::string& input);
 
 private:

@@ -13,8 +13,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include "Parser.hpp" // Ensure that Parser is available.
-
 namespace ISXJson
 {
 
@@ -116,7 +114,7 @@ JSON& JSON::operator[](std::size_t index)
 
 std::ostream& operator<<(std::ostream& os, const JSON& j)
 {
-	os << j.dump(); // Output using dump (defaults to compact output).
+	os << j.Serialize(false); // Output in compact form.
 	return os;
 }
 
@@ -166,7 +164,7 @@ std::string SerializeContainer(const Container& container, bool pretty, int inde
 } // namespace
 
 // Serialize converts the JSON value into its JSON-formatted string.
-std::string JSON::Serialize(bool pretty, int indent, char indent_char) const
+std::string JSON::Serialize(bool pretty, int indent) const
 {
 	switch (GetType())
 	{
@@ -194,93 +192,24 @@ std::string JSON::Serialize(bool pretty, int indent, char indent_char) const
 		return "\"" + EscapeString(AsString()) + "\"";
 
 	case Type::ARRAY:
-		// Call the helper to serialize an array.
-		return SerializeArray(pretty, indent, indent_char);
+		// Use the helper to serialize an array.
+		return SerializeContainer(AsArray(), pretty, indent, "[", "]", [](const JSON& elem, int newIndent, bool pretty)
+								  { return elem.Serialize(pretty, newIndent); });
 
 	case Type::OBJECT:
-		// Call the helper to serialize an object.
-		return SerializeObject(pretty, indent, indent_char);
+		// Use the helper to serialize an object.
+		return SerializeContainer(AsObject(), pretty, indent, "{", "}",
+								  [](const std::pair<const std::string, JSON>& p, int newIndent, bool pretty)
+								  {
+									  std::string res = "\"" + EscapeString(p.first) + "\":";
+									  if (pretty) res += " ";
+									  res += p.second.Serialize(pretty, newIndent);
+									  return res;
+								  });
 
 	default:
 		throw std::runtime_error("Unknown JSON type in serialization");
 	}
-}
-
-// -----------------------------------------------------------------------------
-// New helper function to serialize a JSON array.
-std::string JSON::SerializeArray(bool pretty, int indent, char indent_char) const
-{
-	const Array& array = AsArray();
-	std::ostringstream oss;
-	oss << "[";
-	if (pretty && !array.empty())
-	{
-		oss << "\n";
-	}
-	for (std::size_t i = 0; i < array.size(); ++i)
-	{
-		if (pretty)
-		{
-			oss << std::string(indent + 2, indent_char);
-		}
-		oss << array[i].Serialize(pretty, indent + 2, indent_char);
-		if (i != array.size() - 1)
-		{
-			oss << ",";
-		}
-		if (pretty)
-		{
-			oss << "\n";
-		}
-	}
-	if (pretty && !array.empty())
-	{
-		oss << std::string(indent, indent_char);
-	}
-	oss << "]";
-	return oss.str();
-}
-
-// -----------------------------------------------------------------------------
-// New helper function to serialize a JSON object.
-std::string JSON::SerializeObject(bool pretty, int indent, char indent_char) const
-{
-	const Object& object = AsObject();
-	std::ostringstream oss;
-	oss << "{";
-	if (pretty && !object.empty())
-	{
-		oss << "\n";
-	}
-	std::size_t count = 0;
-	for (const auto& pair : object)
-	{
-		if (pretty)
-		{
-			oss << std::string(indent + 2, indent_char);
-		}
-		oss << "\"" << EscapeString(pair.first) << "\":";
-		if (pretty)
-		{
-			oss << " ";
-		}
-		oss << pair.second.Serialize(pretty, indent + 2, indent_char);
-		if (count != object.size() - 1)
-		{
-			oss << ",";
-		}
-		if (pretty)
-		{
-			oss << "\n";
-		}
-		++count;
-	}
-	if (pretty && !object.empty())
-	{
-		oss << std::string(indent, indent_char);
-	}
-	oss << "}";
-	return oss.str();
 }
 
 std::string JSON::EscapeString(const std::string& input)
@@ -322,36 +251,5 @@ std::string JSON::EscapeString(const std::string& input)
 	for (char c : input) output += escape_char(c); // Use the lambda to get the escaped character.
 
 	return output;
-}
-
-std::string JSON::dump(int indent, char indent_char) const
-{
-	if (indent < 0)
-		return Serialize(false, 0, indent_char); // Compact output.
-	else
-		return Serialize(true, 0, indent_char); // Pretty printed output.
-}
-
-JSON JSON::parse(const std::string& input)
-{
-	// Create a parser from a string (using a new constructor that accepts string input).
-	Parser parser(input);
-	return parser.Parse();
-}
-
-std::istream& operator>>(std::istream& is, JSON& j)
-{
-	try
-	{
-		// Read the entire input stream into a string.
-		std::string input((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-		j = JSON::parse(input);
-	}
-	catch (const std::exception& ex)
-	{
-		// If parsing fails, set the stream failbit.
-		is.setstate(std::ios::failbit);
-	}
-	return is;
 }
 } // namespace ISXJson

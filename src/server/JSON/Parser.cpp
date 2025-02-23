@@ -24,13 +24,6 @@ Parser::Parser(const std::filesystem::path& file_path)
 	m_pos = 0;
 }
 
-// New constructor that accepts a JSON string directly.
-Parser::Parser(const std::string& input)
-	: m_input(input), m_pos(0)
-{
-	// No further action required. The input is already in a string.
-}
-
 void Parser::SkipWhitespace()
 {
 	// Advance m_pos until a non-whitespace character is found.
@@ -130,7 +123,7 @@ JSON Parser::ParseString()
 			result.push_back(c);
 		}
 	}
-	return { result };
+	return {result};
 }
 
 JSON Parser::ParseNumber()
@@ -164,7 +157,7 @@ JSON Parser::ParseNumber()
 	}
 
 	// Convert accumulated substring to a double.
-	return { std::stod(m_input.substr(start, m_pos - start)) };
+	return {std::stod(m_input.substr(start, m_pos - start))};
 }
 
 JSON Parser::ParseBool()
@@ -173,14 +166,14 @@ JSON Parser::ParseBool()
 	if (m_input.compare(m_pos, 4, "true") == 0)
 	{
 		m_pos += 4;
-		return { true };
+		return {true};
 	}
 
 	// Check for "false" literal.
 	if (m_input.compare(m_pos, 5, "false") == 0)
 	{
 		m_pos += 5;
-		return { false };
+		return {false};
 	}
 	throw std::runtime_error("Invalid boolean value");
 }
@@ -212,7 +205,7 @@ JSON Parser::ParseArray()
 		if (Peek() == ',') Get();
 	}
 	Get(); // Consume closing ']'
-	return { std::move(elements) };
+	return {std::move(elements)};
 }
 
 JSON Parser::ParseObject()
@@ -245,7 +238,7 @@ JSON Parser::ParseObject()
 		}
 	}
 	Get(); // Consume closing '}'
-	return { obj };
+	return {obj};
 }
 
 JSON Parser::Parse()

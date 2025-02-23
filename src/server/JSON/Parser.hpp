@@ -33,12 +33,6 @@ public:
 	explicit Parser(const std::filesystem::path& file_path);
 
 	/**
-	 * @brief Constructs a parser from a JSON-formatted string.
-	 * @param input The JSON-formatted string.
-	 */
-	explicit Parser(const std::string& input);
-
-	/**
 	 * @brief Parses the entire JSON content from the file.
 	 * @return The root JSON value parsed from the file.
 	 * @throw std::runtime_error if there is a syntax error or unexpected trailing characters.
