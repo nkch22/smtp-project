@@ -38,3 +38,6 @@ FetchContent_MakeAvailable(base64)
 add_library(base64 STATIC ${base64_SOURCE_DIR}/base64.cpp)
 
 target_include_directories(base64 INTERFACE ${base64_SOURCE_DIR})
+
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})

@@ -1,12 +1,7 @@
-# Find OpenSSL
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
+include_directories(include)
+include_directories(example)
 
-add_library(client_lib STATIC Client.cpp Socket.cpp SSLSocket.cpp Authenticator.cpp)
-target_link_libraries(client_lib PUBLIC asio OpenSSL::SSL OpenSSL::Crypto base64)
-
-add_executable(test_server Server.cpp)
-target_link_libraries(test_server PUBLIC asio base64)
-
-add_executable(client MainClient.cpp)
-target_link_libraries(client PRIVATE client_lib)
+add_library(client STATIC)
+add_subdirectory(source)
+target_link_libraries(client PUBLIC asio base64)
+target_link_libraries(client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
