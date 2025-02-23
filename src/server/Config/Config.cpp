@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <string>
 
-#include "../JsonParser/JsonParser.hpp"
-
 Config::Server Config::GetServer() const
 {
 	return m_server;
@@ -40,12 +38,12 @@ Config::Config(const std::filesystem::path& file_path)
 	try
 	{
 		// Initialize JSONParser with the configuration file path.
-		JSONParser parser(file_path);
+		ISXJson::Parser parser(file_path);
 		// Parse the complete JSON configuration.
-		JSON json = parser.Parse();
+		ISXJson::JSON json = parser.Parse();
 
 		// Retrieve the root object from the configuration.
-		const JSON& root = json["root"];
+		const ISXJson::JSON& root = json["root"];
 
 		// Parse individual configuration sections.
 		ParseServer(root["Server"]);
@@ -60,7 +58,7 @@ Config::Config(const std::filesystem::path& file_path)
 	}
 }
 
-void Config::ParseServer(const JSON& server_json)
+void Config::ParseServer(const ISXJson::JSON& server_json)
 {
 	// Map JSON keys to server configuration fields.
 	m_server.server_name = server_json["servername"].AsString();
@@ -69,14 +67,14 @@ void Config::ParseServer(const JSON& server_json)
 	m_server.ip = server_json["ipaddress"].AsString();
 }
 
-void Config::ParseCommunication(const JSON& comm_json)
+void Config::ParseCommunication(const ISXJson::JSON& comm_json)
 {
 	// Map JSON keys to communication settings.
 	m_communication.blocking = (static_cast<int>(comm_json["blocking"].AsNumber()) != 0);
 	m_communication.socket_timeout = static_cast<int>(comm_json["socket_timeout"].AsNumber());
 }
 
-void Config::ParseLogging(const JSON& logger_json)
+void Config::ParseLogging(const ISXJson::JSON& logger_json)
 {
 	// Map JSON keys to logging configuration.
 	m_logging.filename = logger_json["filename"].AsString();
@@ -84,13 +82,13 @@ void Config::ParseLogging(const JSON& logger_json)
 	m_logging.flush = (static_cast<int>(logger_json["flush"].AsNumber()) != 0);
 }
 
-void Config::ParseTime(const JSON& time_json)
+void Config::ParseTime(const ISXJson::JSON& time_json)
 {
 	// Map JSON key to thread period configuration.
 	m_threads.period_time = static_cast<int>(time_json["Period_time"].AsNumber());
 }
 
-void Config::ParseThreadpool(const JSON& threadpool_json)
+void Config::ParseThreadpool(const ISXJson::JSON& threadpool_json)
 {
 	// Map JSON key to thread pool maximum working threads configuration.
 	m_threads.max_working_threads = static_cast<int>(threadpool_json["maxworkingthreads"].AsNumber());

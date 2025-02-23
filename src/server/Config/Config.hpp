@@ -22,7 +22,7 @@
 #include <filesystem>
 #include <string>
 
-#include "../JsonParser/JsonParser.hpp"
+#include "../JSON/Parser.hpp"
 
 /**
  * @class Config
@@ -127,11 +127,11 @@ public:
 private:
 	/// @name Configuration Parsers
 	/// @{
-	void ParseServer(const JSON& server_json);
-	void ParseCommunication(const JSON& comm_json);
-	void ParseLogging(const JSON& logger_json);
-	void ParseTime(const JSON& time_json);
-	void ParseThreadpool(const JSON& threadpool_json);
+	void ParseServer(const ISXJson::JSON& server_json);
+	void ParseCommunication(const ISXJson::JSON& comm_json);
+	void ParseLogging(const ISXJson::JSON& logger_json);
+	void ParseTime(const ISXJson::JSON& time_json);
+	void ParseThreadpool(const ISXJson::JSON& threadpool_json);
 	/// @}
 
 private:

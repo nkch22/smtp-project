@@ -1,98 +1,21 @@
 /**
- * @file JsonParser.cpp
- * @brief Implements JSON parsing and JSON value handling.
+ * @file Parser.cpp
+ * @brief Implementation of the Parser class.
  *
- * This file contains the implementation of the JSON and JSONParser classes as declared
- * in JsonParser.hpp. It includes routines for parsing strings, numbers, booleans, arrays,
- * and objects from JSON input.
+ * This file implements the methods for parsing JSON content from a file.
+ * It supports parsing of strings, numbers, booleans, null, arrays, and objects.
  */
-#include "JsonParser.hpp"
+
+#include "Parser.hpp"
 
 #include <cctype>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
-#include <string>
 
-JSON::JSON() : m_value(nullptr) {}
-
-JSON::JSON(bool b) : m_value(b) {}
-
-JSON::JSON(double num) : m_value(num) {}
-
-JSON::JSON(const std::string& s) : m_value(s) {}
-
-JSON::JSON(const char* s) : m_value(std::string(s)) {}
-
-JSON::JSON(const Array& arr) : m_value(arr) {}
-JSON::JSON(Array&& arr) : m_value(std::move(arr)) {}
-
-JSON::JSON(const Object& obj) : m_value(obj) {}
-JSON::JSON(Object&& obj) : m_value(std::move(obj)) {}
-
-JSON::Type JSON::GetType() const
+namespace ISXJson
 {
-	switch (m_value.index())
-	{
-	case 0:
-		return Type::NUL;
-	case 1:
-		return Type::BOOL;
-	case 2:
-		return Type::NUMBER;
-	case 3:
-		return Type::STRING;
-	case 4:
-		return Type::ARRAY;
-	case 5:
-		return Type::OBJECT;
-	default:
-		throw std::runtime_error("Invalid JSON type encountered");
-	}
-}
-
-bool JSON::AsBool() const
-{
-	if (GetType() != Type::BOOL) throw std::runtime_error("Not a boolean");
-
-	return std::get<bool>(m_value);
-}
-
-double JSON::AsNumber() const
-{
-	if (GetType() != Type::NUMBER) throw std::runtime_error("Not a number");
-
-	return std::get<double>(m_value);
-}
-
-const std::string& JSON::AsString() const
-{
-	if (GetType() != Type::STRING) throw std::runtime_error("Not a string");
-
-	return std::get<std::string>(m_value);
-}
-
-const JSON::Array& JSON::AsArray() const
-{
-	if (GetType() != Type::ARRAY) throw std::runtime_error("Not an array");
-
-	return std::get<Array>(m_value);
-}
-
-const JSON::Object& JSON::AsObject() const
-{
-	if (GetType() != Type::OBJECT) throw std::runtime_error("Not an object");
-
-	return std::get<Object>(m_value);
-}
-
-const JSON::Value& JSON::GetValue() const
-{
-	return m_value;
-}
-
-JSONParser::JSONParser(const std::filesystem::path& file_path)
+Parser::Parser(const std::filesystem::path& file_path)
 {
 	std::ifstream file(file_path);
 	if (!file) throw std::runtime_error("Could not open file: " + file_path.string());
@@ -101,19 +24,26 @@ JSONParser::JSONParser(const std::filesystem::path& file_path)
 	m_pos = 0;
 }
 
-void JSONParser::SkipWhitespace()
+// New constructor that accepts a JSON string directly.
+Parser::Parser(const std::string& input)
+	: m_input(input), m_pos(0)
+{
+	// No further action required. The input is already in a string.
+}
+
+void Parser::SkipWhitespace()
 {
 	// Advance m_pos until a non-whitespace character is found.
 	while (m_pos < m_input.size() && (std::isspace(static_cast<unsigned char>(m_input[m_pos])) != 0)) m_pos++;
 }
 
-char JSONParser::Peek() const
+char Parser::Peek() const
 {
 	// Return the current character without advancing, or '\0' if at the end.
 	return m_pos < m_input.size() ? m_input[m_pos] : '\0';
 }
 
-char JSONParser::Get()
+char Parser::Get()
 {
 	// Ensure that we are not reading past the end of the input.
 	if (m_pos >= m_input.size())
@@ -123,7 +53,7 @@ char JSONParser::Get()
 	return m_input[m_pos++];
 }
 
-JSON JSONParser::ParseValue()
+JSON Parser::ParseValue()
 {
 	// Skip any whitespace before parsing the JSON value.
 	SkipWhitespace();
@@ -150,33 +80,60 @@ JSON JSONParser::ParseValue()
 	}
 }
 
-JSON JSONParser::ParseString()
+JSON Parser::ParseString()
 {
-	std::string value;
+	char quote = Get(); // Consume opening quote
+	if (quote != '"') throw std::runtime_error("Expected opening quote for string");
 
-	// Expect an opening quote character.
-	if (Get() != '"') throw std::runtime_error("Expected opening quote");
-
-	// Read characters until the closing quote is encountered.
-	while (Peek() != '"')
+	std::string result;
+	while (true)
 	{
-		if (Peek() == '\\')
+		if (m_pos >= m_input.size()) throw std::runtime_error("Unterminated string literal");
+		char c = Get();
+		if (c == '"') break;
+		if (c == '\\')
 		{
-			Get(); // Consume the backslash.
-			// Parse escape sequence following backslash.
-			value += ParseEscapeSequence();
+			if (m_pos >= m_input.size()) throw std::runtime_error("Unterminated escape sequence");
+			char esc = Get();
+			switch (esc)
+			{
+			case '"':
+				result.push_back('\"');
+				break;
+			case '\\':
+				result.push_back('\\');
+				break;
+			case '/':
+				result.push_back('/');
+				break;
+			case 'b':
+				result.push_back('\b');
+				break;
+			case 'f':
+				result.push_back('\f');
+				break;
+			case 'n':
+				result.push_back('\n');
+				break;
+			case 'r':
+				result.push_back('\r');
+				break;
+			case 't':
+				result.push_back('\t');
+				break;
+			default:
+				throw std::runtime_error("Unsupported escape sequence");
+			}
 		}
 		else
 		{
-			// Append the current character to the string.
-			value += Get();
+			result.push_back(c);
 		}
 	}
-	Get(); // Consume closing quote.
-	return JSON(value);
+	return { result };
 }
 
-JSON JSONParser::ParseNumber()
+JSON Parser::ParseNumber()
 {
 	// Record the starting position of the number.
 	size_t start = m_pos;
@@ -207,39 +164,39 @@ JSON JSONParser::ParseNumber()
 	}
 
 	// Convert accumulated substring to a double.
-	return JSON(std::stod(m_input.substr(start, m_pos - start)));
+	return { std::stod(m_input.substr(start, m_pos - start)) };
 }
 
-JSON JSONParser::ParseBool()
+JSON Parser::ParseBool()
 {
 	// Check for "true" literal.
 	if (m_input.compare(m_pos, 4, "true") == 0)
 	{
 		m_pos += 4;
-		return JSON(true);
+		return { true };
 	}
 
 	// Check for "false" literal.
 	if (m_input.compare(m_pos, 5, "false") == 0)
 	{
 		m_pos += 5;
-		return JSON(false);
+		return { false };
 	}
 	throw std::runtime_error("Invalid boolean value");
 }
 
-JSON JSONParser::ParseNull()
+JSON Parser::ParseNull()
 {
 	// Check for "null" literal.
 	if (m_input.compare(m_pos, 4, "null") == 0)
 	{
 		m_pos += 4;
-		return JSON();
+		return {};
 	}
-	throw std::runtime_error("Invalid null value");
+	throw std::runtime_error("Invalid null literal");
 }
 
-JSON JSONParser::ParseArray()
+JSON Parser::ParseArray()
 {
 	std::vector<JSON> elements;
 	Get(); // Consume '['
@@ -255,10 +212,10 @@ JSON JSONParser::ParseArray()
 		if (Peek() == ',') Get();
 	}
 	Get(); // Consume closing ']'
-	return JSON(std::move(elements));
+	return { std::move(elements) };
 }
 
-JSON JSONParser::ParseObject()
+JSON Parser::ParseObject()
 {
 	JSON::Object obj;
 	Get(); // Consume '{'
@@ -288,40 +245,10 @@ JSON JSONParser::ParseObject()
 		}
 	}
 	Get(); // Consume closing '}'
-	return JSON(obj);
+	return { obj };
 }
 
-std::string JSONParser::ParseEscapeSequence()
-{
-	char esc = Get();
-	// Return corresponding unescaped character based on the escape sequence.
-	switch (esc)
-	{
-	case '"':
-		return "\"";
-	case '\\':
-		return "\\";
-	case '/':
-		return "/";
-	case 'b':
-		return "\b";
-	case 'f':
-		return "\f";
-	case 'n':
-		return "\n";
-	case 'r':
-		return "\r";
-	case 't':
-		return "\t";
-	case 'u':
-		// Unicode escape sequences are not supported.
-		throw std::runtime_error("Unicode escape sequences are not supported");
-	default:
-		throw std::runtime_error("Invalid escape character in string");
-	}
-}
-
-JSON JSONParser::Parse()
+JSON Parser::Parse()
 {
 	// Parse the main JSON value.
 	JSON result = ParseValue();
@@ -333,12 +260,4 @@ JSON JSONParser::Parse()
 	return result;
 }
 
-const JSON& JSON::operator[](const std::string& key) const
-{
-	// Retrieve the underlying object.
-	const Object& obj = AsObject();
-	auto it = obj.find(key);
-	if (it == obj.end()) throw std::runtime_error("Key not found: " + key);
-
-	return it->second;
-}
+} // namespace ISXJson
