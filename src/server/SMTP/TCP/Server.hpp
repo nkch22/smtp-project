@@ -28,7 +28,7 @@ public:
     void Stop() override;
     void Restart() override;
     
-    bool IsStarted() const override;
+    bool IsStarted() const noexcept;
     
 protected:
     void Accept() override;

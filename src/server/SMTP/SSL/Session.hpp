@@ -28,8 +28,8 @@ public:
     void Receive() override;
     bool Send(const std::string_view data) override;
 
-    bool IsConnected() const override;
-    bool IsHandshaked() const;
+    bool IsConnected() const noexcept;
+    bool IsHandshaked() const noexcept;
 
     asio::ssl::stream<asio::ip::tcp::socket>& get_stream() noexcept;
     asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& get_socket() noexcept;

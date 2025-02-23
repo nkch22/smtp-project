@@ -120,9 +120,14 @@ bool Session::Send(const std::string_view data)
     return true;
 }
 
-bool Session::IsConnected() const
+bool Session::IsConnected() const noexcept
 {
     return m_connected;
+}
+
+bool Session::IsHandshaked() const noexcept
+{
+    return m_handshaked;
 }
 
 void Session::ClearBuffers()
@@ -130,9 +135,97 @@ void Session::ClearBuffers()
     std::scoped_lock lock{m_send_mutex};
 }
 
-bool Session::IsHandshaked() const
+asio::ssl::stream<asio::ip::tcp::socket>& Session::get_stream() noexcept
 {
-    return m_handshaked;
+    return m_stream;
+}
+
+asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& Session::get_socket() noexcept
+{
+    return m_stream.next_layer();
+}
+
+void Session::TryReceive()
+{
+    if(m_receiving)
+    {
+        return;
+    }
+    
+    if(!IsHandshaked())
+    {
+        return;
+    }
+    
+    m_receiving = true;
+    auto self{shared_from_this()};
+    auto async_receive_handler{[this, self](const std::error_code& error, const std::size_t size)
+        {
+            m_receiving = false;
+            
+            if(!IsHandshaked())
+            {
+                return;
+        }
+
+        if(size > 0)
+        {
+            std::string data{std::istreambuf_iterator<char>{&m_receive_buffer},
+            std::istreambuf_iterator<char>{}};
+            OnReceived(data);
+        }
+        
+        if(!error)
+        {
+            TryReceive();
+        }
+        else 
+        {
+            HandleError(error);
+            Disconnect();
+        }
+    }};
+    asio::async_read_until(get_stream(), m_receive_buffer, "\r\n", async_receive_handler);
+}
+
+void Session::TrySend()
+{
+    if(m_sending)
+    {
+        return;
+    }
+    
+    if(!IsHandshaked())
+    {
+        return;
+    }
+    
+    m_sending = true;
+    auto self{shared_from_this()};
+    auto async_write_handler{[this, self](const asio::error_code& error, const std::size_t size)
+        {
+            m_sending = false;
+
+            if(!IsHandshaked())
+            {
+                return;
+            }
+
+        if(size > 0)
+        {
+            OnSent(size);
+        }
+        if(!error)
+        {
+            TrySend();
+        }
+        else
+        {
+            HandleError(error);
+            Disconnect();
+        }
+    }};
+    asio::async_write(m_stream, m_send_buffer, async_write_handler);
 }
 
 void Session::OnConnected()
@@ -153,99 +246,6 @@ void Session::OnReceived(const std::string_view data)
 
 void Session::OnSent(const std::size_t sent)
 {
-}
-
-asio::ssl::stream<asio::ip::tcp::socket>& Session::get_stream() noexcept
-{
-    return m_stream;
-}
-
-asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& Session::get_socket() noexcept
-{
-    return m_stream.next_layer();
-}
-
-void Session::TryReceive()
-{
-    if(m_receiving)
-    {
-        return;
-    }
-
-    if(!IsHandshaked())
-    {
-        return;
-    }
-
-    m_receiving = true;
-    auto self{shared_from_this()};
-    auto async_receive_handler{[this, self](const std::error_code& error, const std::size_t size)
-    {
-        m_receiving = false;
-
-        if(!IsHandshaked())
-        {
-            return;
-        }
-
-        if(size > 0)
-        {
-            std::string data{std::istreambuf_iterator<char>{&m_receive_buffer},
-                std::istreambuf_iterator<char>{}};
-            OnReceived(data);
-        }
-
-        if(!error)
-        {
-            TryReceive();
-        }
-        else 
-        {
-            HandleError(error);
-            Disconnect();
-        }
-    }};
-    asio::async_read_until(get_stream(), m_receive_buffer, "\r\n", async_receive_handler);
-}
-
-void Session::TrySend()
-{
-    if(m_sending)
-    {
-        return;
-    }
-
-    if(!IsHandshaked())
-    {
-        return;
-    }
-
-    m_sending = true;
-    auto self{shared_from_this()};
-    auto async_write_handler{[this, self](const asio::error_code& error, const std::size_t size)
-    {
-        m_sending = false;
-
-        if(!IsHandshaked())
-        {
-            return;
-        }
-
-        if(size > 0)
-        {
-            OnSent(size);
-        }
-        if(!error)
-        {
-            TrySend();
-        }
-        else
-        {
-            HandleError(error);
-            Disconnect();
-        }
-    }};
-    asio::async_write(m_stream, m_send_buffer, async_write_handler);
 }
 
 }

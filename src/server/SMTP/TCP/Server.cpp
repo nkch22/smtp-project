@@ -79,7 +79,7 @@ void Server::Restart()
     OnRestarted();
 }
 
-bool Server::IsStarted() const 
+bool Server::IsStarted() const noexcept
 {
     return m_started;
 }

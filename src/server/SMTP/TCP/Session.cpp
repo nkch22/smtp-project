@@ -81,7 +81,7 @@ bool Session::Send(const std::string_view data)
     return true;
 }
 
-bool Session::IsConnected() const
+bool Session::IsConnected() const noexcept
 {
     return m_connected;
 }

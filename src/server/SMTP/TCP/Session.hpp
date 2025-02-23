@@ -27,7 +27,7 @@ public:
     void Receive() override;
     bool Send(const std::string_view data) override;
 
-    bool IsConnected() const override;
+    bool IsConnected() const noexcept;
     
     asio::ip::tcp::socket& get_socket() noexcept;
 protected:
