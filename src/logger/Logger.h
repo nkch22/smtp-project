@@ -16,40 +16,17 @@
 	@brief Interface of Logger shared library
 */
 
-#define LOG_START_ARGS(...)                                                                                            \
-	Logger log;                                                                                                        \
-	switch (log.get_level())                                                                                           \
-	{                                                                                                                  \
-	case LOG_LEVEL_TRACE:                                                                                              \
-		log.save_arguments(__VA_ARGS__);                                                                               \
-		break;                                                                                                         \
-	case LOG_LEVEL_DEBUG:                                                                                              \
-		log.save_func_start();                                                                                         \
-		break;                                                                                                         \
-	}
+namespace logger
+{
 
-#define LOG_START()                                                                                                    \
-	Logger log;                                                                                                        \
-	if (log.get_level() >= LOG_LEVEL_DEBUG) log.save_func_start()
+#define DEFAULT_LEVEL LOG_LEVEL_PROD
+#define DEFAULT_AMOUNT 30
+#define DEFAULT_PATH ""
 
-#define LOG_RETURN(value)                                                                                              \
-	switch (log.get_level())                                                                                           \
-	{                                                                                                                  \
-	case LOG_LEVEL_TRACE:                                                                                              \
-		log.save_return(value);                                                                                        \
-		break;                                                                                                         \
-	case LOG_LEVEL_DEBUG:                                                                                              \
-		log.save_return_nothing();                                                                                     \
-		break;                                                                                                         \
-	}                                                                                                                  \
-	return value
-
-#define LOG_RETURN_NOTHING()                                                                                           \
-	if (log.get_level() >= LOG_LEVEL_DEBUG) log.save_return_nothing()
-
-#define LOG_SAVE_ERROR(value) log.save_error(value)
-#define LOG_SAVE_WARNING(value) log.save_warning(value)
-#define LOG_SAVE_MESSAGE(value) log.save_message(value)
+#define DEFAULT_COLOR "\033[0m"
+#define ERROR_COLOR "\033[41m"
+#define WARNING_COLOR "\033[43m"
+#define INFORMATION_COLOR "\033[42m"
 
 //! Enum for log levels
 enum LogLevels
@@ -188,7 +165,8 @@ private:
 
 		static void destroy();
 
-		void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&);
+		void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
+							   const unsigned short& level);
 
 		void real_set_level(const unsigned short&);
 		unsigned short real_get_level() const;
@@ -200,6 +178,8 @@ private:
 
 	const std::source_location m_location;
 
+	unsigned short m_local_level;
+
 	template<typename T>
 	void save_argument(const T& value)
 	{
@@ -210,7 +190,7 @@ private:
 
 public:
 	Logger(const std::source_location location = std::source_location::current());
-	~Logger(); //!< Default destructor
+	~Logger() = default; //!< Default destructor
 
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
 	 *	@brief Default constructor
@@ -218,11 +198,8 @@ public:
 	 *	It stores location where it was created
 	 */
 
-	static bool init();
-	static bool init(const unsigned short& level);
-	static bool init(const std::string& save_path);
-	static bool init(const unsigned int& amount);
-	static bool init(const unsigned short& level, const std::string& save_path, const unsigned int& amount);
+	static bool init(const unsigned short& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
+					 const unsigned int& amount = DEFAULT_AMOUNT);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *   @brief Singleton initialization method
 	 *
@@ -233,18 +210,6 @@ public:
 	 *	It will save message of successful initialization
 	 *
 	 *	It return true if initialization is successful, otherwise false
-	 */
-	/*! @fn init()
-	 *	Initialize with all default values
-	 */
-	/*! @fn init(const unsigned short&)
-	 *	Initialize with partly default values
-	 */
-	/*! @fn init(const std::string&)
-	 *	Initialize with partly default values
-	 */
-	/*! @fn init(const unsigned int&)
-	 *	Initialize with partly default values
 	 */
 
 	static bool destroy();
@@ -280,25 +245,25 @@ public:
 	 *   Saves message with information flag
 	 */
 
-	void set_level(const unsigned short&);
+	void set_global_level(const unsigned short&);
 	/*! @fn set_level(const unsigned short&)
 	 *	@brief It sets log level to new value
 	 *
 	 *	It checks value to be valid log level, and then set log level to that value
 	 */
 
-	unsigned short get_level() const;
-	/*! @fn get_level()
+	unsigned short get_global_level() const;
+	/*! @fn get_global_level()
 	 *	@brief It returns stored log level value
 	 */
 
 	template<typename T>
 	void save_return(const T& value)
 	{
-		if (m_real->real_get_level() == LOG_LEVEL_TRACE)
+		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			m_buff << value;
-			m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location);
+			m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
 			m_buff.clear();
 		}
 		else
@@ -324,7 +289,7 @@ public:
 	template<typename T, typename... Args>
 	void save_arguments(const T& first, Args&... args)
 	{
-		if (m_real->real_get_level() == LOG_LEVEL_TRACE)
+		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			save_argument(first);
 			save_arguments(std::forward<Args>(args)...);
@@ -348,6 +313,10 @@ public:
 
 		It saves message that function has successfully started
 	*/
+
+	void set_local_level(const LogLevels&);
+
+	unsigned short get_local_level() const;
 };
 
 /*! @class MainLogger
@@ -363,23 +332,13 @@ private:
 	Logger* m_log;
 
 public:
-	MainLogger();
-	MainLogger(const unsigned short&);
-	MainLogger(const unsigned short&, const std::string&);
-	MainLogger(const unsigned short&, const std::string&, const unsigned int&);
+	MainLogger(const unsigned short& level = DEFAULT_LEVEL, const std::string& path = DEFAULT_PATH,
+			   const unsigned int& amount = DEFAULT_AMOUNT,
+		const std::source_location location = std::source_location::current());
 	/*! @fn MainLogger(const unsigned short&, const std::string&, const unsigned int&)
 	 *	@brief Full MainLogger constructor
 	 *
 	 *	It calls to Logger::init() with given parameters
-	 */
-	/*! @fn MainLogger(const unsigned short&, const std::string&)
-	 *	It calles full constructor
-	 */
-	/*! @fn MainLogger(const unsigned short&)
-	 *	It calles full constructor
-	 */
-	/*! @fn MainLogger()
-	 *	It calls full constructor with default values
 	 */
 
 	~MainLogger();
@@ -394,3 +353,4 @@ public:
 	 *	@brief It returns stored log
 	 */
 };
+} // namespace logger

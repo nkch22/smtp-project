@@ -1,14 +1,10 @@
 #include "Logger.h"
 
-#define DEFAULT_COLOR "\033[0m"
-#define ERROR_COLOR "\033[41m"
-#define WARNING_COLOR "\033[43m"
-#define INFORMATION_COLOR "\033[42m"
+
 
 // RealLogger
 
-unsigned short default_level = 1, default_amount = 30;
-std::string default_path{""};
+using namespace logger;
 
 Logger::RealLogger* Logger::RealLogger::m_instance = nullptr;
 
@@ -38,7 +34,7 @@ Logger::RealLogger::RealLogger(const unsigned short& _level, const std::string& 
 		unsigned int count = std::distance(std::filesystem::directory_iterator{log_dir}, {});
 		if (count >= amount)
 		{
-			for (auto& file : std::filesystem::directory_iterator(log_dir))
+			for (const auto& file : std::filesystem::directory_iterator(log_dir))
 			{
 				std::filesystem::remove(file);
 
@@ -59,7 +55,7 @@ Logger::RealLogger::RealLogger(const unsigned short& _level, const std::string& 
 
 Logger::RealLogger* Logger::RealLogger::get_instance()
 {
-	return get_instance(default_level, {}, default_amount);
+	return get_instance(DEFAULT_LEVEL, {}, DEFAULT_AMOUNT);
 }
 
 Logger::RealLogger* Logger::RealLogger::get_instance(const unsigned short& level, const std::string& path,
@@ -87,9 +83,9 @@ void Logger::RealLogger::destroy()
 }
 
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
-								   const std::source_location& location)
+										   const std::source_location& location, const unsigned short& level)
 {
-	if (*m_level != LOG_LEVEL_NO)
+	if (level != LOG_LEVEL_NO)
 	{
 		std::string time = std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
 
@@ -107,7 +103,7 @@ void Logger::RealLogger::real_save(const std::string& str, const Logger::Message
 			break;
 		}
 
-		std::string level_str{"[" + std::to_string(*m_level) + "]"};
+		std::string level_str{"[" + std::to_string(level) + "]"};
 
 		std::string func_name{"["};
 		func_name += location.function_name();
@@ -152,32 +148,14 @@ unsigned short Logger::RealLogger::real_get_level() const
 // Logger
 
 Logger::Logger(const std::source_location location) :
-	m_real{Logger::RealLogger::get_instance()}, m_buff{}, m_location{location} {};
+	m_real{Logger::RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()} {};
 
-Logger::~Logger() {};
-
-bool Logger::init()
-{
-	return init(default_level, default_path, default_amount);
-}
-bool Logger::init(const unsigned short& level)
-{
-	return init(level, default_path, default_amount);
-}
-bool Logger::init(const std::string& save_path)
-{
-	return init(default_level, save_path, default_amount);
-}
-bool Logger::init(const unsigned int& amount)
-{
-	return init(default_level, default_path, amount);
-}
 bool Logger::init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 {
 	Logger::RealLogger* real = Logger::RealLogger::get_instance(level, save_path, amount);
 	bool result = real != nullptr;
 
-	if (result && real->real_get_level() != LOG_LEVEL_NO)
+	if (result)
 	{
 		Logger log;
 		log.save_message("logger is successfully initialized");
@@ -191,7 +169,7 @@ bool Logger::destroy()
 	Logger::RealLogger* buff = Logger::RealLogger::get_instance();
 
 	Logger log;
-	if (buff->real_get_level() != LOG_LEVEL_NO) log.save_message("logger is destroyed");
+	log.save_message("logger is destroyed");
 
 	Logger::RealLogger::destroy();
 	return buff == nullptr;
@@ -199,47 +177,56 @@ bool Logger::destroy()
 
 void Logger::save_error(const std::string& msg)
 {
-	m_real->real_save(msg, ERROR, m_location);
+	m_real->real_save(msg, ERROR, m_location, m_local_level);
 }
 
 void Logger::save_warning(const std::string& msg)
 {
-	m_real->real_save(msg, WARNING, m_location);
+	m_real->real_save(msg, WARNING, m_location, m_local_level);
 }
 
 void Logger::save_message(const std::string& msg)
 {
-	m_real->real_save(msg, INFORMATION, m_location);
+	m_real->real_save(msg, INFORMATION, m_location, m_local_level);
 }
 
-void Logger::set_level(const unsigned short& _level)
+void Logger::set_global_level(const unsigned short& _level)
 {
 	if (_level >= LOG_LEVEL_NO && _level <= LOG_LEVEL_TRACE)
 		m_real->real_set_level(_level);
 	else
 		throw std::invalid_argument{"invalid level argumet"};
 }
-unsigned short Logger::get_level() const
+unsigned short Logger::get_global_level() const
 {
 	return m_real->real_get_level();
 }
 
 void Logger::save_return_nothing()
 {
-	if (m_real->real_get_level() >= LOG_LEVEL_DEBUG)
-		m_real->real_save("successfully executed", INFORMATION, m_location);
+	if (m_local_level >= LOG_LEVEL_DEBUG)
+		m_real->real_save("successfully executed", INFORMATION, m_location, m_local_level);
 }
 
 void Logger::save_func_start()
 {
-	if (m_real->real_get_level() >= LOG_LEVEL_DEBUG)
-		m_real->real_save("started", INFORMATION, m_location);
+	if (m_local_level >= LOG_LEVEL_DEBUG) m_real->real_save("started", INFORMATION, m_location, m_local_level);
 }
 
 void Logger::save_arguments()
 {
-	m_real->real_save({"arguments: " + m_buff.get()}, INFORMATION, m_location);
+	m_real->real_save({"arguments: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
 	m_buff.clear();
+}
+
+void Logger::set_local_level(const LogLevels& level)
+{
+	m_local_level = level;
+}
+
+unsigned short Logger::get_local_level() const
+{
+	return m_local_level;
 }
 
 // Buffer
@@ -295,22 +282,18 @@ Buffer& Buffer::operator<<(const double& value)
 }
 Buffer& Buffer::operator<<(const bool& value)
 {
-	*m_real_buff += std::to_string(value);
+	*m_real_buff += std::to_string((int)value);
 	*m_real_buff += " ";
 	return *this;
 }
 
+// MainLogger
 
-//MainLogger
-
-MainLogger::MainLogger() : MainLogger(default_level, default_path, default_amount) {}
-MainLogger::MainLogger(const unsigned short& level) : MainLogger{level, default_path, default_amount} {}
-MainLogger::MainLogger(const unsigned short& level, const std::string& path) :
-	MainLogger{level, path, default_amount} {};
-MainLogger::MainLogger(const unsigned short& level, const std::string& path, const unsigned int& amount)
+MainLogger::MainLogger(const unsigned short& level, const std::string& path,
+	const unsigned int& amount, const std::source_location location)
 {
 	Logger::init(level, path, amount);
-	m_log = new Logger{};
+	m_log = new Logger{location};
 }
 
 MainLogger::~MainLogger()
