@@ -161,6 +161,7 @@ void Server::RegisterSession(std::shared_ptr<ISession> session)
     m_sessions.insert(session);
 }
 
+//TODO: UNUSED FUNCTION
 void Server::UnregisterSession(std::shared_ptr<ISession> session)
 {
     m_sessions.erase(session);

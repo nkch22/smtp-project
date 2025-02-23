@@ -28,13 +28,14 @@ public:
     bool Send(const std::string_view data) override;
 
     bool IsConnected() const override;
-
+    
+    asio::ip::tcp::socket& get_socket() noexcept;
+protected:
     void OnConnected() override;
     void OnDisconnected() override;
     void OnReceived(const std::string_view data) override;
     void OnSent(const std::size_t sent) override;
 
-    asio::ip::tcp::socket& get_socket() noexcept;
 private:
     void TryReceive();
     void TrySend();

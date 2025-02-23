@@ -13,7 +13,7 @@ public:
     virtual void Accept() = 0;
 
     virtual bool IsStarted() const = 0;
-
+protected:
     virtual void OnStarted() = 0;
     virtual void OnStopped() = 0;
     virtual void OnRestarted() = 0;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../IServer.hpp"
+
 namespace SMTP
 {
 

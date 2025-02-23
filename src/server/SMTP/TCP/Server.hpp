@@ -27,10 +27,11 @@ public:
     void Start() override;
     void Stop() override;
     void Restart() override;
-    void Accept() override;
-
+    
     bool IsStarted() const override;
-
+    
+protected:
+    void Accept() override;
     void OnStarted() override;
     void OnStopped() override;
     void OnRestarted() override;
