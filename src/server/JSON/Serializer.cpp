@@ -1,5 +1,6 @@
 /**
  * @file Serializer.cpp
+ * @brief Implementation of the Serializer specializations.
  *
  * @details
  * This file implements the Serializer specializations for basic types.

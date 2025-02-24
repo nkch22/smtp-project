@@ -135,7 +135,8 @@ bool JSON::Contains(const std::string& key) const
 
 namespace
 {
-// SerializeContainer formats a container (array or object) into a JSON string.
+// Helper function for serializing JSON containers (arrays and objects).
+// This template handles the common logic for both container types:
 // 'container' is the collection to serialize,
 // 'open' and 'close' are the opening and closing delimiters,
 // 'formatter' is a lambda that converts each element to a string.
