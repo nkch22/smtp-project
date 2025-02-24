@@ -14,10 +14,10 @@ ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
     , m_started{false}
+    , m_acceptor{*m_io_context}
+    , m_endpoint{asio::ip::tcp::v4(), port}
     , m_sessions{}
     , m_sessions_mutex{}
-    , m_endpoint{}
-    , m_acceptor{*m_io_context, port}
 {
 }
 
@@ -101,7 +101,7 @@ void ServerBase::Accept()
         {
             return;
         }
-        
+
         auto session{CreateSession()};
         auto async_accept_handler{[this, self, session](const asio::error_code& error)
         {
@@ -169,6 +169,10 @@ void ServerBase::DisconnectAll()
         }
     }};
     m_io_context->dispatch(disconnect_all_handler);
+}
+
+void ServerBase::Multicast(const std::string_view data)
+{
 }
 
 void ServerBase::OnStarted()

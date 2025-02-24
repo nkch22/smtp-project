@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(smtp_proc)
+project(smtp_proj)
 
 include(cmake/Ccache.cmake)
 include(cmake/CompileOptions.cmake)

@@ -16,11 +16,11 @@ void Session::OnConnected()
     std::println("Connected: {}:{}", 
         SessionBase::get_socket().remote_endpoint().address().to_string(),
         SessionBase::get_socket().remote_endpoint().port());
-    Send("220 192.168.56.1 ESMTP Postfix\r\n");
 }
 
 void Session::OnDisconnected()
 {
+    std::println("Disconnected");
 }
 
 void Session::OnReceived(const std::string_view data)
@@ -35,6 +35,12 @@ void Session::OnReceived(const std::string_view data)
 
 void Session::OnSent(const std::size_t sent)
 {
+}
+
+void Session::OnHandshaked()
+{
+    std::println("Handshake is successfull");
+    Send("220 192.168.56.1 ESMTP Postfix\r\n");
 }
 
 }

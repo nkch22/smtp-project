@@ -29,13 +29,14 @@ public:
     void Start() override;
     void Stop() override;
     void Restart() override;
-    void Accept() override;
-
+    
     bool IsStarted() const noexcept;
-protected:
+    protected:
     virtual std::shared_ptr<SessionBase> CreateSession();
     virtual void HandleError(const asio::error_code& error);
-
+    
+    void Multicast(const std::string_view data) override;
+    void Accept() override;
     void OnStarted() override;
     void OnStopped() override;
     void OnRestarted() override;

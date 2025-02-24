@@ -3,6 +3,15 @@
 #include "SSL/ServerBase.hpp"
 #include "Session.hpp"
 
+/*
+    TODO: ADD ENCRYPTION(PROBABLY DONE)
+          INTEGRATE THREAD POOL
+          TIMEOUT CONNECTION
+          LIMIT OF RECEIVED BYTES
+          BETTER BUFFER OBJECTS FOR ASYNC
+          ADD FLUSH BUFFERS
+*/
+
 namespace SMTP
 {
 

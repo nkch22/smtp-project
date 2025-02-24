@@ -17,6 +17,7 @@ protected:
     void OnDisconnected() override;
     void OnReceived(const std::string_view data) override;
     void OnSent(const std::size_t sent) override;
+    void OnHandshaked() override;
 private:
     Protocol::Parser m_request_parser;
 };
