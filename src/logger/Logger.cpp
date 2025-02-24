@@ -1,7 +1,5 @@
 #include "Logger.h"
 
-
-
 // RealLogger
 
 using namespace logger;
@@ -15,8 +13,8 @@ std::mutex* Logger::RealLogger::m_mutex = nullptr;
 
 Logger::RealLogger::RealLogger(const unsigned short& _level, const std::string& _save, const unsigned int& amount)
 {
-	amount <= 0 ? throw std::exception{} : 0;
-	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::exception{};
+	if (amount <= 0) throw std::invalid_argument{"logs amount cannot be less than 1"};
+	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::invalid_argument{"invalid log level"};
 
 	m_level = new unsigned short{_level};
 	m_output_path = new std::string{_save};
@@ -28,6 +26,8 @@ Logger::RealLogger::RealLogger(const unsigned short& _level, const std::string& 
 	{
 		log_dir = *m_output_path + "/Logs";
 	}
+	else if (std::filesystem::is_regular_file(*m_output_path))
+		throw std::invalid_argument{"save path cannot be file"};
 
 	if (std::filesystem::is_directory(log_dir))
 	{
@@ -83,7 +83,7 @@ void Logger::RealLogger::destroy()
 }
 
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
-										   const std::source_location& location, const unsigned short& level)
+								   const std::source_location& location, const unsigned short& level)
 {
 	if (level != LOG_LEVEL_NO)
 	{
@@ -139,7 +139,7 @@ void Logger::RealLogger::real_set_level(const unsigned short& _level)
 	std::lock_guard<std::mutex> lock{*m_mutex};
 	*m_level = _level;
 }
-unsigned short Logger::RealLogger::real_get_level() const
+unsigned short Logger::RealLogger::real_get_level()
 {
 	std::lock_guard<std::mutex> lock{*m_mutex};
 	return *m_level;
@@ -289,8 +289,8 @@ Buffer& Buffer::operator<<(const bool& value)
 
 // MainLogger
 
-MainLogger::MainLogger(const unsigned short& level, const std::string& path,
-	const unsigned int& amount, const std::source_location location)
+MainLogger::MainLogger(const unsigned short& level, const std::string& path, const unsigned int& amount,
+					   const std::source_location location)
 {
 	Logger::init(level, path, amount);
 	m_log = new Logger{location};

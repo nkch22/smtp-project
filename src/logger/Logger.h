@@ -28,6 +28,28 @@ namespace logger
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
+/*! @def DEFAULT_LEVEL
+*	@brief Default log level
+*/
+/*! @def DEFAULT_AMOUNT
+ *	@brief Default logs amount
+ */
+/*! @def DEFAULT_PATH
+ *	@brief Default output path
+ */
+/*! @def DEFAULT_COLOR
+ *	@brief Default console color
+ */
+/*! @def ERROR_COLOR
+ *	@brief Error console color
+ */
+/*! @def WARNING_COLOR
+ *	@brief Warning console color
+ */
+/*! @def INFORMATION_COLOR
+ *	@brief Information console color
+ */
+
 //! Enum for log levels
 enum LogLevels
 {
@@ -38,7 +60,7 @@ enum LogLevels
 };
 
 /*! @class Buffer
- *   @brief Logger class, that is used to transform variables into string
+ *  @brief Logger class, that is used to transform variables into string
  *
  *	This class is used to transform different variables into std::stiring for futher saving by Logger
  */
@@ -46,18 +68,43 @@ enum LogLevels
 class Buffer
 {
 private:
-	std::string* m_real_buff; //!< String buffer
+	std::string* m_real_buff;
 
 public:
-	Buffer(); /*!< Default empty constructor*/
+	Buffer();
+	/*! @fn Buffer()
+	 *	@brief Default empty constructor
+	 *
+	 *	Calls Buffer(const std::string&) with empty string
+	 * */
 
-	Buffer(const std::string&); /*!< Copies value of given string into string buffer */
+	Buffer(const std::string&);
+	/*! @fn Buffer(const std::string&)
+	 *	@brief Parameterized constructor
+	 *
+	 *	Copies given string in created string buffer
+	 */
 
-	~Buffer(); /*!< Deletes string buffer */
+	~Buffer();
+	/*! @fn ~Buffer()
+	 *	@brief Default destructor
+	 *
+	 *	Deletes string buffer
+	 */
 
-	std::string get() const; /*!< Method to get stored string */
+	std::string get() const;
+	/*! @fn get()
+	 *	@brief String buffer getter
+	 *
+	 *	@return string buffer copy
+	 */
 
-	void clear(); /*!< Method to clear string buffer*/
+	void clear();
+	/*! @fn clear()
+	 *	@brief String buffer cleaner
+	 *
+	 *	Clears string buffer without deletion
+	 */
 
 	Buffer& operator<<(const std::string&);
 	Buffer& operator<<(const char*);
@@ -74,42 +121,41 @@ public:
 	}
 
 	/*! @fn operator<<(const std::string&)
-	 * Spesifies how buffer writes given variables into string buffer.
+	 * @brief Default overloaded operator<< with const string&.
+	 * Spesifies how buffer writes given variables into string buffer
 	 *
-	 *		Be careful:
-	 *			If operator<< is not found for given variable in default Buffer operators <<, it will use template
-	 *			operator<<().
+	 *	@attention If operator<< is not found for given variable in default Buffer operators <<, it will use template
+	 *	@attention operator<<(const T&).
 	 *
-	 *			If template operator<< is not defined with friend specifier in variable definition, it will throw
-	 *			std::exception
-	 *
-	 *	Overload example:
-	 *
-	 *			friend Buffer& operator<<(Buffer&, const YOUR_CLASS &)
+	 *	@return Buffer
 	 */
 	/*! @fn operator<<(const char*)
-		Default overloaded operator<< with const char*
+		@brief Default overloaded operator<< with const char*
 	*/
 	/*! @fn operator<<(const int&)
-		Default overloaded operator<< with const int&
+		@brief Default overloaded operator<< with const int&
 	*/
 	/*! @fn operator<<(const unsigned int&)
-		Default overloaded operator<< with const unsigned int&
+		@brief Default overloaded operator<< with const unsigned int&
 	*/
 	/*! @fn operator<<(const double&)
-		Default overloaded operator<< with const double&
+		@brief Default overloaded operator<< with const double&
 	*/
 	/*! @fn operator<<(const bool&)
-		Default overloaded operator<< with const bool&
+		@brief Default overloaded operator<< with const bool&
 	*/
 	/*! @fn operator<<(const T&)
-	 *	Default template operator<<
+	 *	@brief Default template operator<<
 	 *
-	 *	Be careful:
+	 *	@attention It will be called, if none of default overloaded operators << can be used
+	 *	@attention If not properly overloaded in given variable, it will throw std::exception
 	 *
-	 *			It will be called, if none of default overloaded operators << can be used
+	 *  @important Overload example:
+	 *  @important	friend Buffer& operator<<(Buffer&, const YOUR_CLASS &)
 	 *
-	 *			If not properly overloaded in given variable, it will throw std::exception
+	 *	@throw std::exception;
+	 *
+	 *  @return Buffer
 	 */
 };
 
@@ -118,22 +164,15 @@ public:
  *
  *	This class implements saving messages of different types in console and txt file
  *
- *	Warning:
+ *	@warning It's using inner singleton class as global variable
+ * 
+ *	@warning So, before using logger, user must initialize it with init(), and after using, delete with destroy()	
+ * 
+ *	@warning init() and destroy() calls can be replaced with MainLogger constructor and destructor
+ * 
+ *	@warning Every saving message methods (save_message(), save_warning(), save_error()) ignores log levels, except log level NO
  *
- *		It's using inner singleton class as global variable
- *
- *		So, before using logger, user must initialize it with init(),
- *			and after using, delete with destoy()
- *
- *		Init() and destoy() calls can be replaced with MainLogger constructor and destructor
- *
- *		Every saving method ignores log levels, except log level NO
- *
- *		Using saving methods or macros without previous init() call in any other place is undefined behavior
- *
- *		It is recomended to use macros that calls needed method with respect to log level
- *
- *	@sa Logger.h, MainLogger
+ *	@warning Using saving methods without previous init() call in any other place is undefined behavior
  */
 class Logger
 {
@@ -165,11 +204,11 @@ private:
 
 		static void destroy();
 
-		void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
-							   const unsigned short& level);
+		static void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
+							  const unsigned short& level);
 
-		void real_set_level(const unsigned short&);
-		unsigned short real_get_level() const;
+		static void real_set_level(const unsigned short&);
+		static unsigned short real_get_level();
 	};
 
 	RealLogger* m_real;
@@ -190,26 +229,38 @@ private:
 
 public:
 	Logger(const std::source_location location = std::source_location::current());
-	~Logger() = default; //!< Default destructor
-
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
 	 *	@brief Default constructor
 	 *
 	 *	It stores location where it was created
 	 */
 
+	~Logger() = default;
+	/*! @fn ~Logger()
+	*	@brief Default destructor
+	* 
+	*	Trivial destructor
+	*/
+
 	static bool init(const unsigned short& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int& amount = DEFAULT_AMOUNT);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
-	 *   @brief Singleton initialization method
+	 *  @brief Singleton initialization method
 	 *
-	 *		level - is log level on start,		default value = 1
-	 *		save_path - is path to output directory,		default value = ""
-	 *		amount - is amount of how many logs can be in log folder,		default value = 30
+	 *	@important level - is global log level on start, default value = 1
+	 *	@important save_path - is path to output directory,	default value = ""
+	 *	@important amount - is amount of how many logs can be in log folder, default value = 30
 	 *
 	 *	It will save message of successful initialization
+	 * 
+	 *	@warning It will throw std::invalid_argument if 
+	 *	@warning 1. Level is out of scope OR
+	 *	@warning 2. Save_path is incorrect OR
+	 *	@warning 3. Amount is less than 1
 	 *
-	 *	It return true if initialization is successful, otherwise false
+	 *	@throw std::invalid_argument
+	 * 
+	 *	@return initialization state (true or false)
 	 */
 
 	static bool destroy();
@@ -218,7 +269,7 @@ public:
 	 *
 	 *	It will save message of destroying singleton
 	 *
-	 *	It returns true, if singleton was destroyed successfully, else false
+	 *	@return deletion state (true or false)
 	 */
 
 	void save_error(const std::string&);
@@ -227,8 +278,7 @@ public:
 	 *
 	 *	Saves messages with error flag
 	 *
-	 *		Be careful:
-	 *			It won`t stop function execution!
+	 *	@attention It won`t stop function execution!
 	 */
 
 	void save_warning(const std::string&);
@@ -246,15 +296,19 @@ public:
 	 */
 
 	void set_global_level(const unsigned short&);
-	/*! @fn set_level(const unsigned short&)
-	 *	@brief It sets log level to new value
+	/*! @fn set_global_level(const unsigned short&)
+	 *	@brief Global log level setter
 	 *
-	 *	It checks value to be valid log level, and then set log level to that value
+	 *	It checks value to be valid log level, and then set global log level to that value
+	 * 
+	 *  @warning local log level has more priority than global one
 	 */
 
 	unsigned short get_global_level() const;
 	/*! @fn get_global_level()
-	 *	@brief It returns stored log level value
+	 *	@brief Global log level getter
+	 * 
+	 *	@return Global log level value
 	 */
 
 	template<typename T>
@@ -272,16 +326,14 @@ public:
 	/*! @fn save_return(const T&)
 	 *	@brief It saves return value of funtion
 	 *
-	 *	Be careful:
-	 *
-	 *		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
 	 */
 
 	void save_return_nothing();
 	/*! @fn save_return_nothing()
 		@brief It save end of function execution
 
-		It saves end of function execution as inforation message
+		It saves end of function execution as information message
 
 		This method should be called at the end of void functions
 	*/
@@ -298,11 +350,9 @@ public:
 			this->save_func_start();
 	}
 	/*! @fn save_arguments(const T& first, Args&... args)
-	 *	@brief It save input arguments
+	 *	@brief It saves input arguments
 	 *
-	 *	Be careful:
-	 *
-	 *		If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
 	 *
 	 *	This method should be called at the beginning of parameterized function
 	 */
@@ -315,16 +365,26 @@ public:
 	*/
 
 	void set_local_level(const LogLevels&);
+	/*! @fn set_local_level(const LogLevels&)
+	*	@brief Local log level setter
+	*	
+	*	Sets local log level to given value, if value is valid
+	* 
+	*   @warning local log level has more priority than global one
+	*/
 
 	unsigned short get_local_level() const;
+	/*! @fn get_local_level()
+	*  @brief Local log level getter
+	* 
+	*  @return Local log level value
+	*/
 };
 
 /*! @class MainLogger
  *   @brief Class that automatically controls lifecycle of Logger singleton
  *
- *	Be careful:
- *
- *		There can be only one MainLogger, otherwise its undefined behavior
+ *	 @warning There can be only one MainLogger, otherwise its undefined behavior (when destructor is called)
  */
 class MainLogger
 {
@@ -334,23 +394,25 @@ private:
 public:
 	MainLogger(const unsigned short& level = DEFAULT_LEVEL, const std::string& path = DEFAULT_PATH,
 			   const unsigned int& amount = DEFAULT_AMOUNT,
-		const std::source_location location = std::source_location::current());
+			   const std::source_location location = std::source_location::current());
 	/*! @fn MainLogger(const unsigned short&, const std::string&, const unsigned int&)
-	 *	@brief Full MainLogger constructor
+	 *	@brief Default constructor
 	 *
-	 *	It calls to Logger::init() with given parameters
+	 *	@attention Calls to Logger::init() with given parameters
 	 */
 
 	~MainLogger();
 	/*! @fn ~MainLogger()
-		@brief Destructor
+		@brief Default destructor
 
-		It calls Logger::destroy()
+		@attention Calls Logger::destroy()
 	*/
 
 	Logger& get() const;
 	/*! @fn get()
-	 *	@brief It returns stored log
+	 *	@brief Logger getter
+	 * 
+	 *	@return stored Logger reference
 	 */
 };
 } // namespace logger
