@@ -2,6 +2,7 @@
  * @file JSON.cpp
  * @brief Implementation of the JSON class.
  *
+ * @details
  * This file implements the JSON class for representing and manipulating JSON values.
  * It provides constructors for various types, accessors, operator overloads, and
  * functionality to serialize the JSON value into a string.
@@ -192,12 +193,12 @@ std::string JSON::Serialize(bool pretty, int indent) const
 		return "\"" + EscapeString(AsString()) + "\"";
 
 	case Type::ARRAY:
-		// Use the helper to serialize an array.
+		// Helper to serialize an array.
 		return SerializeContainer(AsArray(), pretty, indent, "[", "]", [](const JSON& elem, int newIndent, bool pretty)
 								  { return elem.Serialize(pretty, newIndent); });
 
 	case Type::OBJECT:
-		// Use the helper to serialize an object.
+		// Helper to serialize an object.
 		return SerializeContainer(AsObject(), pretty, indent, "{", "}",
 								  [](const std::pair<const std::string, JSON>& p, int newIndent, bool pretty)
 								  {
@@ -214,7 +215,7 @@ std::string JSON::Serialize(bool pretty, int indent) const
 
 std::string JSON::EscapeString(const std::string& input)
 {
-	// Define a local lambda to escape a single character.
+	// Local lambda to escape a single character.
 	auto escape_char = [](char c) -> std::string
 	{
 		switch (c)
@@ -248,7 +249,7 @@ std::string JSON::EscapeString(const std::string& input)
 	};
 
 	std::string output;
-	for (char c : input) output += escape_char(c); // Use the lambda to get the escaped character.
+	for (char c : input) output += escape_char(c); // Getting the escaped character.
 
 	return output;
 }

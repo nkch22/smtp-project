@@ -2,6 +2,7 @@
  * @file Parser.cpp
  * @brief Implementation of the Parser class.
  *
+ * @details
  * This file implements the methods for parsing JSON content from a file.
  * It supports parsing of strings, numbers, booleans, null, arrays, and objects.
  */

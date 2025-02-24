@@ -2,6 +2,7 @@
  * @file JSON.hpp
  * @brief Declaration of the JSON class for representing JSON values.
  *
+ * @details
  * This header file declares the JSON class which encapsulates JSON values
  * of various types including null, boolean, number, string, array, and object.
  * It also provides methods for type-safe access, modification, and serialization
@@ -16,6 +17,8 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#include "Serializer.hpp"
 
 namespace ISXJson
 {
@@ -327,6 +330,30 @@ public:
 	 * properly escaped.
 	 */
 	std::string Serialize(bool pretty = false, int indent = 0) const;
+
+	/**
+	 * @brief Convert a value to JSON using its Serializer specialization
+	 * @tparam T Type of value to convert
+	 * @param value Value to convert
+	 * @return JSON representation of the value
+	 */
+	template<typename T>
+	static JSON From(const T& value)
+	{
+		return Serializer<T>::Serialize(value);
+	}
+
+	/**
+	 * @brief Convert JSON to a value using its JSONSerializer specialization
+	 * @tparam T Type to convert to
+	 * @return Converted value
+	 * @throw std::runtime_error If conversion fails
+	 */
+	template<typename T>
+	T To() const
+	{
+		return Serializer<T>::Deserialize(*this);
+	}
 
 private:
 	std::string SerializeArray(bool pretty, int indent) const;
