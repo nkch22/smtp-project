@@ -356,8 +356,6 @@ public:
 	}
 
 private:
-	std::string SerializeArray(bool pretty, int indent) const;
-	std::string SerializeObject(bool pretty, int indent) const;
 	static std::string EscapeString(const std::string& input);
 
 private:
@@ -365,3 +363,5 @@ private:
 };
 
 } // namespace ISXJson
+
+#include "SerializerVectorImpl.hpp"

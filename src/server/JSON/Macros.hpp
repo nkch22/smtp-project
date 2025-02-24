@@ -1,5 +1,5 @@
 /**
- * @file JSONMacros.hpp
+ * @file Macros.hpp
  * @brief Macros for defining JSON serializer specializations.
  *
  * @details
@@ -14,7 +14,7 @@
  */
 
 #pragma once
-#include "Convert.hpp"
+
 #include "PreprocessorUtilities.hpp"
 
 /**
@@ -26,19 +26,19 @@
  *
  * @param field The name of the field.
  */
-#define JSON_ADD_FIELD(field) obj[#field] = value.field;
+#define JSON_ADD_FIELD(field) obj[#field] = JSON::From(value.field);
 
 /**
  * @brief Macro to extract a field from a JSON object.
  *
  * @details
  * This macro expands to an expression that extracts a value from a JSON object for a specific key.
- * It then assigns it to the corresponding member of the C++ object after converting it with the
- * Convert function. This ensures that the JSON value is transformed to the correct type.
+ * It then assigns it to the corresponding member of the C++ object after converting it using
+ * the JSON::To method. This ensures that the JSON value is transformed to the correct type.
  *
  * @param field The name of the field.
  */
-#define JSON_GET_FIELD(field) value.field = ISXJson::Convert<decltype(value.field)>(json[#field]);
+#define JSON_GET_FIELD(field) value.field = json[#field].To<decltype(value.field)>();
 
 /**
  * @brief Applies an action macro to each variadic argument.

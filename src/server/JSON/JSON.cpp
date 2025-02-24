@@ -133,7 +133,6 @@ bool JSON::Contains(const std::string& key) const
 	return obj.find(key) != obj.end();
 }
 
-// Anonymous namespace for helper function used by SerializeArray and SerializeObject.
 namespace
 {
 // SerializeContainer formats a container (array or object) into a JSON string.

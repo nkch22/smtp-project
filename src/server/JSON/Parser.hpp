@@ -3,7 +3,7 @@
  * @brief Declaration of the Parser class.
  *
  * @details
- *  header file declares the JSONParser class which provides functionality to
+ *  header file declares the arser class which provides functionality to
  * parse JSON content from a file. It constructs a JSON object hierarchy from the file content.
  */
 
