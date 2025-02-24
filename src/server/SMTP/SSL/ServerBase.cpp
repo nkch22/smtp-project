@@ -1,23 +1,32 @@
-#include "Server.hpp"
+#include "ServerBase.hpp"
 
 #include <print>
 
 namespace SMTP
 {
 
-namespace TCP
+namespace SSL
 {
 
-Server::Server(std::shared_ptr<asio::io_context> io_context, const Port port)
+ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
+               std::shared_ptr<asio::ssl::context> ssl_context,
+               const Port port)
     : m_io_context{io_context}
+    , m_ssl_context{ssl_context}
     , m_started{false}
-    , m_endpoint{asio::ip::tcp::v4(), port}
-    , m_acceptor{*m_io_context}
     , m_sessions{}
+    , m_sessions_mutex{}
+    , m_endpoint{}
+    , m_acceptor{*m_io_context, port}
 {
 }
 
-void Server::Start() 
+std::shared_ptr<SSL::SessionBase> ServerBase::CreateSession()
+{
+    return std::make_shared<SessionBase>(m_io_context, m_ssl_context);
+}
+
+void ServerBase::Start()
 {
     if(IsStarted())
     {
@@ -31,19 +40,20 @@ void Server::Start()
         {
             return;
         }
+
         m_started = true;
         m_acceptor.open(m_endpoint.protocol());
         m_acceptor.set_option(asio::ip::tcp::acceptor::reuse_address{true});
         m_acceptor.bind(m_endpoint);
         m_acceptor.listen();
-
+        
         OnStarted();
         Accept();
     }};
     m_io_context->post(start_handler);
 }
 
-void Server::Stop() 
+void ServerBase::Stop()
 {
     if(!IsStarted())
     {
@@ -57,18 +67,16 @@ void Server::Stop()
         {
             return;
         }
-
         m_acceptor.close();
         DisconnectAll();
         m_started = false;
         m_sessions.clear();
         OnStopped();
     }};
-
     m_io_context->post(stop_handler);
 }
 
-void Server::Restart() 
+void ServerBase::Restart()
 {
     if(!IsStarted())
     {
@@ -79,12 +87,7 @@ void Server::Restart()
     OnRestarted();
 }
 
-bool Server::IsStarted() const noexcept
-{
-    return m_started;
-}
-
-void Server::Accept()
+void ServerBase::Accept()
 {
     if(!IsStarted())
     {
@@ -99,13 +102,13 @@ void Server::Accept()
             return;
         }
         
-        auto async_accept_handler{[this, self](const asio::error_code& error, asio::ip::tcp::socket socket)
+        auto session{CreateSession()};
+        auto async_accept_handler{[this, self, session](const asio::error_code& error)
         {
             if(!error)
             {
                 OnAccepted();
 
-                auto session{CreateSession(std::move(socket))};
                 RegisterSession(session);
     
                 session->Connect();
@@ -117,17 +120,34 @@ void Server::Accept()
     
             Accept();
         }};
-        m_acceptor.async_accept(async_accept_handler);
+        m_acceptor.async_accept(session->get_socket(), async_accept_handler);
     }};
     m_io_context->dispatch(accept_handler);
 }
 
-std::shared_ptr<Session> Server::CreateSession(asio::ip::tcp::socket socket)
+bool ServerBase::IsStarted() const noexcept
 {
-    return std::make_shared<Session>(m_io_context, std::move(socket));
+    return m_started;
 }
 
-void Server::DisconnectAll()
+void ServerBase::HandleError(const asio::error_code& error)
+{
+    std::println("Error: {}", error.message());
+}
+
+void ServerBase::RegisterSession(std::shared_ptr<ISession> session)
+{
+    std::unique_lock<std::shared_mutex> lock{m_sessions_mutex};
+    m_sessions.insert(session);
+}
+
+void ServerBase::UnregisterSession(std::shared_ptr<ISession> session)
+{
+    std::unique_lock<std::shared_mutex> lock{m_sessions_mutex};
+    m_sessions.erase(session);
+}
+
+void ServerBase::DisconnectAll()
 {
     if(!IsStarted())
     {
@@ -141,9 +161,9 @@ void Server::DisconnectAll()
         {
             return;
         }
-
+        
         std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
-        for(auto& session : m_sessions) 
+        for(auto& session : m_sessions)
         {
             session->Disconnect();
         }
@@ -151,35 +171,19 @@ void Server::DisconnectAll()
     m_io_context->dispatch(disconnect_all_handler);
 }
 
-void Server::HandleError(const asio::error_code& error)
-{
-    std::println("Error: {}", error.message());
-}
-
-void Server::RegisterSession(std::shared_ptr<ISession> session)
-{
-    m_sessions.insert(session);
-}
-
-//TODO: UNUSED FUNCTION
-void Server::UnregisterSession(std::shared_ptr<ISession> session)
-{
-    m_sessions.erase(session);
-}
-
-void Server::OnStarted() 
+void ServerBase::OnStarted()
 {
 }
 
-void Server::OnStopped() 
+void ServerBase::OnStopped()
 {
 }
 
-void Server::OnRestarted() 
+void ServerBase::OnRestarted()
 {
 }
 
-void Server::OnAccepted()
+void ServerBase::OnAccepted()
 {
 }
 

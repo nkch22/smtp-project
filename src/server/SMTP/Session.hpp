@@ -1,17 +1,17 @@
 #pragma once
 
 #include "Protocol/Parser.hpp"
-#include "Utils.hpp"
+#include "SSL/SessionBase.hpp"
 
 namespace SMTP
 {
 
-class Session : public SessionBase
+class Session : public SSL::SessionBase
 {
 public:
-    Session(std::shared_ptr<asio::io_context> io_context, asio::ip::tcp::socket socket);
+    Session(std::shared_ptr<asio::io_context> io_context, 
+            std::shared_ptr<asio::ssl::context> ssl_context);
     ~Session() = default;
-
 protected:
     void OnConnected() override;
     void OnDisconnected() override;

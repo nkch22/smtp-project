@@ -14,14 +14,14 @@ namespace SMTP
 namespace SSL
 {
 
-class Session 
+class SessionBase 
     : public ISession
-    , public std::enable_shared_from_this<Session>
+    , public std::enable_shared_from_this<SessionBase>
 {
 public:
-    Session(std::shared_ptr<asio::io_context> io_context, 
+    SessionBase(std::shared_ptr<asio::io_context> io_context, 
             std::shared_ptr<asio::ssl::context> ssl_context);
-    ~Session() = default;
+    ~SessionBase() = default;
 
     void Connect() override;
     void Disconnect() override;
@@ -35,6 +35,7 @@ public:
     asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& get_socket() noexcept;
 protected:
     virtual void OnHandshaked();
+    virtual void HandleError(const asio::error_code& error);
     void OnConnected() override;
     void OnDisconnected() override;
     void OnReceived(const std::string_view data) override;
@@ -43,7 +44,6 @@ protected:
 private:
     void TryReceive();
     void TrySend();
-    void HandleError(const asio::error_code& error);
     void ClearBuffers();
     std::shared_ptr<asio::io_context> m_io_context;
     std::shared_ptr<asio::ssl::context> m_ssl_context;

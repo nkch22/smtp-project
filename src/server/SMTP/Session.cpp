@@ -5,8 +5,9 @@
 namespace SMTP
 {
 
-Session::Session(std::shared_ptr<asio::io_context> io_context, asio::ip::tcp::socket socket)
-    : SessionBase{io_context, std::move(socket)}
+Session::Session(std::shared_ptr<asio::io_context> io_context,
+                 std::shared_ptr<asio::ssl::context> ssl_context)
+    : SSL::SessionBase{io_context, ssl_context}
 {
 }
 

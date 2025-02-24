@@ -1,4 +1,4 @@
-#include "Session.hpp"
+#include "SessionBase.hpp"
 
 namespace SMTP
 {
@@ -6,8 +6,8 @@ namespace SMTP
 namespace SSL
 {
 
-Session::Session(std::shared_ptr<asio::io_context> io_context, 
-                 std::shared_ptr<asio::ssl::context> ssl_context)
+SessionBase::SessionBase(std::shared_ptr<asio::io_context> io_context, 
+                         std::shared_ptr<asio::ssl::context> ssl_context)
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
     , m_connected{false}
@@ -21,7 +21,7 @@ Session::Session(std::shared_ptr<asio::io_context> io_context,
 {
 }
 
-void Session::Connect()
+void SessionBase::Connect()
 {
     m_connected = true;
 
@@ -51,7 +51,7 @@ void Session::Connect()
     m_stream.async_handshake(asio::ssl::stream_base::server, async_handshake_handler);
 }
 
-void Session::Disconnect()
+void SessionBase::Disconnect()
 {
     if(!IsConnected())
     {
@@ -89,12 +89,12 @@ void Session::Disconnect()
     m_io_context->dispatch(disconnect_handler);
 }
 
-void Session::Receive()
+void SessionBase::Receive()
 {
     TryReceive();
 }
 
-bool Session::Send(const std::string_view data)
+bool SessionBase::Send(const std::string_view data)
 {
     if(!IsHandshaked())
     {
@@ -120,32 +120,32 @@ bool Session::Send(const std::string_view data)
     return true;
 }
 
-bool Session::IsConnected() const noexcept
+bool SessionBase::IsConnected() const noexcept
 {
     return m_connected;
 }
 
-bool Session::IsHandshaked() const noexcept
+bool SessionBase::IsHandshaked() const noexcept
 {
     return m_handshaked;
 }
 
-void Session::ClearBuffers()
+void SessionBase::ClearBuffers()
 {
     std::scoped_lock lock{m_send_mutex};
 }
 
-asio::ssl::stream<asio::ip::tcp::socket>& Session::get_stream() noexcept
+asio::ssl::stream<asio::ip::tcp::socket>& SessionBase::get_stream() noexcept
 {
     return m_stream;
 }
 
-asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& Session::get_socket() noexcept
+asio::ssl::stream<asio::ip::tcp::socket>::next_layer_type& SessionBase::get_socket() noexcept
 {
     return m_stream.next_layer();
 }
 
-void Session::TryReceive()
+void SessionBase::TryReceive()
 {
     if(m_receiving)
     {
@@ -188,7 +188,7 @@ void Session::TryReceive()
     asio::async_read_until(get_stream(), m_receive_buffer, "\r\n", async_receive_handler);
 }
 
-void Session::TrySend()
+void SessionBase::TrySend()
 {
     if(m_sending)
     {
@@ -228,23 +228,27 @@ void Session::TrySend()
     asio::async_write(m_stream, m_send_buffer, async_write_handler);
 }
 
-void Session::OnConnected()
+void SessionBase::HandleError(const asio::error_code& error)
 {
 }
 
-void Session::OnHandshaked()
+void SessionBase::OnConnected()
 {
 }
 
-void Session::OnDisconnected()
+void SessionBase::OnHandshaked()
 {
 }
 
-void Session::OnReceived(const std::string_view data)
+void SessionBase::OnDisconnected()
 {
 }
 
-void Session::OnSent(const std::size_t sent)
+void SessionBase::OnReceived(const std::string_view data)
+{
+}
+
+void SessionBase::OnSent(const std::size_t sent)
 {
 }
 

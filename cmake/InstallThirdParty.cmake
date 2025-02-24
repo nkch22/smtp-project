@@ -13,6 +13,9 @@ include(FetchContent)
 
 # --------------------------------------------------------------------
 
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
 project_log("FetchContent: asio")
 
 FetchContent_Declare(
@@ -25,5 +28,3 @@ FetchContent_MakeAvailable(asio)
 
 add_library(asio INTERFACE)
 target_include_directories(asio INTERFACE ${asio_SOURCE_DIR}/asio/include)
-
-find_package(OpenSSL REQUIRED)
