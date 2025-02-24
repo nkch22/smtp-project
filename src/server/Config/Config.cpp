@@ -77,7 +77,7 @@ void Config::ParseCommunication(const ISXJson::JSON& comm_json)
 void Config::ParseLogging(const ISXJson::JSON& logger_json)
 {
 	// Map JSON keys to logging configuration.
-	m_logging.filename = logger_json["filename"].AsString();
+	m_logging.logs_directory = logger_json["logs_directory"].AsString();
 	m_logging.log_level = static_cast<int>(logger_json["LogLevel"].AsNumber());
 	m_logging.flush = (static_cast<int>(logger_json["flush"].AsNumber()) != 0);
 }

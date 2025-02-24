@@ -11,7 +11,7 @@
       "socket_timeout": 5
     },
     "logging": {
-      "filename": "serverlog.txt",
+      "logs_directory": "logs/",
       "LogLevel": 2,
       "flush": 0
     },

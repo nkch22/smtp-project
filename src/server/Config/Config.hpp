@@ -68,15 +68,15 @@ public:
 	 * @brief Logging system configuration.
 	 *
 	 * Expected JSON keys:
-	 * - "filename": Log file path (e.g., "serverlog.txt")
+	 * - "logs_directory": Directory path for storing log files (e.g., "logs/")
 	 * - "LogLevel": Logging verbosity level (0 - No logs, 1 - Production, 2 - Debug, 3 - Trace)
 	 * - "flush": Immediate flush setting (0 for false, non-zero for true)
 	 */
 	struct Logging
 	{
-		std::string filename; ///< Log file path (config key: "filename")
-		int log_level;		  ///< Logging verbosity level (config key: "LogLevel")
-		bool flush;			  ///< Immediate flush setting (config key: "flush")
+		std::string logs_directory; ///< Directory path for log files (config key: "logs_directory")
+		int log_level;				///< Logging verbosity level (config key: "LogLevel")
+		bool flush;					///< Immediate flush setting (config key: "flush")
 	};
 
 	/**
