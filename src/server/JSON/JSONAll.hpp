@@ -34,6 +34,38 @@
  * MyType reconstructed = json.To<MyType>();
  * @endcode
  *
+ * @section private_fields_example Serializing Private/Protected Fields Example
+ * @code
+ * #include "JSON/JSONAll.hpp"
+ *
+ * class SecureClass
+ * {
+ * private:
+ *     int private_value;
+ *     std::string secret_key;
+ *
+ * protected:
+ *     double protected_value;
+ *
+ * public:
+ *     std::string name;
+ *
+ *     SecureClass(int val = 0, const std::string& key = "", double pval = 0.0, const std::string& n = "")
+ *         : private_value(val), secret_key(key), protected_value(pval), name(n) {}
+ *
+ *     // Make the serializer a friend of this class
+ *     JSON_FRIEND_SERIALIZER(SecureClass)
+ * };
+ *
+ * // Define serializer outside the class, listing all fields including private ones
+ * JSON_DEFINE_FRIEND_SERIALIZER(SecureClass, private_value, secret_key, protected_value, name)
+ *
+ * // Use it the same way as regular serialization
+ * SecureClass obj(42, "top-secret", 3.14, "MyObject");
+ * JSON json = JSON::From(obj);
+ * std::string serialized = json.Serialize(true);
+ * @endcode
+ *
  * @section parsing_example JSON Parsing Example
  * @code
  * #include "JSON/JSONAll.hpp"

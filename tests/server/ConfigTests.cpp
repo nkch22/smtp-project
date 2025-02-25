@@ -47,7 +47,7 @@ TEST(ConfigTest, LoadsFullConfiguration)
                 "socket_timeout": 5000
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0
             },
@@ -78,7 +78,7 @@ TEST(ConfigTest, LoadsFullConfiguration)
 
 	// Verify logging configuration
 	auto logging = config.GetLogging();
-	EXPECT_EQ(logging.filename, "app.log");
+	EXPECT_EQ(logging.logs_directory, "logs/");
 	EXPECT_EQ(logging.log_level, 2);
 	EXPECT_FALSE(logging.flush);
 
@@ -157,7 +157,7 @@ TEST(ConfigTest, ValidatesFieldTypes)
                 "ipaddress": "192.168.1.1"
             },
             "communicationsettings": {"blocking": 1, "socket_timeout": 5000},
-            "logging": {"filename": "app.log", "LogLevel": 2, "flush": 0},
+            "logging": {"logs_directory": "logs/", "LogLevel": 2, "flush": 0},
             "time": {"Period_time": 30},
             "threadpool": {"maxworkingthreads": 8}
         }
@@ -197,7 +197,7 @@ TEST(ConfigTest, HandlesBooleanConversion)
                 "socket_timeout": 5000
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0
             },
@@ -238,7 +238,7 @@ TEST(ConfigTest, HandlesEdgeCaseValues)
                 "socket_timeout": 5000
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0
             },
@@ -306,7 +306,7 @@ TEST(ConfigTest, HandlesMissingServerField)
                 "socket_timeout": 5000
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0
             },
@@ -341,7 +341,7 @@ TEST(ConfigTest, HandlesMissingCommunicationField)
                 "blocking": 1
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0
             },
@@ -379,10 +379,10 @@ TEST(ConfigTest, IgnoresExtraFields)
                 "unused": 999
             },
             "logging": {
-                "filename": "app.log",
+                "logs_directory": "logs/",
                 "LogLevel": 2,
                 "flush": 0,
-                "logging_extra": "extra data"
+                "extra": "value"
             },
             "time": {
                 "Period_time": 30,
@@ -399,4 +399,170 @@ TEST(ConfigTest, IgnoresExtraFields)
 	// Should parse without throwing errors.
 	EXPECT_NO_THROW(Config config(filename));
 	DeleteTempFile(filename);
+}
+
+// Test: VeryLongFieldNames
+// Tests that the Config class can handle unusually long field names (1000 characters),
+// ensuring the parsing mechanism is robust against extreme input.
+TEST(ConfigTest, VeryLongFieldNames)
+{
+	// Create a field name that's 1000 characters long
+	std::string very_long_name(1000, 'a');
+
+	std::string json_content = R"({
+        "root": {
+            "Server": {
+                "servername": "value",
+                "serverdisplayname": ")"
+							   + very_long_name + R"(",
+                "listenerport": 8080,
+                "ipaddress": "192.168.1.1"
+            },
+            "communicationsettings": {
+                "blocking": 1,
+                "socket_timeout": 5000
+            },
+            "logging": {
+                "logs_directory": "logs/",
+                "LogLevel": 2,
+                "flush": 0
+            },
+            "time": {
+                "Period_time": 30
+            },
+            "threadpool": {
+                "maxworkingthreads": 10
+            }
+        }
+    })";
+
+	std::string filename = CreateTempFile(json_content);
+	Config config(filename);
+	DeleteTempFile(filename);
+
+	// Verify the other settings are still loaded correctly
+	EXPECT_EQ(config.GetServer().server_display_name, very_long_name);
+	EXPECT_EQ(config.GetServer().port, 8080);
+}
+
+// Test: VeryLongFieldValues
+// Tests that the Config class can handle unusually long field values (10000 characters),
+// verifying there are no unexpected limitations on value length.
+TEST(ConfigTest, VeryLongFieldValues)
+{
+	// Create a string that's 10000 characters long
+	std::string very_long_value(10000, 'x');
+
+	std::string json_content = R"({
+        "root": {
+            "Server": {
+                "servername": ")"
+							   + very_long_value + R"(",
+                "serverdisplayname": "Test Server",
+                "listenerport": 8080,
+                "ipaddress": "192.168.1.1"
+            },
+            "communicationsettings": {
+                "blocking": 1,
+                "socket_timeout": 5000
+            },
+            "logging": {
+                "logs_directory": "logs/",
+                "LogLevel": 2,
+                "flush": 0
+            },
+            "time": {
+                "Period_time": 30
+            },
+            "threadpool": {
+                "maxworkingthreads": 10
+            }
+        }
+    })";
+
+	std::string filename = CreateTempFile(json_content);
+	Config config(filename);
+	DeleteTempFile(filename);
+
+	// Verify the long value is loaded correctly
+	EXPECT_EQ(config.GetServer().server_name, very_long_value);
+}
+
+// Test: SpecialCharactersInPaths
+// Tests that the Config class can handle paths with special characters including
+// spaces, hash symbols, and ampersands without corruption or errors.
+TEST(ConfigTest, SpecialCharactersInPaths)
+{
+	std::string json_content = R"({
+        "root": {
+            "Server": {
+                "servername": "TestServer",
+                "serverdisplayname": "Test Server",
+                "listenerport": 8080,
+                "ipaddress": "192.168.1.1"
+            },
+            "communicationsettings": {
+                "blocking": 1,
+                "socket_timeout": 5000
+            },
+            "logging": {
+                "logs_directory": "logs/with spaces/and#special&chars/",
+                "LogLevel": 2,
+                "flush": 0
+            },
+            "time": {
+                "Period_time": 30
+            },
+            "threadpool": {
+                "maxworkingthreads": 10
+            }
+        }
+    })";
+
+	std::string filename = CreateTempFile(json_content);
+	Config config(filename);
+	DeleteTempFile(filename);
+
+	// Verify the special character path is loaded correctly
+	EXPECT_EQ(config.GetLogging().logs_directory, "logs/with spaces/and#special&chars/");
+}
+
+// Test: InternationalCharactersInValues
+// Tests that the Config class can handle Unicode/international characters in values,
+// ensuring proper support for non-ASCII text in configuration files.
+TEST(ConfigTest, InternationalCharactersInValues)
+{
+	std::string json_content = R"({
+        "root": {
+            "Server": {
+                "servername": "サーバー名",
+                "serverdisplayname": "测试服务器",
+                "listenerport": 8080,
+                "ipaddress": "192.168.1.1"
+            },
+            "communicationsettings": {
+                "blocking": 1,
+                "socket_timeout": 5000
+            },
+            "logging": {
+                "logs_directory": "logs/",
+                "LogLevel": 2,
+                "flush": 0
+            },
+            "time": {
+                "Period_time": 30
+            },
+            "threadpool": {
+                "maxworkingthreads": 10
+            }
+        }
+    })";
+
+	std::string filename = CreateTempFile(json_content);
+	Config config(filename);
+	DeleteTempFile(filename);
+
+	// Verify the international character values are loaded correctly
+	EXPECT_EQ(config.GetServer().server_name, "サーバー名");
+	EXPECT_EQ(config.GetServer().server_display_name, "测试服务器");
 }

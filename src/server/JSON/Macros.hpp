@@ -120,3 +120,28 @@
 		}                                                                                                              \
 	};                                                                                                                 \
 	}
+
+/**
+ * @brief Friend class declaration for the Serializer template.
+ *
+ * @details
+ * Use this inside your class definition to make the Serializer a friend of your class,
+ * which will allow it to access private and protected members. This should be used
+ * in conjunction with JSON_DEFINE_FRIEND_SERIALIZER.
+ */
+#define JSON_FRIEND_SERIALIZER(Type) friend struct ISXJson::Serializer<Type>;
+
+/**
+ * @brief Generates a Serializer specialization for a given type with access to private/protected members.
+ *
+ * @details
+ * This macro is identical to JSON_DEFINE_SERIALIZER, but is meant to be used in conjunction
+ * with JSON_FRIEND_SERIALIZER declared inside the class. This combination allows the serializer
+ * to access private and protected members of the class.
+ *
+ * @note The class must have JSON_FRIEND_SERIALIZER(Type) declared inside its definition.
+ *
+ * @tparam Type The C++ type being serialized/deserialized.
+ * @param ... The member fields to be processed, including private/protected ones.
+ */
+#define JSON_DEFINE_FRIEND_SERIALIZER(Type, ...) JSON_DEFINE_SERIALIZER(Type, __VA_ARGS__)

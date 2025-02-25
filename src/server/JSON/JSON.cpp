@@ -96,7 +96,9 @@ JSON& JSON::operator[](const std::string& key)
 {
 	if (GetType() != Type::OBJECT) throw std::runtime_error("Not an object");
 	auto& obj = std::get<Object>(m_value);
-	return obj[key];
+	auto it = obj.find(key);
+	if (it == obj.end()) throw std::runtime_error("Key not found: " + key);
+	return it->second;
 }
 
 const JSON& JSON::operator[](std::size_t index) const
