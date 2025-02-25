@@ -16,3 +16,11 @@ target_link_libraries(ui_lib PUBLIC Qt6::Core Qt6::Widgets)
 qt_add_executable(cmtp_client main.cpp)
 
 target_link_libraries(cmtp_client PRIVATE ui_lib)
+
+include_directories(include)
+include_directories(example)
+
+add_library(client STATIC)
+add_subdirectory(source)
+target_link_libraries(client PUBLIC asio base64)
+target_link_libraries(client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
