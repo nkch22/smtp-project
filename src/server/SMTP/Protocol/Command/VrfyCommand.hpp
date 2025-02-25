@@ -12,9 +12,10 @@ class VrfyCommand : public ICommand
 {
 public:
     constexpr static const char* COMMAND{"VRFY"};
+
     VrfyCommand() = default;
     ~VrfyCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

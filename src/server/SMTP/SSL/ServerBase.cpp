@@ -9,8 +9,9 @@ namespace SSL
 {
 
 ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
-               std::shared_ptr<asio::ssl::context> ssl_context,
-               const Port port)
+                       std::shared_ptr<asio::ssl::context> ssl_context,
+                       const ServerOptions server_options,
+                       const Port port)
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
     , m_started{false}
@@ -18,6 +19,7 @@ ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
     , m_endpoint{asio::ip::tcp::v4(), port}
     , m_sessions{}
     , m_sessions_mutex{}
+    , m_server_options{server_options}
 {
 }
 
@@ -109,8 +111,6 @@ void ServerBase::Accept()
             {
                 OnAccepted();
 
-                RegisterSession(session);
-    
                 session->Connect();
             }
             else
@@ -133,18 +133,6 @@ bool ServerBase::IsStarted() const noexcept
 void ServerBase::HandleError(const asio::error_code& error)
 {
     std::println("Error: {}", error.message());
-}
-
-void ServerBase::RegisterSession(std::shared_ptr<ISession> session)
-{
-    std::unique_lock<std::shared_mutex> lock{m_sessions_mutex};
-    m_sessions.insert(session);
-}
-
-void ServerBase::UnregisterSession(std::shared_ptr<ISession> session)
-{
-    std::unique_lock<std::shared_mutex> lock{m_sessions_mutex};
-    m_sessions.erase(session);
 }
 
 void ServerBase::DisconnectAll()
@@ -171,8 +159,22 @@ void ServerBase::DisconnectAll()
     m_io_context->dispatch(disconnect_all_handler);
 }
 
-void ServerBase::Multicast(const std::string_view data)
+bool ServerBase::Multicast(const std::string_view data)
 {
+    if(!IsStarted())
+    {
+        return false;
+    }
+    if(std::size(data) == 0)
+    {
+        return true;
+    }
+    std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
+    for(auto& session : m_sessions)
+    {
+        session->Send(data);
+    }
+    return true;
 }
 
 void ServerBase::OnStarted()

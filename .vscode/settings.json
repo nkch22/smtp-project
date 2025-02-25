@@ -3,6 +3,7 @@
         "xhash": "cpp",
         "mutex": "cpp",
         "*.ipp": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "unordered_set": "cpp"
     }
 }

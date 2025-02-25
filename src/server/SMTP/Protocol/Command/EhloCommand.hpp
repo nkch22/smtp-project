@@ -13,9 +13,9 @@ class EhloCommand : public ICommand
 public:
     constexpr static const char* COMMAND{"EHLO"};
 
-    EhloCommand(const std::string& domain_or_address);
+    EhloCommand() = default;
     ~EhloCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 private:
     std::string m_domain_of_address;
 };

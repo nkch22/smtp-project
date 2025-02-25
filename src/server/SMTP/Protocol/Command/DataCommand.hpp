@@ -15,7 +15,7 @@ public:
 
     DataCommand() = default;
     ~DataCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

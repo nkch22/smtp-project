@@ -6,8 +6,10 @@ namespace SMTP
 namespace Protocol
 {
 
-void VrfyCommand::Execute()
+Response VrfyCommand::CreateRespose()
 {
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

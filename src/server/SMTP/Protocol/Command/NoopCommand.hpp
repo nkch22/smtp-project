@@ -15,7 +15,7 @@ public:
 
     NoopCommand() = default;
     ~NoopCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

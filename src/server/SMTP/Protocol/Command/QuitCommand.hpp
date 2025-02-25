@@ -15,7 +15,7 @@ public:
 
     QuitCommand() = default;
     ~QuitCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

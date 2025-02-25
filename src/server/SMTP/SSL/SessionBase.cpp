@@ -107,8 +107,8 @@ bool SessionBase::Send(const std::string_view data)
 
     {
         std::scoped_lock lock{m_send_mutex};
-        std::copy(std::begin(data), std::end(data), 
-            std::ostreambuf_iterator<char>{&m_send_buffer});
+        /*std::copy(std::begin(data), std::end(data), 
+            std::ostreambuf_iterator<char>{&m_send_buffer});*/
     }
 
     auto self{shared_from_this()};
@@ -160,12 +160,12 @@ void SessionBase::TryReceive()
     m_receiving = true;
     auto self{shared_from_this()};
     auto async_receive_handler{[this, self](const std::error_code& error, const std::size_t size)
+    {
+        m_receiving = false;
+        
+        if(!IsHandshaked())
         {
-            m_receiving = false;
-            
-            if(!IsHandshaked())
-            {
-                return;
+            return;
         }
 
         if(size > 0)
@@ -185,7 +185,7 @@ void SessionBase::TryReceive()
             Disconnect();
         }
     }};
-    asio::async_read_until(get_stream(), m_receive_buffer, "\r\n", async_receive_handler);
+    asio::async_read_until(m_stream, m_receive_buffer, "\r\n", async_receive_handler);
 }
 
 void SessionBase::TrySend()

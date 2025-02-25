@@ -8,8 +8,10 @@ namespace SMTP
 namespace Protocol
 {
 
-void QuitCommand::Execute()
+Response QuitCommand::CreateRespose()
 {
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

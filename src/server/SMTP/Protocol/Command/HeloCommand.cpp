@@ -8,8 +8,10 @@ namespace SMTP
 namespace Protocol
 {
 
-void HeloCommand::Execute()
+Response HeloCommand::CreateRespose()
 {
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

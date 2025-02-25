@@ -6,8 +6,10 @@ namespace SMTP
 namespace Protocol
 {
 
-void NoopCommand::Execute()
+Response NoopCommand::CreateRespose()
 {
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

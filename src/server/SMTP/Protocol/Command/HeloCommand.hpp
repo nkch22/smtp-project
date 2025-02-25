@@ -17,7 +17,7 @@ public:
 
     HeloCommand() = default;
     ~HeloCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 }; 
 
 }

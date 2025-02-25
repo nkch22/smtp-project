@@ -8,13 +8,10 @@ namespace SMTP
 namespace Protocol
 {
 
-EhloCommand::EhloCommand(const std::string& domain_or_address)
-    : m_domain_of_address{domain_or_address}
+Response EhloCommand::CreateRespose()
 {
-}
-
-void EhloCommand::Execute()
-{
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

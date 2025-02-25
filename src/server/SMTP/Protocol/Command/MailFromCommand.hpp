@@ -15,7 +15,7 @@ public:
 
     MailFromCommand() = default;
     ~MailFromCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

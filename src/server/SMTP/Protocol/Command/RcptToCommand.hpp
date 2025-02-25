@@ -15,7 +15,7 @@ public:
 
     RcptToCommand() = default;
     ~RcptToCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

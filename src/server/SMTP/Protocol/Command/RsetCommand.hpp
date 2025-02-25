@@ -15,7 +15,7 @@ public:
 
     RsetCommand() = default;
     ~RsetCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

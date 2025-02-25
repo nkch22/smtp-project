@@ -15,7 +15,7 @@ public:
 
     AuthCommand() = default;
     ~AuthCommand() = default;
-    void Execute() override;
+    Response CreateRespose() override;
 };
 
 }

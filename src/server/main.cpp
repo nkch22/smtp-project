@@ -16,7 +16,8 @@ int main()
         ssl_context->use_certificate_chain_file("tools/certificates/cert.pem");
         ssl_context->use_private_key_file("tools/certificates/key.pem", asio::ssl::context::file_format::pem);
         ssl_context->use_tmp_dh_file("tools/certificates/dhparam.pem");
-        auto server{std::make_shared<SMTP::Server>(io_context, ssl_context, 465)};
+        const SMTP::ServerOptions server_options{};
+        auto server{std::make_shared<SMTP::Server>(io_context, ssl_context, server_options, 465)};
         server->Start();
         io_context->run();
         server->Stop();

@@ -9,10 +9,9 @@ namespace SMTP
 
 Server::Server(std::shared_ptr<asio::io_context> io_context,
                std::shared_ptr<asio::ssl::context> ssl_context, 
+               const ServerOptions server_options,
                const Port port)
-    : m_io_context{io_context}
-    , m_ssl_context{ssl_context}
-    , SSL::ServerBase{io_context, ssl_context, port}
+    : SSL::ServerBase{io_context, ssl_context, server_options, port}
 {
 }
 

@@ -6,8 +6,10 @@ namespace SMTP
 namespace Protocol
 {
 
-void RsetCommand::Execute()
+Response RsetCommand::CreateRespose()
 {
+    const Response response{ReplyCode::Ok};
+    return response;
 }
 
 }

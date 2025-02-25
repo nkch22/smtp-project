@@ -12,7 +12,7 @@ public:
     virtual void Stop() = 0;
     virtual void Restart() = 0;
     virtual void Accept() = 0;
-    virtual void Multicast(const std::string_view data) = 0;
+    virtual bool Multicast(const std::string_view data) = 0;
 
     virtual void OnStarted() = 0;
     virtual void OnStopped() = 0;
