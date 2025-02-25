@@ -233,20 +233,20 @@ TEST(JSONParserTest, DeepNesting)
 	ASSERT_EQ(result.GetType(), JSON::Type::ARRAY);
 	ASSERT_EQ(result.Size(), 1);
 
-	JSON level1 = result[0];
+	const JSON& level1 = result[0];
 	ASSERT_EQ(level1.GetType(), JSON::Type::ARRAY);
 	ASSERT_EQ(level1.Size(), 1);
 
-	JSON level2 = level1[0];
+	const JSON& level2 = level1[0];
 	ASSERT_EQ(level2.GetType(), JSON::Type::ARRAY);
 	ASSERT_EQ(level2.Size(), 1);
 
-	JSON level3 = level2[0];
-	ASSERT_EQ(level3.GetType(), JSON::Type::ARRAY); // Changed from NUMBER to ARRAY
-	ASSERT_EQ(level3.Size(), 1);					// It's an array so check its size
+	const JSON& level3 = level2[0];
+	ASSERT_EQ(level3.GetType(), JSON::Type::ARRAY);
+	ASSERT_EQ(level3.Size(), 1);
 
 	// Get the actual number value
-	JSON level4 = level3[0];
+	const JSON& level4 = level3[0];
 	ASSERT_EQ(level4.GetType(), JSON::Type::NUMBER);
 	EXPECT_EQ(level4.AsNumber(), 42);
 }

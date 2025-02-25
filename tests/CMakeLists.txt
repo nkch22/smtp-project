@@ -14,6 +14,7 @@ set(TEST_SOURCES
     server/JsonParserTests.cpp
     server/ConfigTests.cpp
     server/JSONTest.cpp
+    server/SerializerTests.cpp
 )
 
 add_library(json STATIC
