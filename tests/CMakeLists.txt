@@ -17,18 +17,6 @@ set(TEST_SOURCES
     server/SerializerTests.cpp
 )
 
-add_library(json STATIC
-    ${CMAKE_SOURCE_DIR}/src/server/json/JSON.cpp
-    ${CMAKE_SOURCE_DIR}/src/server/json/Parser.cpp
-    ${CMAKE_SOURCE_DIR}/src/server/json/Serializer.cpp
-)
-target_include_directories(json PUBLIC ${CMAKE_SOURCE_DIR}/src/server/json)
-
-add_library(config STATIC
-    ${CMAKE_SOURCE_DIR}/src/server/Config/Config.cpp
-)
-target_include_directories(config PUBLIC ${CMAKE_SOURCE_DIR}/src)
-
 add_executable(tests_executable ${TEST_SOURCES})
 target_link_libraries(tests_executable PRIVATE json config gtest gtest_main)
 
