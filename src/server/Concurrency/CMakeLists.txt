@@ -10,6 +10,7 @@ add_library(concurrency STATIC
         include/Concurrency/Sync/WaitGroup.h
         include/Concurrency/ThreadPool/ThreadPool.h
         include/Concurrency/ThreadPool/Task.h
+        include/Concurrency/DataStructures/UnboundedBlockingMPMCQueue.h
 )
 target_include_directories(concurrency PUBLIC include)
 
