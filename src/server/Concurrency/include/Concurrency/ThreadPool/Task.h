@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace tp
+namespace concurrency
 {
 
 /**
@@ -14,4 +14,4 @@ namespace tp
  */
 using Task = std::function<void()>;
 
-} // namespace tp
+} // namespace concurrency

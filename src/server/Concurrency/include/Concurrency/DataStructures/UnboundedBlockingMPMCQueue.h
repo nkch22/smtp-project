@@ -7,7 +7,7 @@
 #include <mutex>
 #include <optional>
 
-namespace tp
+namespace concurrency
 {
 
 /**
@@ -90,4 +90,4 @@ private:
 	std::atomic<bool> m_is_closed{false};
 };
 
-} // namespace tp
+} // namespace concurrency

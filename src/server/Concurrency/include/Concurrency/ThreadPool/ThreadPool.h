@@ -6,7 +6,7 @@
 #include "Task.h"
 #include "UnboundedBlockingMPMCQueue.h"
 
-namespace tp
+namespace concurrency
 {
 
 /**
@@ -93,4 +93,4 @@ private:
 	static thread_local ThreadPool* s_current;
 };
 
-} // namespace tp
+} // namespace concurrency

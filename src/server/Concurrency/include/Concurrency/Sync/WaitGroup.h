@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace tp
+namespace concurrency
 {
 
 /**
@@ -62,4 +62,4 @@ private:
 	uint32_t m_is_waiting{0};
 };
 
-} // namespace tp
+} // namespace concurrency

@@ -1,6 +1,6 @@
 #include "ThreadPool.h"
 
-namespace tp
+namespace concurrency
 {
 ThreadPool::ThreadPool(size_t threads) : m_workers(GetOptimalNumberOfWorkers(threads)) {}
 
@@ -72,4 +72,4 @@ void ThreadPool::Invoke(Task& task)
 }
 
 thread_local ThreadPool* ThreadPool::s_current{nullptr};
-} // namespace tp
+} // namespace concurrency

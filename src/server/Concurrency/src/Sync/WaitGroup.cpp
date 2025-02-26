@@ -1,6 +1,6 @@
 #include "WaitGroup.h"
 
-namespace tp
+namespace concurrency
 {
 void WaitGroup::Add(size_t count)
 {
@@ -24,4 +24,4 @@ void WaitGroup::Wait()
 	m_is_finished.wait(lock, [this] { return m_jobs == 0; });
 	m_is_waiting -= 1;
 }
-} // namespace tp
+} // namespace concurrency
