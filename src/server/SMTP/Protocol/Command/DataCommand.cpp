@@ -12,6 +12,11 @@ Response DataCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand DataCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

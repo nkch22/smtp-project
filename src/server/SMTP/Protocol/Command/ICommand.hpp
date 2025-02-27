@@ -13,13 +13,15 @@ namespace SMTP
 namespace Protocol
 {
 using namespace std::string_view_literals;
-        
+
 class ICommand
 {
-public:
+    public:
     virtual ~ICommand() = default;
     virtual Response CreateResponse(const Options& options) = 0;
 };
+
+using OptionalCommand = std::optional<std::unique_ptr<ICommand>>;
 
 }
 

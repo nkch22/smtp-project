@@ -12,6 +12,11 @@ Response RsetCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand RsetCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

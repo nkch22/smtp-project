@@ -27,24 +27,24 @@ Parser::Parser(const Options global_options)
 {
 }
 
-Parser::OptionalCommand Parser::TryParseRequest(const std::string& request) const
+OptionalCommand Parser::TryParseRequest(const std::string& request) const
 {
     return TryParseRequest(request, m_global_options);
 }
 
-Parser::OptionalCommand Parser::TryParseRequest(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseRequest(const std::string& request, const Options& custom_options) const
 {
     const auto upper_request{ToUpper(request)};
-    ParserHelper<HeloCommand, EhloCommand, 
+    ParserHelper<HeloCommand/*, EhloCommand, 
                  HelpCommand, QuitCommand, 
                  DataCommand, AuthCommand,
                  MailFromCommand, NoopCommand,
                  QuitCommand, RcptToCommand,
-                 RsetCommand, VrfyCommand>::TryParse(request, custom_options);
+                 RsetCommand, VrfyCommand*/>::TryParse(request, custom_options);
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseHelo(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseHelo(const std::string& request, const Options& custom_options) const
 {
     if(const auto position{request.find(HeloCommand::COMMAND)};
        position != std::string::npos)
@@ -56,7 +56,7 @@ Parser::OptionalCommand Parser::TryParseHelo(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseEhlo(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseEhlo(const std::string& request, const Options& custom_options) const
 {
     if(const auto position{request.find(EhloCommand::COMMAND)};
        position != std::string::npos)
@@ -68,7 +68,7 @@ Parser::OptionalCommand Parser::TryParseEhlo(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseQuit(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseQuit(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(QuitCommand::COMMAND))
     {
@@ -77,7 +77,7 @@ Parser::OptionalCommand Parser::TryParseQuit(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseData(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseData(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(DataCommand::COMMAND))
     {
@@ -86,7 +86,7 @@ Parser::OptionalCommand Parser::TryParseData(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseAuth(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseAuth(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(AuthCommand::COMMAND))
     {
@@ -95,7 +95,7 @@ Parser::OptionalCommand Parser::TryParseAuth(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseMailFrom(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseMailFrom(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(MailFromCommand::COMMAND))
     {
@@ -104,7 +104,7 @@ Parser::OptionalCommand Parser::TryParseMailFrom(const std::string& request, con
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseNoop(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseNoop(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(NoopCommand::COMMAND))
     {
@@ -113,7 +113,7 @@ Parser::OptionalCommand Parser::TryParseNoop(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseRcptTo(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseRcptTo(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(RcptToCommand::COMMAND))
     {
@@ -122,7 +122,7 @@ Parser::OptionalCommand Parser::TryParseRcptTo(const std::string& request, const
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseRset(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseRset(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(RsetCommand::COMMAND))
     {
@@ -131,7 +131,7 @@ Parser::OptionalCommand Parser::TryParseRset(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseVrfy(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseVrfy(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(VrfyCommand::COMMAND))
     {
@@ -140,7 +140,7 @@ Parser::OptionalCommand Parser::TryParseVrfy(const std::string& request, const O
     return std::nullopt;
 }
 
-Parser::OptionalCommand Parser::TryParseHelp(const std::string& request, const Options& custom_options) const
+OptionalCommand Parser::TryParseHelp(const std::string& request, const Options& custom_options) const
 {
     if(request.contains(HelpCommand::COMMAND))
     {

@@ -20,6 +20,11 @@ Response HeloCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand HeloCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

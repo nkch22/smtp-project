@@ -15,6 +15,11 @@ Response QuitCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand QuitCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

@@ -12,6 +12,11 @@ Response VrfyCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand VrfyCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

@@ -17,8 +17,6 @@ namespace Protocol
 class Parser
 {
 public:
-    using OptionalCommand = std::optional<std::unique_ptr<ICommand>>;
-
     Parser(const Options global_options);
     OptionalCommand TryParseRequest(const std::string& request) const;
     OptionalCommand TryParseRequest(const std::string& request, const Options& custom_options) const;

@@ -49,6 +49,11 @@ std::vector<std::string> EhloCommand::FillExtensions(const Options& options) con
     return extensions;
 }
 
+OptionalCommand EhloCommand::TryParseCommand(const std::string& request, const Options options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

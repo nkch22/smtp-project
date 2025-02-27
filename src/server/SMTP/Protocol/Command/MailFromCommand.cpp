@@ -12,6 +12,11 @@ Response MailFromCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand MailFromCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

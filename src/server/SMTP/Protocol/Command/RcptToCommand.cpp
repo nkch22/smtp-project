@@ -12,6 +12,11 @@ Response RcptToCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand RcptToCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }

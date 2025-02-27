@@ -1,6 +1,9 @@
 #pragma once
 
 #include <type_traits>
+#include <memory>
+
+#include "../Options.hpp"
 
 namespace SMTP
 {
@@ -11,7 +14,7 @@ namespace Protocol
 template<typename T>
 concept ParseCommandType = requires(T type)
 {
-    requires(true);
+    {T::TryParseCommand(std::declval<std::string>(), std::declval<Options>())} -> std::same_as<OptionalCommand>;
 };
 
 }

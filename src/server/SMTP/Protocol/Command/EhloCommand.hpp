@@ -19,6 +19,7 @@ public:
     EhloCommand(const std::string client_domain);
     ~EhloCommand() = default;
     Response CreateResponse(const Options& options) override;
+    static OptionalCommand TryParseCommand(const std::string& request, const Options options);
 private:
     std::vector<std::string> FillExtensions(const Options& options) const;
     std::string m_client_domain;

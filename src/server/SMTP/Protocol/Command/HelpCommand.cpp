@@ -12,6 +12,11 @@ Response HelpCommand::CreateResponse(const Options& options)
     return response;
 }
 
+OptionalCommand HelpCommand::TryParseCommand(const std::string& request, const Options& options)
+{
+    return std::nullopt;
+}
+
 }
 
 }
