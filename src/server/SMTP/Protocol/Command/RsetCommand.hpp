@@ -11,11 +11,11 @@ namespace Protocol
 class RsetCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"RSET"};
+    constexpr static std::string_view COMMAND{"RSET"sv};
 
     RsetCommand() = default;
     ~RsetCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "ICommand.hpp"
+#include "../Options.hpp"
 
 namespace SMTP
 {
@@ -11,13 +14,14 @@ namespace Protocol
 class EhloCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"EHLO"};
+    constexpr static std::string_view COMMAND{"EHLO"sv};
 
-    EhloCommand() = default;
+    EhloCommand(const std::string client_domain);
     ~EhloCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 private:
-    std::string m_domain_of_address;
+    std::vector<std::string> FillExtensions(const Options& options) const;
+    std::string m_client_domain;
 };
 
 }

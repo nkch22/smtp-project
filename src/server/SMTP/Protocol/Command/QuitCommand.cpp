@@ -8,9 +8,10 @@ namespace SMTP
 namespace Protocol
 {
 
-Response QuitCommand::CreateRespose()
+Response QuitCommand::CreateResponse(const Options& options)
 {
-    const Response response{ReplyCode::Ok};
+    const Response response{ReplyCode::ServiceClosingTransmissionChannel, 
+                            "Service closing transmission channel"};
     return response;
 }
 

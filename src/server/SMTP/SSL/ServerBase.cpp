@@ -10,7 +10,6 @@ namespace SSL
 
 ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
                        std::shared_ptr<asio::ssl::context> ssl_context,
-                       const ServerOptions server_options,
                        const Port port)
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
@@ -19,7 +18,6 @@ ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
     , m_endpoint{asio::ip::tcp::v4(), port}
     , m_sessions{}
     , m_sessions_mutex{}
-    , m_server_options{server_options}
 {
 }
 

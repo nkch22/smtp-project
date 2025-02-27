@@ -1,5 +1,7 @@
 #include "SessionBase.hpp"
 
+#include <print>
+
 namespace SMTP
 {
 
@@ -107,8 +109,8 @@ bool SessionBase::Send(const std::string_view data)
 
     {
         std::scoped_lock lock{m_send_mutex};
-        /*std::copy(std::begin(data), std::end(data), 
-            std::ostreambuf_iterator<char>{&m_send_buffer});*/
+        std::copy(std::begin(data), std::end(data), 
+                  std::ostreambuf_iterator<char>{&m_send_buffer});
     }
 
     auto self{shared_from_this()};
@@ -203,13 +205,13 @@ void SessionBase::TrySend()
     m_sending = true;
     auto self{shared_from_this()};
     auto async_write_handler{[this, self](const asio::error_code& error, const std::size_t size)
-        {
-            m_sending = false;
+    {
+        m_sending = false;
 
-            if(!IsHandshaked())
-            {
-                return;
-            }
+        if(!IsHandshaked())
+        {
+            return;
+        }
 
         if(size > 0)
         {
@@ -230,6 +232,7 @@ void SessionBase::TrySend()
 
 void SessionBase::HandleError(const asio::error_code& error)
 {
+    std::println("Error: {}", error.message());
 }
 
 void SessionBase::OnConnected()

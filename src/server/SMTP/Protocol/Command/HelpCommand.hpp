@@ -8,13 +8,13 @@ namespace SMTP
 namespace Protocol
 {
 
-class VrfyCommand : public ICommand
+class HelpCommand : public ICommand
 {
 public:
-    constexpr static std::string_view COMMAND{"VRFY"sv};
+    constexpr static std::string_view COMMAND{"HELP"};
 
-    VrfyCommand() = default;
-    ~VrfyCommand() = default;
+    HelpCommand() = default;
+    ~HelpCommand() = default;
     Response CreateResponse(const Options& options) override;
 };
 

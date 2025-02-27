@@ -8,7 +8,7 @@ int main()
     try
     {
         auto io_context{std::make_shared<asio::io_context>()};
-        auto ssl_context{std::make_shared<asio::ssl::context>(asio::ssl::context::tls)};
+        auto ssl_context{std::make_shared<asio::ssl::context>(asio::ssl::context::tlsv13)};
         ssl_context->set_password_callback([](const size_t max_length, const asio::ssl::context::password_purpose& purpose) -> std::string 
         {
             return "hello"; 
@@ -16,8 +16,14 @@ int main()
         ssl_context->use_certificate_chain_file("tools/certificates/cert.pem");
         ssl_context->use_private_key_file("tools/certificates/key.pem", asio::ssl::context::file_format::pem);
         ssl_context->use_tmp_dh_file("tools/certificates/dhparam.pem");
-        const SMTP::ServerOptions server_options{};
-        auto server{std::make_shared<SMTP::Server>(io_context, ssl_context, server_options, 465)};
+
+        SMTP::Protocol::Options options{};
+        options.domain_name = asio::ip::host_name();
+        options.max_message_size = 1024;
+        options.plain_login_allowed = false;
+        options.is_secure = false;
+
+        auto server{std::make_shared<SMTP::Server>(io_context, ssl_context, options, 465)};
         server->Start();
         io_context->run();
         server->Stop();

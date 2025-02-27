@@ -9,15 +9,16 @@ namespace SMTP
 
 Server::Server(std::shared_ptr<asio::io_context> io_context,
                std::shared_ptr<asio::ssl::context> ssl_context, 
-               const ServerOptions server_options,
+               const Protocol::Options options,
                const Port port)
-    : SSL::ServerBase{io_context, ssl_context, server_options, port}
+    : SSL::ServerBase{io_context, ssl_context, port}
+    , m_smtp_parser{std::make_shared<Protocol::Parser>(options)}
 {
 }
 
 std::shared_ptr<SSL::SessionBase> Server::CreateSession()
 {
-    return std::make_shared<Session>(m_io_context, m_ssl_context);
+    return std::make_shared<Session>(m_io_context, m_ssl_context, m_smtp_parser);
 }
 
 void Server::OnAccepted()

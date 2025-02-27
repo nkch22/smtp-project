@@ -11,11 +11,11 @@ namespace Protocol
 class NoopCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"NOOP"};
+    constexpr static std::string_view COMMAND{"NOOP"sv};
 
     NoopCommand() = default;
     ~NoopCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

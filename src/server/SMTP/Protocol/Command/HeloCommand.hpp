@@ -13,11 +13,13 @@ namespace Protocol
 class HeloCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"HELO"};
+    constexpr static std::string_view COMMAND{"HELO"sv};
 
-    HeloCommand() = default;
+    HeloCommand(const std::string client_domain);
     ~HeloCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
+private:
+    std::string m_client_domain;
 }; 
 
 }

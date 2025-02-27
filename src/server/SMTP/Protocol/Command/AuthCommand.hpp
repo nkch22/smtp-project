@@ -11,11 +11,11 @@ namespace Protocol
 class AuthCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"AUTH"};
+    constexpr static std::string_view COMMAND{"AUTH"sv};
 
     AuthCommand() = default;
     ~AuthCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

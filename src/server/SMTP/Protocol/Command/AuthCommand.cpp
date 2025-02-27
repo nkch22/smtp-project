@@ -6,7 +6,7 @@ namespace SMTP
 namespace Protocol
 {
 
-Response AuthCommand::CreateRespose()
+Response AuthCommand::CreateResponse(const Options& options)
 {
     const Response response{ReplyCode::Ok};
     return response;

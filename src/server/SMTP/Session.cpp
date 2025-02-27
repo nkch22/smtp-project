@@ -6,8 +6,10 @@ namespace SMTP
 {
 
 Session::Session(std::shared_ptr<asio::io_context> io_context,
-                 std::shared_ptr<asio::ssl::context> ssl_context)
+                 std::shared_ptr<asio::ssl::context> ssl_context,
+                 std::shared_ptr<Protocol::Parser> smtp_parser)
     : SSL::SessionBase{io_context, ssl_context}
+    , m_smtp_parser{smtp_parser}
 {
 }
 
@@ -25,11 +27,18 @@ void Session::OnDisconnected()
 
 void Session::OnReceived(const std::string_view data)
 {
-    std::println("Received: {}", data);
-    auto response{m_request_parser.TryParseRequest(std::data(data))};
-    if(response.has_value())
+    std::print("Received: {}", data);
+    const auto command{m_smtp_parser->TryParseRequest(std::data(data))};
+    if(command.has_value())
     {
-        response.value()->CreateRespose();
+        const auto response{command.value()->CreateResponse(m_smtp_parser->get_global_options())};
+        const auto string_response{response.CreateStringResponse()};
+        Send(string_response);
+        if(response.get_reply_code() == 
+           Protocol::ReplyCode::ServiceClosingTransmissionChannel)
+        {
+            Disconnect();
+        }
     }
 }
 
@@ -39,8 +48,12 @@ void Session::OnSent(const std::size_t sent)
 
 void Session::OnHandshaked()
 {
-    std::println("Handshake is successfull");
-    Send("220 192.168.56.1 ESMTP Postfix\r\n");
+    std::println("Handshaked is successfull {}:{}", 
+        SessionBase::get_socket().remote_endpoint().address().to_string(),
+        SessionBase::get_socket().remote_endpoint().port());
+    const Protocol::Response response{Protocol::ReplyCode::ServiceReady, 
+                                      std::format("{} SMTP is ready", m_smtp_parser->get_global_options().domain_name)};
+    Send(response.CreateStringResponse());
 }
 
 }

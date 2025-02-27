@@ -8,9 +8,15 @@ namespace SMTP
 namespace Protocol
 {
 
-Response HeloCommand::CreateRespose()
+HeloCommand::HeloCommand(const std::string client_domain)
+    : m_client_domain{std::move(client_domain)}
 {
-    const Response response{ReplyCode::Ok};
+}
+
+Response HeloCommand::CreateResponse(const Options& options)
+{
+    const Response response{ReplyCode::Ok, 
+        std::format("{} greets {}", options.domain_name, m_client_domain)};
     return response;
 }
 

@@ -8,7 +8,6 @@
 #include <asio/ssl.hpp>
 
 #include "../IServer.hpp"
-#include "../ServerOptions.hpp"
 #include "SessionBase.hpp"
 
 namespace SMTP
@@ -26,7 +25,6 @@ public:
 
     ServerBase(std::shared_ptr<asio::io_context> io_context,
                std::shared_ptr<asio::ssl::context> ssl_context, 
-               const ServerOptions server_options,
                const Port port);
     ~ServerBase() = default;
     void Start() override;
@@ -52,7 +50,6 @@ protected:
     std::shared_mutex m_sessions_mutex;
     std::shared_ptr<asio::io_context> m_io_context;
     std::shared_ptr<asio::ssl::context> m_ssl_context;
-    ServerOptions m_server_options;
 private:
     std::atomic<bool> m_started;
     asio::ip::tcp::endpoint m_endpoint;

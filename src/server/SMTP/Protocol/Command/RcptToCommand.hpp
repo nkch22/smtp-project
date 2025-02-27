@@ -11,11 +11,11 @@ namespace Protocol
 class RcptToCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"RCPT TO"};
+    constexpr static std::string_view COMMAND{"RCPT TO"sv};
 
     RcptToCommand() = default;
     ~RcptToCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

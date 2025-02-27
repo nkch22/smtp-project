@@ -11,11 +11,11 @@ namespace Protocol
 class MailFromCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"MAIL FROM"};
+    constexpr static std::string_view COMMAND{"MAIL FROM"sv};
 
     MailFromCommand() = default;
     ~MailFromCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

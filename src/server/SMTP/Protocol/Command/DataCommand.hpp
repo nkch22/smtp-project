@@ -11,11 +11,11 @@ namespace Protocol
 class DataCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"DATA"};
+    constexpr static std::string_view COMMAND{"DATA"sv};
 
     DataCommand() = default;
     ~DataCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

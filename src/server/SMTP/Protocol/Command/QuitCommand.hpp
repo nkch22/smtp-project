@@ -11,11 +11,11 @@ namespace Protocol
 class QuitCommand : public ICommand
 {
 public:
-    constexpr static const char* COMMAND{"QUIT"};
+    constexpr static std::string_view COMMAND{"QUIT"sv};
 
     QuitCommand() = default;
     ~QuitCommand() = default;
-    Response CreateRespose() override;
+    Response CreateResponse(const Options& options) override;
 };
 
 }

@@ -6,7 +6,7 @@ namespace SMTP
 namespace Protocol
 {
 
-Response MailFromCommand::CreateRespose()
+Response MailFromCommand::CreateResponse(const Options& options)
 {
     const Response response{ReplyCode::Ok};
     return response;
