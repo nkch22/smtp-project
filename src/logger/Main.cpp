@@ -2,6 +2,8 @@
 
 using namespace logger;
 
+#include <tuple>
+
 void lv1() {
 	Logger log;
 	log.save_func_start();
@@ -43,11 +45,5 @@ int lv_glob(int a, int b) {
 }
 
 int main() {
-	logger::MainLogger lg{};
-	lg.get().set_global_level(LOG_LEVEL_TRACE);
-
-	lv1();
-	lv2();
-	lv3(5, 7);
-	lv_glob(9, 4);
+	
 }
