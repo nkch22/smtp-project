@@ -4,8 +4,8 @@
 
 int main(int argc, char* argv[])
 {
-	QApplication app(argc, argv);
-	MainWindow window;
+	QApplication app{argc, argv};
+	UI::MainWindow window{};
 	window.show();
 	return app.exec();
 }

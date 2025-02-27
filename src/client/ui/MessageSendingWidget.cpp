@@ -9,6 +9,8 @@
 #include "ClientGlobalVariables.inl"
 #include "UiGlobalVariables.inl"
 
+using namespace UI;
+
 MessageSendingWidget::MessageSendingWidget(QWidget* parent) : QWidget{parent}
 {
 	m_email_validator = new QRegularExpressionValidator{Regexes::G_EMAIL_REGEX, this};
