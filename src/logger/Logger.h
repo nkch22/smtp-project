@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iostream>
 
-
 #include <source_location>
 #include <string>
 
@@ -16,7 +15,7 @@
 #include <thread>
 #include <condition_variable>
 
-#include <DataStructures/UnboundedBlockingMPMCQueue.h>
+#include <queue>
 
 /*!
 	@file Logger.h
@@ -199,13 +198,13 @@ private:
 
 		struct Message
 		{
-			const std::string msg;
-			const Logger::MessageTypes type;
-			const std::source_location location;
-			const LogLevels level;
+			std::string msg;
+			Logger::MessageTypes type;
+			std::source_location location;
+			LogLevels level;
 		};
 
-		using queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
+		using queue = std::queue<Message>;
 
 		static RealLogger* m_instance;
 
@@ -213,7 +212,6 @@ private:
 		static std::string* m_output_path;
 		static std::ofstream* m_file;
 
-		// mutex, con_var, end - temp for thr control
 		static std::mutex* m_mutex; 
 		static std::condition_variable* m_con_var;
 		static bool* m_end;

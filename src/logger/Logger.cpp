@@ -63,77 +63,74 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 		log_dir + "/log_" + std::format("{:%d-%m-%y-%H_%M_%S}", std::chrono::system_clock::now()) + ".txt";
 	m_file = new std::ofstream{buff_name};
 
-	m_thr = new std::thread{
-		[]
-		{
-			while (true)
-			{
-				{
-					std::unique_lock<std::mutex> lock{*m_mutex};
-
-					m_con_var->wait(lock, [] { return *m_end || !m_queue->empty(); });
-
-					if (*m_end && m_queue->empty()) return;
-				}
-
-				auto message_op = m_queue->Pop();
-				if (message_op.has_value()) {
-					auto message = message_op.value();
-
-					if (message.level != LOG_LEVEL_NO)
-					{
-						std::string time = std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
-
-						std::string message_type;
-						switch (message.type)
-						{
-						case ERROR:
-							message_type = " E ";
-							break;
-						case WARNING:
-							message_type = " W ";
-							break;
-						case INFORMATION:
-							message_type = " I ";
-							break;
-						}
-
-						std::string level_str{"[" + std::to_string(message.level) + "]"};
-
-						std::string func_name{"["};
-						func_name += message.location.function_name();
-						func_name += "]";
-
-						{
-							std::lock_guard<std::mutex> lock{*m_mutex};
-							std::cout << DEFAULT_COLOR "[" << std::this_thread::get_id() << "]" << time;
-
-							switch (message.type)
+	m_thr = new std::thread{[]
 							{
-							case ERROR:
-								std::cout << ERROR_COLOR;
-								break;
-							case WARNING:
-								std::cout << WARNING_COLOR;
-								break;
-							case INFORMATION:
-								std::cout << INFORMATION_COLOR;
-								break;
-							}
+								while (true)
+								{
+									Message message;
+									{
+										std::unique_lock<std::mutex> lock{*m_mutex};
 
-							std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
+										m_con_var->wait(lock, [] { return *m_end || !m_queue->empty(); });
 
-							*m_file << "[" << std::this_thread::get_id() << "]" << time << message_type << level_str
-									<< func_name << " " << message.msg << "\n";
-						}
-					}
-				}
-				
-			}
-		}
+										if (*m_end && m_queue->empty()) return;
 
-	};
-}
+										message = m_queue->front();
+										m_queue->pop();
+									}
+
+									if (message.level != LOG_LEVEL_NO)
+									{
+										std::string time =
+											std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
+
+										std::string message_type;
+										switch (message.type)
+										{
+										case ERROR:
+											message_type = " E ";
+											break;
+										case WARNING:
+											message_type = " W ";
+											break;
+										case INFORMATION:
+											message_type = " I ";
+											break;
+										}
+
+										std::string level_str{"[" + std::to_string(message.level) + "]"};
+
+										std::string func_name{"["};
+										func_name += message.location.function_name();
+										func_name += "]";
+
+										{
+											std::lock_guard<std::mutex> lock{*m_mutex};
+											std::cout << DEFAULT_COLOR "[" << std::this_thread::get_id() << "]" << time;
+
+											switch (message.type)
+											{
+											case ERROR:
+												std::cout << ERROR_COLOR;
+												break;
+											case WARNING:
+												std::cout << WARNING_COLOR;
+												break;
+											case INFORMATION:
+												std::cout << INFORMATION_COLOR;
+												break;
+											}
+
+											std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " "
+													  << message.msg << "\n";
+
+											*m_file << "[" << std::this_thread::get_id() << "]" << time << message_type
+													<< level_str << func_name << " " << message.msg << "\n";
+										}
+									}
+								}
+							}};
+};
 
 Logger::RealLogger* Logger::RealLogger::get_instance()
 {
@@ -162,8 +159,6 @@ void Logger::RealLogger::destroy()
 
 		m_thr->join();
 
-		m_queue->Close();
-
 		delete m_level;
 		delete m_output_path;
 		delete m_file;
@@ -183,7 +178,8 @@ void Logger::RealLogger::destroy()
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
 								   const std::source_location& location, const LogLevels& level)
 {
-	m_queue->Push({str, type, location, level});
+	std::unique_lock<std::mutex> lock{*m_mutex};
+	m_queue->emplace(Message{str, type, location, level});
 }
 
 void Logger::RealLogger::real_set_level(const LogLevels& _level)
