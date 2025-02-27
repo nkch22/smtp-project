@@ -2,18 +2,15 @@
 
 #include <algorithm>
 #include <chrono>
-#include <format>
-
+#include <condition_variable>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iostream>
-
+#include <mutex>
+#include <queue>
 #include <source_location>
 #include <string>
-#include <queue>
-
-#include <mutex>
-#include <condition_variable>
 #include <thread>
 
 /*!
@@ -34,8 +31,8 @@ namespace logger
 #define INFORMATION_COLOR "\033[42m"
 
 /*! @def DEFAULT_LEVEL
-*	@brief Default log level
-*/
+ *	@brief Default log level
+ */
 /*! @def DEFAULT_AMOUNT
  *	@brief Default logs amount
  */
@@ -170,12 +167,15 @@ public:
  *	This class implements saving messages of different types in console and txt file
  *
  *	@warning It's using inner singleton class as global variable
- * 
- *	@warning So, before using logger, user must initialize it with init(), and after using, delete with destroy()	
- * 
- *	@warning init() and destroy() calls can be replaced with MainLogger constructor and destructor
- * 
- *	@warning Every saving message methods (save_message(), save_warning(), save_error()) ignores log levels, except log level NO
+ *
+ *	@warning So, before using logger, user must initialize it with init()
+ *
+ *	@warning init() method will delete Logger singleton AFTER program ends
+ *
+ *  @warning @attention Don't use init() more than once
+ *
+ *	@warning Every saving message methods (save_message(), save_warning(), save_error()) ignores log levels, except log
+ *level NO
  *
  *	@warning Using saving methods without previous init() call in any other place is undefined behavior
  */
@@ -192,7 +192,6 @@ private:
 	class RealLogger
 	{
 	private:
-
 		struct Message
 		{
 			std::string msg;
@@ -250,6 +249,8 @@ private:
 
 	void save_arguments();
 
+	static void destroy();
+
 public:
 	Logger(const std::source_location location = std::source_location::current());
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
@@ -260,10 +261,10 @@ public:
 
 	~Logger() = default;
 	/*! @fn ~Logger()
-	*	@brief Default destructor
-	* 
-	*	Trivial destructor
-	*/
+	 *	@brief Default destructor
+	 *
+	 *	Trivial destructor
+	 */
 
 	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int& amount = DEFAULT_AMOUNT);
@@ -275,24 +276,17 @@ public:
 	 *	@important amount - is amount of how many logs can be in log folder, default value = 30
 	 *
 	 *	It will save message of successful initialization
-	 * 
-	 *	@warning It will throw std::invalid_argument if 
+	 *
+	 *	@warning It will throw std::invalid_argument if
 	 *	@warning 1. Level is out of scope OR
 	 *	@warning 2. Save_path is incorrect OR
 	 *	@warning 3. Amount is less than 1
 	 *
+	 *  @attention this method can be called only once
+	 *
 	 *	@throw std::invalid_argument
-	 * 
+	 *
 	 *	@return initialization state (true or false)
-	 */
-
-	static bool destroy();
-	/*! @fn destroy()
-	 *	@brief Destroyes singleton valiable
-	 *
-	 *	It will save message of destroying singleton
-	 *
-	 *	@return deletion state (true or false)
 	 */
 
 	void save_error(const std::string&);
@@ -323,14 +317,14 @@ public:
 	 *	@brief Global log level setter
 	 *
 	 *	It checks value to be valid log level, and then set global log level to that value
-	 * 
+	 *
 	 *  @warning local log level has more priority than global one
 	 */
 
 	LogLevels get_global_level() const;
 	/*! @fn get_global_level()
 	 *	@brief Global log level getter
-	 * 
+	 *
 	 *	@return Global log level value
 	 */
 
@@ -389,53 +383,18 @@ public:
 
 	void set_local_level(const LogLevels&);
 	/*! @fn set_local_level(const LogLevels&)
-	*	@brief Local log level setter
-	*	
-	*	Sets local log level to given value, if value is valid
-	* 
-	*   @warning local log level has more priority than global one
-	*/
+	 *	@brief Local log level setter
+	 *
+	 *	Sets local log level to given value, if value is valid
+	 *
+	 *   @warning local log level has more priority than global one
+	 */
 
 	LogLevels get_local_level() const;
 	/*! @fn get_local_level()
-	*  @brief Local log level getter
-	* 
-	*  @return Local log level value
-	*/
-};
-
-/*! @class MainLogger
- *   @brief Class that automatically controls lifecycle of Logger singleton
- *
- *	 @warning There can be only one MainLogger, otherwise its undefined behavior (when destructor is called)
- */
-class MainLogger
-{
-private:
-	Logger* m_log;
-
-public:
-	MainLogger(const LogLevels& level = DEFAULT_LEVEL, const std::string& path = DEFAULT_PATH,
-			   const unsigned int& amount = DEFAULT_AMOUNT,
-			   const std::source_location location = std::source_location::current());
-	/*! @fn MainLogger(const LogLevels&, const std::string&, const unsigned int&)
-	 *	@brief Default constructor
+	 *  @brief Local log level getter
 	 *
-	 *	@attention Calls to Logger::init() with given parameters
-	 */
-
-	~MainLogger();
-	/*! @fn ~MainLogger()
-		@brief Default destructor
-
-		@attention Calls Logger::destroy()
-	*/
-
-	Logger& get() const;
-	/*! @fn get()
-	 *	@brief Logger getter
-	 * 
-	 *	@return stored Logger reference
+	 *  @return Local log level value
 	 */
 };
 } // namespace logger

@@ -143,6 +143,8 @@ Logger::RealLogger* Logger::RealLogger::get_instance(const LogLevels& level, con
 	if (m_instance == nullptr)
 	{
 		m_instance = new Logger::RealLogger{level, path, amount};
+
+		atexit([] { Logger::destroy(); });
 	}
 	return m_instance;
 }
@@ -178,8 +180,9 @@ void Logger::RealLogger::destroy()
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
 								   const std::source_location& location, const LogLevels& level, std::thread::id id)
 {
-	std::unique_lock<std::mutex> lock{*m_mutex};
+	std::lock_guard<std::mutex> lock{*m_mutex};
 	m_queue->emplace(Message{str, type, location, level, id});
+	m_con_var->notify_all();
 }
 
 void Logger::RealLogger::real_set_level(const LogLevels& _level)
@@ -212,15 +215,12 @@ bool Logger::init(const LogLevels& level, const std::string& save_path, const un
 	return result;
 }
 
-bool Logger::destroy()
+void Logger::destroy()
 {
-	Logger::RealLogger* buff = Logger::RealLogger::get_instance();
-
-	Logger log;
-	log.save_message("logger is destroyed");
+	Logger::RealLogger::real_save("logger is destroyed", INFORMATION, std::source_location::current(),
+								  Logger::RealLogger::real_get_level(), std::thread::id{});
 
 	Logger::RealLogger::destroy();
-	return buff == nullptr;
 }
 
 void Logger::save_error(const std::string& msg)
@@ -333,24 +333,4 @@ Buffer& Buffer::operator<<(const bool& value)
 	*m_real_buff += std::to_string((int)value);
 	*m_real_buff += " ";
 	return *this;
-}
-
-// MainLogger
-
-MainLogger::MainLogger(const LogLevels& level, const std::string& path, const unsigned int& amount,
-					   const std::source_location location)
-{
-	Logger::init(level, path, amount);
-	m_log = new Logger{location};
-}
-
-MainLogger::~MainLogger()
-{
-	delete m_log;
-	Logger::destroy();
-}
-
-Logger& MainLogger::get() const
-{
-	return *m_log;
 }

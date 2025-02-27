@@ -44,15 +44,10 @@ int lv_glob(int a, int b) {
 
 int main() {
 
-	MainLogger log{LOG_LEVEL_TRACE};
+	//MainLogger log{LOG_LEVEL_TRACE};
+	Logger::init(LOG_LEVEL_TRACE);
 
-	for (int i = 0; i < 100; i++)
-	{
 
-		std::thread thr{[] { lv_glob(5, 7); }};
-		std::thread thr1{[] { lv2(); }};
 
-		thr.join();
-		thr1.join();
-	}
 }
+
