@@ -5,16 +5,61 @@
  * This file declares the Config class which loads configuration settings from a JSON file
  * and provides structured access to configuration parameters.
  *
- * Expected JSON structure:
+ * @section usage_example Usage Example
+ * @code
+ * #include "Config/Config.hpp"
+ * #include <iostream>
+ *
+ * // Expected JSON structure:
+ * // {
+ * //   "root": {
+ * //     "Server": { ... },
+ * //     "communicationsettings": { ... },
+ * //     "logging": { ... },
+ * //     "time": { ... },
+ * //     "threadpool": { ... }
+ * //   }
+ * // }
+ *
+ * try
  * {
- *   "root": {
- *     "Server": { ... },
- *     "communicationsettings": { ... },
- *     "logging": { ... },
- *     "time": { ... },
- *     "threadpool": { ... }
- *   }
+ *     // Load configuration from JSON file
+ *     Config config("config.json");
+ *
+ *     // Access server configuration
+ *     Config::Server server = config.GetServer();
+ *     std::string server_namne = server.server_name;
+ *     std::string display_name = server.server_display_name;
+ *     int port = server.port;
+ *     std::string ip_address = server.ip;
+ *
+ *     // Access communication settings
+ *     Config::Communication comm = config.GetCommunication();
+ *     bool is_blocking = comm.blocking;
+ *     int socket_timeout = comm.socket_timeout;
+ *
+ *     // Access logging configuration
+ *     Config::Logging logging = config.GetLogging();
+ *     std::string logs_dir = logging.logs_directory;
+ *     int log_level = logging.log_level;
+ *     bool should_flush = logging.flush;
+ *
+ *     // Access thread settings
+ *     Config::Threads threads = config.GetThreads();
+ *     int period_time = threads.period_time;
+ *     int max_threads = threads.max_working_threads;
+ *
+ *     // Use the configuration values
+ *     std::cout << "Server " << server_namne << " listening on " << ip_address << ":" << port << "\n";
+ *     std::cout << "Log directory: " << logs_dir << " (Level: " << log_level << ")\n";
+ *     std::cout << "Using " << max_threads << " worker threads\n";
  * }
+ * catch (const std::exception& ex)
+ * {
+ *     std::cerr << "Configuration error: " << ex.what() << std::endl;
+ *     return 1;
+ * }
+ * @endcode
  */
 
 #pragma once
