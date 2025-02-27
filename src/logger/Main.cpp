@@ -46,7 +46,12 @@ int main() {
 	logger::MainLogger lg{};
 	lg.get().set_global_level(LOG_LEVEL_TRACE);
 
-	lv1();
+	std::thread thr{[] { lv_glob(5, 7); }};
+	std::thread thr1{[] { lv2(); }};
+
+	thr.join();
+	thr1.join();
+
 	lv2();
 	lv3(5, 7);
 	lv_glob(9, 4);

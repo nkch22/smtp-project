@@ -109,9 +109,9 @@ void Logger::RealLogger::real_save(const std::string& str, const Logger::Message
 		func_name += location.function_name();
 		func_name += "]";
 
-		{
-			std::lock_guard<std::mutex> lock{*m_mutex};
-			std::cout << DEFAULT_COLOR "[" << std::this_thread::get_id() << "]" << time;
+										{
+											std::lock_guard<std::mutex> lock{*m_mutex};
+											std::cout << DEFAULT_COLOR "[" << std::this_thread::get_id() << "]" << time;
 
 			switch (type)
 			{
@@ -128,10 +128,62 @@ void Logger::RealLogger::real_save(const std::string& str, const Logger::Message
 
 			std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << str << "\n";
 
-			*m_file << "[" << std::this_thread::get_id() << "]" << time << message_type << level_str << func_name << " "
-					<< str << "\n";
-		}
+											*m_file << "[" << message.thr_id << "]" << time << message_type
+													<< level_str << func_name << " " << message.msg << "\n";
+										}
+									}
+								}
+							}};
+};
+
+Logger::RealLogger* Logger::RealLogger::get_instance()
+{
+	return get_instance(DEFAULT_LEVEL, {}, DEFAULT_AMOUNT);
+}
+
+Logger::RealLogger* Logger::RealLogger::get_instance(const LogLevels& level, const std::string& path,
+													 const unsigned int& amount)
+{
+	if (m_instance == nullptr)
+	{
+		m_instance = new Logger::RealLogger{level, path, amount};
 	}
+	return m_instance;
+}
+
+void Logger::RealLogger::destroy()
+{
+	if (m_instance != nullptr)
+	{
+		{
+			std::unique_lock<std::mutex> lock{*m_mutex};
+			*m_end = 1;
+		}
+		m_con_var->notify_all();
+
+		m_thr->join();
+
+		delete m_level;
+		delete m_output_path;
+		delete m_file;
+
+		delete m_mutex;
+		delete m_con_var;
+		delete m_end;
+
+		delete m_thr;
+		delete m_queue;
+
+		delete m_instance;
+		m_instance = nullptr;
+	}
+}
+
+void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
+								   const std::source_location& location, const LogLevels& level, std::thread::id id)
+{
+	std::unique_lock<std::mutex> lock{*m_mutex};
+	m_queue->emplace(Message{str, type, location, level, id});
 }
 
 void Logger::RealLogger::real_set_level(const unsigned short& _level)
