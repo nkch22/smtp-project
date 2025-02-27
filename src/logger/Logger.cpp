@@ -106,7 +106,7 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 
 										{
 											std::lock_guard<std::mutex> lock{*m_mutex};
-											std::cout << DEFAULT_COLOR "[" << std::this_thread::get_id() << "]" << time;
+											std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
 
 											switch (message.type)
 											{
@@ -124,7 +124,7 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 											std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " "
 													  << message.msg << "\n";
 
-											*m_file << "[" << std::this_thread::get_id() << "]" << time << message_type
+											*m_file << "[" << message.thr_id << "]" << time << message_type
 													<< level_str << func_name << " " << message.msg << "\n";
 										}
 									}
@@ -176,10 +176,10 @@ void Logger::RealLogger::destroy()
 }
 
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
-								   const std::source_location& location, const LogLevels& level)
+								   const std::source_location& location, const LogLevels& level, std::thread::id id)
 {
 	std::unique_lock<std::mutex> lock{*m_mutex};
-	m_queue->emplace(Message{str, type, location, level});
+	m_queue->emplace(Message{str, type, location, level, id});
 }
 
 void Logger::RealLogger::real_set_level(const LogLevels& _level)

@@ -202,6 +202,7 @@ private:
 			Logger::MessageTypes type;
 			std::source_location location;
 			LogLevels level;
+			std::thread::id thr_id;
 		};
 
 		using queue = std::queue<Message>;
@@ -230,7 +231,7 @@ private:
 		static void destroy();
 
 		static void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
-							  const LogLevels& level);
+							  const LogLevels& level, std::thread::id id = std::this_thread::get_id());
 
 		static void real_set_level(const LogLevels&);
 		static LogLevels real_get_level();

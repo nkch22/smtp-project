@@ -47,7 +47,11 @@ int lv_glob(int a, int b) {
 int main() {
 	MainLogger log{LOG_LEVEL_TRACE};
 
-	lv_glob(5, 7);
+	std::thread thr{[] { lv_glob(5, 7); }};
+	std::thread thr1{[] { lv2(); }};
+
+	thr.join();
+	thr1.join();
 
 	lv2();
 }
