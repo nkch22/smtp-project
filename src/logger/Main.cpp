@@ -43,16 +43,16 @@ int lv_glob(int a, int b) {
 }
 
 int main() {
-	logger::MainLogger lg{};
-	lg.get().set_global_level(LOG_LEVEL_TRACE);
 
-	std::thread thr{[] { lv_glob(5, 7); }};
-	std::thread thr1{[] { lv2(); }};
+	MainLogger log{LOG_LEVEL_TRACE};
 
-	thr.join();
-	thr1.join();
+	for (int i = 0; i < 100; i++)
+	{
 
-	lv2();
-	lv3(5, 7);
-	lv_glob(9, 4);
+		std::thread thr{[] { lv_glob(5, 7); }};
+		std::thread thr1{[] { lv2(); }};
+
+		thr.join();
+		thr1.join();
+	}
 }

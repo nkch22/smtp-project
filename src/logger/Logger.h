@@ -2,13 +2,18 @@
 
 #include <algorithm>
 #include <chrono>
-#include <filesystem>
 #include <format>
+
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <mutex>
+
 #include <source_location>
 #include <string>
+#include <queue>
+
+#include <mutex>
+#include <condition_variable>
 #include <thread>
 
 /*!
@@ -201,26 +206,32 @@ private:
 
 		static RealLogger* m_instance;
 
-		static unsigned short* m_level;
+		static LogLevels* m_level;
 		static std::string* m_output_path;
 		static std::ofstream* m_file;
-		static std::mutex* m_mutex;
 
-		RealLogger(const unsigned short&, const std::string&, const unsigned int&);
+		static std::mutex* m_mutex;
+		static std::condition_variable* m_con_var;
+		static bool* m_end;
+
+		static queue* m_queue;
+		static std::thread* m_thr;
+
+		RealLogger(const LogLevels&, const std::string&, const unsigned int&);
 
 		~RealLogger() = default;
 
 	public:
 		static RealLogger* get_instance();
-		static RealLogger* get_instance(const unsigned short&, const std::string&, const unsigned int&);
+		static RealLogger* get_instance(const LogLevels&, const std::string&, const unsigned int&);
 
 		static void destroy();
 
 		static void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
 							  const LogLevels& level, std::thread::id id = std::this_thread::get_id());
 
-		static void real_set_level(const unsigned short&);
-		static unsigned short real_get_level();
+		static void real_set_level(const LogLevels&);
+		static LogLevels real_get_level();
 	};
 
 	RealLogger* m_real;
@@ -229,7 +240,7 @@ private:
 
 	const std::source_location m_location;
 
-	unsigned short m_local_level;
+	LogLevels m_local_level;
 
 	template<typename T>
 	void save_argument(const T& value)
@@ -254,7 +265,7 @@ public:
 	*	Trivial destructor
 	*/
 
-	static bool init(const unsigned short& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
+	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int& amount = DEFAULT_AMOUNT);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
@@ -307,8 +318,8 @@ public:
 	 *   Saves message with information flag
 	 */
 
-	void set_global_level(const unsigned short&);
-	/*! @fn set_global_level(const unsigned short&)
+	void set_global_level(const LogLevels&);
+	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
 	 *	It checks value to be valid log level, and then set global log level to that value
@@ -316,7 +327,7 @@ public:
 	 *  @warning local log level has more priority than global one
 	 */
 
-	unsigned short get_global_level() const;
+	LogLevels get_global_level() const;
 	/*! @fn get_global_level()
 	 *	@brief Global log level getter
 	 * 
@@ -385,7 +396,7 @@ public:
 	*   @warning local log level has more priority than global one
 	*/
 
-	unsigned short get_local_level() const;
+	LogLevels get_local_level() const;
 	/*! @fn get_local_level()
 	*  @brief Local log level getter
 	* 
@@ -404,10 +415,10 @@ private:
 	Logger* m_log;
 
 public:
-	MainLogger(const unsigned short& level = DEFAULT_LEVEL, const std::string& path = DEFAULT_PATH,
+	MainLogger(const LogLevels& level = DEFAULT_LEVEL, const std::string& path = DEFAULT_PATH,
 			   const unsigned int& amount = DEFAULT_AMOUNT,
 			   const std::source_location location = std::source_location::current());
-	/*! @fn MainLogger(const unsigned short&, const std::string&, const unsigned int&)
+	/*! @fn MainLogger(const LogLevels&, const std::string&, const unsigned int&)
 	 *	@brief Default constructor
 	 *
 	 *	@attention Calls to Logger::init() with given parameters
