@@ -18,7 +18,7 @@
 
 class QLineEdit;
 
-namespace UI
+namespace UserInterface
 {
 /**
  * @brief Configuration Widget which contains SMTP connection parameters
@@ -40,4 +40,4 @@ private:
 	QPointer<QLineEdit> m_user_line_edit;
 	QPointer<QLineEdit> m_password_line_edit;
 };
-} // namespace UI
+} // namespace UserInterface

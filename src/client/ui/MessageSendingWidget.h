@@ -18,8 +18,9 @@
 #include <QWidget>
 
 class QLineEdit;
+class QTextEdit;
 
-namespace UI
+namespace UserInterface
 {
 /**
  * @brief Message Sending Widget which contains Message parameters
@@ -45,5 +46,10 @@ private:
 												   const QRegularExpressionValidator* validator);
 
 	QPointer<QRegularExpressionValidator> m_email_validator;
+
+	QPointer<QLineEdit> m_from_line_edit;
+	QPointer<QLineEdit> m_to_line_edit;
+	QPointer<QLineEdit> m_subject_line_edit;
+	QPointer<QTextEdit> m_body_text_edit;
 };
-} // namespace UI
+} // namespace UserInterface
