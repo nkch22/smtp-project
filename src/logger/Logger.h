@@ -12,6 +12,8 @@
 #include <source_location>
 #include <string>
 #include <thread>
+#include <csignal>
+#include <exception>
 
 /*!
 	@file Logger.h
@@ -213,6 +215,8 @@ private:
 		static std::condition_variable* m_con_var;
 		static bool* m_end;
 
+		static bool* do_flush;
+
 		static queue* m_queue;
 		static std::thread* m_thr;
 
@@ -231,6 +235,10 @@ private:
 
 		static void real_set_level(const LogLevels&);
 		static LogLevels real_get_level();
+
+		static void save_message(const Message&);
+
+		static void handle_fatal_error(int);
 	};
 
 	RealLogger* m_real;

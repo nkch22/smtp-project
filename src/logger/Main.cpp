@@ -1,5 +1,7 @@
 #include "Logger.h"
 
+#include <csignal>
+
 using namespace logger;
 
 void lv1() {
@@ -42,12 +44,10 @@ int lv_glob(int a, int b) {
 	return a + b;
 }
 
-int main() {
 
-	//MainLogger log{LOG_LEVEL_TRACE};
+int main() {
 	Logger::init(LOG_LEVEL_TRACE);
 
-
-
+	throw std::runtime_error("Some error");
 }
 

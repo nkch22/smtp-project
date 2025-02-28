@@ -14,6 +14,8 @@ std::mutex* Logger::RealLogger::m_mutex = nullptr;
 std::condition_variable* Logger::RealLogger::m_con_var = nullptr;
 bool* Logger::RealLogger::m_end = nullptr;
 
+bool* Logger::RealLogger::do_flush = nullptr;
+
 Logger::RealLogger::queue* Logger::RealLogger::m_queue = nullptr;
 std::thread* Logger::RealLogger::m_thr = nullptr;
 
@@ -28,6 +30,8 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 
 	m_con_var = new std::condition_variable;
 	m_end = new bool{0};
+
+	do_flush = new bool{1};
 
 	m_queue = new queue;
 
@@ -79,55 +83,7 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 										m_queue->pop();
 									}
 
-									if (message.level != LOG_LEVEL_NO)
-									{
-										std::string time =
-											std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
-
-										std::string message_type;
-										switch (message.type)
-										{
-										case ERROR:
-											message_type = " E ";
-											break;
-										case WARNING:
-											message_type = " W ";
-											break;
-										case INFORMATION:
-											message_type = " I ";
-											break;
-										}
-
-										std::string level_str{"[" + std::to_string(message.level) + "]"};
-
-										std::string func_name{"["};
-										func_name += message.location.function_name();
-										func_name += "]";
-
-										{
-											std::lock_guard<std::mutex> lock{*m_mutex};
-											std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
-
-											switch (message.type)
-											{
-											case ERROR:
-												std::cout << ERROR_COLOR;
-												break;
-											case WARNING:
-												std::cout << WARNING_COLOR;
-												break;
-											case INFORMATION:
-												std::cout << INFORMATION_COLOR;
-												break;
-											}
-
-											std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " "
-													  << message.msg << "\n";
-
-											*m_file << "[" << message.thr_id << "]" << time << message_type << level_str
-													<< func_name << " " << message.msg << "\n";
-										}
-									}
+									save_message(message);
 								}
 							}};
 };
@@ -145,6 +101,7 @@ Logger::RealLogger* Logger::RealLogger::get_instance(const LogLevels& level, con
 		m_instance = new Logger::RealLogger{level, path, amount};
 
 		atexit([] { Logger::destroy(); });
+		signal(SIGABRT, handle_fatal_error);
 	}
 	return m_instance;
 }
@@ -168,6 +125,8 @@ void Logger::RealLogger::destroy()
 		delete m_mutex;
 		delete m_con_var;
 		delete m_end;
+
+		delete do_flush;
 
 		delete m_queue;
 		delete m_thr;
@@ -194,6 +153,74 @@ LogLevels Logger::RealLogger::real_get_level()
 {
 	std::lock_guard<std::mutex> lock{*m_mutex};
 	return *m_level;
+}
+
+void Logger::RealLogger::save_message(const Message& message) {
+	if (message.level != LOG_LEVEL_NO)
+	{
+		std::string time = std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
+
+		std::string message_type;
+		switch (message.type)
+		{
+		case ERROR:
+			message_type = " E ";
+			break;
+		case WARNING:
+			message_type = " W ";
+			break;
+		case INFORMATION:
+			message_type = " I ";
+			break;
+		}
+
+		std::string level_str{"[" + std::to_string(message.level) + "]"};
+
+		std::string func_name{"["};
+		func_name += message.location.function_name();
+		func_name += "]";
+
+		{
+			std::lock_guard<std::mutex> lock{*m_mutex};
+			std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
+
+			switch (message.type)
+			{
+			case ERROR:
+				std::cout << ERROR_COLOR;
+				break;
+			case WARNING:
+				std::cout << WARNING_COLOR;
+				break;
+			case INFORMATION:
+				std::cout << INFORMATION_COLOR;
+				break;
+			}
+
+			std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
+
+			*m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
+					<< message.msg << "\n";
+		}
+	}
+}
+
+void Logger::RealLogger::handle_fatal_error(int)
+{
+	try
+	{
+		std::rethrow_exception(std::current_exception());
+	}
+	catch (const std::exception& ex)
+	{
+		std::string str{"Fatal error: "}; 
+		str += ex.what();
+		Logger::RealLogger::save_message(Message{str, ERROR, std::source_location::current(),
+												 Logger::RealLogger::real_get_level(), std::thread::id{}});
+	}
+
+	
+	Logger::destroy();
 }
 
 // Logger
