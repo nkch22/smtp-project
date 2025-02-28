@@ -23,7 +23,7 @@ Logger::RealLogger::queue Logger::RealLogger::m_queue;
 std::thread Logger::RealLogger::m_thr;
 
 Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save, const unsigned int& amount,
-							   const bool& is_config)
+							   const bool& is_config, const bool& do_flush)
 {
 	if (amount <= 0) throw std::invalid_argument{"logs amount cannot be less than 1"};
 	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::invalid_argument{"invalid log level"};
@@ -34,7 +34,7 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 
 	m_end = 0;
 
-	m_do_flush = 1;
+	m_do_flush = do_flush;
 	m_is_config = is_config;
 
 	m_amount = amount;
@@ -53,11 +53,8 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 
 									if (m_end && (m_queue.empty() || m_is_config)) return;
 
-									if (!m_is_config)
-									{
-										message = m_queue.front();
-										m_queue.pop();
-									}
+									message = m_queue.front();
+									m_queue.pop();
 								}
 
 								save_message(message);
@@ -106,17 +103,13 @@ void Logger::RealLogger::file_init(const unsigned int& amount)
 				  std::this_thread::get_id());
 }
 
-Logger::RealLogger* Logger::RealLogger::get_instance()
-{
-	return get_instance(DEFAULT_LEVEL, DEFAULT_PATH, DEFAULT_AMOUNT, false);
-}
-
 Logger::RealLogger* Logger::RealLogger::get_instance(const LogLevels& level, const std::string& path,
-													 const unsigned int& amount, const bool& is_config)
+													 const unsigned int& amount, const bool& is_config,
+													 const bool& do_flush)
 {
 	if (m_instance == nullptr)
 	{
-		m_instance = new Logger::RealLogger{level, path, amount, is_config};
+		m_instance = new Logger::RealLogger{level, path, amount, is_config, do_flush};
 
 		atexit([] { Logger::destroy(); });
 		signal(SIGABRT, handle_fatal_error);
@@ -144,6 +137,8 @@ void Logger::RealLogger::destroy()
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
 								   const std::source_location& location, const LogLevels& level, std::thread::id id)
 {
+	if (!m_do_flush) return;
+
 	{
 		std::unique_lock<std::mutex> lock{m_mutex};
 		m_queue.emplace(Message{str, type, location, level, id});
@@ -164,7 +159,6 @@ LogLevels Logger::RealLogger::real_get_level()
 
 void Logger::RealLogger::save_message(const Message& message)
 {
-	if (m_is_config) return;
 
 	if (message.level != LOG_LEVEL_NO)
 	{
@@ -235,7 +229,11 @@ void Logger::RealLogger::handle_fatal_error(int)
 void Logger::RealLogger::real_stop_config()
 {
 	file_init(m_amount);
-	m_is_config = 0;
+
+	{
+		std::lock_guard<std::mutex> lock{m_mutex};
+		m_is_config = 0;
+	}
 
 	m_con_var.notify_all();
 }
@@ -246,15 +244,20 @@ void Logger::RealLogger::set_output(const std::string& path)
 	m_output_path = path;
 }
 
+void Logger::RealLogger::real_set_flush(const bool& value) {
+	m_do_flush = value;
+}
+
+
 // Logger
 
 Logger::Logger(const std::source_location location) :
 	m_real{Logger::RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()} {};
 
 bool Logger::init(const LogLevels& level, const std::string& save_path, const unsigned int& amount,
-				  const bool& is_config)
+				  const bool& is_config, const bool& do_flush)
 {
-	Logger::RealLogger* real = Logger::RealLogger::get_instance(level, save_path, amount, is_config);
+	Logger::RealLogger* real = Logger::RealLogger::get_instance(level, save_path, amount, is_config, do_flush);
 	bool result = real != nullptr;
 
 	if (result)
@@ -336,6 +339,11 @@ void Logger::stop_config()
 void Logger::set_output_dir(const std::string& path)
 {
 	RealLogger::set_output(path);
+}
+
+void Logger::set_flush(const bool& value)
+{
+	RealLogger::real_set_flush(value);
 }
 
 // Buffer

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <chrono>
 #include <condition_variable>
+#include <csignal>
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -12,8 +14,6 @@
 #include <source_location>
 #include <string>
 #include <thread>
-#include <csignal>
-#include <exception>
 
 /*!
 	@file Logger.h
@@ -26,6 +26,8 @@ namespace logger
 #define DEFAULT_LEVEL LOG_LEVEL_PROD
 #define DEFAULT_AMOUNT 30
 #define DEFAULT_PATH ""
+#define DEFAULT_CONFIG false
+#define DEFAULT_FLUSH true
 
 #define DEFAULT_COLOR "\033[0m"
 #define ERROR_COLOR "\033[41m"
@@ -223,15 +225,16 @@ private:
 		static queue m_queue;
 		static std::thread m_thr;
 
-		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&);
+		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&, const bool&);
 
 		~RealLogger() = default;
 
 		static void file_init(const unsigned int&);
 
 	public:
-		static RealLogger* get_instance();
-		static RealLogger* get_instance(const LogLevels&, const std::string&, const unsigned int&, const bool&);
+		static RealLogger* get_instance(const LogLevels& = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
+										const unsigned int& amount = DEFAULT_AMOUNT,
+										const bool& is_config = DEFAULT_CONFIG, const bool& do_flush = DEFAULT_FLUSH);
 
 		static void destroy();
 
@@ -248,6 +251,8 @@ private:
 		static void real_stop_config();
 
 		static void set_output(const std::string&);
+
+		static void real_set_flush(const bool&);
 	};
 
 	RealLogger* m_real;
@@ -284,7 +289,8 @@ public:
 	 */
 
 	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int& amount = DEFAULT_AMOUNT, const bool& is_config = false);
+					 const unsigned int& amount = DEFAULT_AMOUNT, const bool& is_config = false,
+					 const bool& do_flush = true);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -417,5 +423,7 @@ public:
 	static void stop_config();
 
 	static void set_output_dir(const std::string&);
+
+	static void set_flush(const bool&);
 };
 } // namespace logger

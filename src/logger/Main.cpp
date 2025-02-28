@@ -46,17 +46,16 @@ int lv_glob(int a, int b) {
 
 
 int main() {
-	Logger::init(LOG_LEVEL_TRACE, "", 1, true);
+	Logger::init(LOG_LEVEL_TRACE, "", 1, true, false);
 
 	lv3(3,5);
 	lv3(3, 5);
 	lv3(3, 5);
 	lv3(3, 5);
+	Logger::set_flush(true);
 	lv3(3, 5);
 
-	std::this_thread::sleep_for(std::chrono::seconds(2));
-
-	Logger::set_output_dir("test_config");
+	Logger::set_output_dir("qe");
 	Logger::stop_config();
 }
 
