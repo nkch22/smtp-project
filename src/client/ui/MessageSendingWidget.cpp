@@ -4,12 +4,15 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QString>
 #include <QTextEdit>
 
+#include "Client.hpp"
 #include "ClientGlobalVariables.inl"
+#include "Mail.hpp"
 #include "UiGlobalVariables.inl"
 
-using namespace UI;
+using namespace UserInterface;
 
 MessageSendingWidget::MessageSendingWidget(QWidget* parent) : QWidget{parent}
 {
@@ -21,24 +24,24 @@ MessageSendingWidget::MessageSendingWidget(QWidget* parent) : QWidget{parent}
 	email_group_box->setLayout(form_layout);
 	main_layout->addWidget(email_group_box);
 
-	const QPointer from_line_edit{new QLineEdit{email_group_box}};
-	connect(from_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
-	connect(from_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
+	m_from_line_edit = new QLineEdit{email_group_box};
+	connect(m_from_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
+	connect(m_from_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
 
-	const QPointer to_line_edit{new QLineEdit{email_group_box}};
-	connect(to_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
-	connect(to_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
+	m_to_line_edit = new QLineEdit{email_group_box};
+	connect(m_to_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
+	connect(m_to_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
 
-	const QPointer subject_line_edit{new QLineEdit{email_group_box}};
-	const QPointer body_text_edit{new QTextEdit{email_group_box}};
+	m_subject_line_edit = new QLineEdit{email_group_box};
+	m_body_text_edit = new QTextEdit{email_group_box};
 
 	const QPointer send_button{new QPushButton{"Send mail", email_group_box}};
 	connect(send_button, &QPushButton::clicked, this, &MessageSendingWidget::OnSendButtonClicked);
 
-	form_layout->addRow("From", from_line_edit);
-	form_layout->addRow("To", to_line_edit);
-	form_layout->addRow("Subject", subject_line_edit);
-	form_layout->addRow("Body", body_text_edit);
+	form_layout->addRow("From", m_from_line_edit);
+	form_layout->addRow("To", m_to_line_edit);
+	form_layout->addRow("Subject", m_subject_line_edit);
+	form_layout->addRow("Body", m_body_text_edit);
 	form_layout->addRow(send_button);
 }
 
@@ -70,7 +73,7 @@ void MessageSendingWidget::OnEmailAddressEdited()
 	}
 }
 
-QValidator::State MessageSendingWidget::GetEmailLineEditState(const class QLineEdit* line_edit,
+QValidator::State MessageSendingWidget::GetEmailLineEditState(const QLineEdit* line_edit,
 															  const QRegularExpressionValidator* validator)
 {
 	int pos{};
@@ -78,4 +81,16 @@ QValidator::State MessageSendingWidget::GetEmailLineEditState(const class QLineE
 	return validator->validate(email_text, pos);
 }
 
-void MessageSendingWidget::OnSendButtonClicked() {}
+void MessageSendingWidget::OnSendButtonClicked()
+{
+	SMTP::Client* client{SMTP::Client::get_instance()};
+	assert(client);
+
+	const std::string from{m_from_line_edit->text().toUtf8().constData()};
+	const std::string to{m_to_line_edit->text().toUtf8().constData()};
+	const std::string subject{m_subject_line_edit->text().toUtf8().constData()};
+	const std::string body{m_body_text_edit->toPlainText().toUtf8().constData()};
+
+	SMTP::Mail mail{subject, from, {to}, body};
+	client->SendMail(mail);
+}

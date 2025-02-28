@@ -15,7 +15,7 @@
 
 #include <QMainWindow>
 
-namespace UI
+namespace UserInterface
 {
 /**
  * @brief Main UI window which contains other widgets
@@ -30,4 +30,4 @@ class MainWindow final : public QMainWindow
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
 };
-} // namespace UI
+} // namespace UserInterface

@@ -5,7 +5,7 @@
 #include "ConfigurationWidget.h"
 #include "MessageSendingWidget.h"
 
-using namespace UI;
+using namespace UserInterface;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 {
