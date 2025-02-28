@@ -14,35 +14,73 @@ std::mutex* Logger::RealLogger::m_mutex = nullptr;
 std::condition_variable* Logger::RealLogger::m_con_var = nullptr;
 bool* Logger::RealLogger::m_end = nullptr;
 
-bool* Logger::RealLogger::do_flush = nullptr;
+bool* Logger::RealLogger::m_do_flush = nullptr;
+bool* Logger::RealLogger::m_is_config = nullptr;
+
+unsigned int* Logger::RealLogger::m_amount = nullptr;
 
 Logger::RealLogger::queue* Logger::RealLogger::m_queue = nullptr;
 std::thread* Logger::RealLogger::m_thr = nullptr;
 
-Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save, const unsigned int& amount)
+Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save, const unsigned int& amount,
+							   const bool& is_config)
 {
 	if (amount <= 0) throw std::invalid_argument{"logs amount cannot be less than 1"};
 	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::invalid_argument{"invalid log level"};
 
 	m_level = new LogLevels{_level};
-	m_output_path = new std::string{_save};
 	m_mutex = new std::mutex;
+
+	m_output_path = new std::string{_save};
 
 	m_con_var = new std::condition_variable;
 	m_end = new bool{0};
 
-	do_flush = new bool{1};
+	m_do_flush = new bool{1};
+	m_is_config = new bool{is_config};
+
+	m_amount = new unsigned int{amount};
 
 	m_queue = new queue;
 
+	if (!is_config) file_init(amount);
+
+	m_thr = new std::thread{[]
+							{
+								while (true)
+								{
+									Message message;
+									{
+										std::unique_lock<std::mutex> lock{*m_mutex};
+
+										m_con_var->wait(lock,
+														[] { return *m_end || (!m_queue->empty() && !*m_is_config); });
+
+										if (*m_end && (m_queue->empty() || *m_is_config)) return;
+
+										if (!*m_is_config)
+										{
+											message = m_queue->front();
+											m_queue->pop();
+										}
+									}
+
+									save_message(message);
+								}
+							}};
+};
+
+void Logger::RealLogger::file_init(const unsigned int& amount)
+{
 	std::string log_dir{"Logs"};
 
+	bool error = 0;
 	if (std::filesystem::is_directory(*m_output_path))
 	{
 		log_dir = *m_output_path + "/Logs";
 	}
 	else if (std::filesystem::is_regular_file(*m_output_path))
-		throw std::invalid_argument{"save path cannot be file"};
+		error = 1;
 
 	if (std::filesystem::is_directory(log_dir))
 	{
@@ -67,38 +105,22 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 		log_dir + "/log_" + std::format("{:%d-%m-%y-%H_%M_%S}", std::chrono::system_clock::now()) + ".txt";
 	m_file = new std::ofstream{buff_name};
 
-	m_thr = new std::thread{[]
-							{
-								while (true)
-								{
-									Message message;
-									{
-										std::unique_lock<std::mutex> lock{*m_mutex};
-
-										m_con_var->wait(lock, [] { return *m_end || !m_queue->empty(); });
-
-										if (*m_end && m_queue->empty()) return;
-
-										message = m_queue->front();
-										m_queue->pop();
-									}
-
-									save_message(message);
-								}
-							}};
-};
+	if (error)
+		real_save("invalid output path, default will be used", WARNING, std::source_location::current(), *m_level,
+				  std::this_thread::get_id());
+}
 
 Logger::RealLogger* Logger::RealLogger::get_instance()
 {
-	return get_instance(DEFAULT_LEVEL, DEFAULT_PATH, DEFAULT_AMOUNT);
+	return get_instance(DEFAULT_LEVEL, DEFAULT_PATH, DEFAULT_AMOUNT, false);
 }
 
 Logger::RealLogger* Logger::RealLogger::get_instance(const LogLevels& level, const std::string& path,
-													 const unsigned int& amount)
+													 const unsigned int& amount, const bool& is_config)
 {
 	if (m_instance == nullptr)
 	{
-		m_instance = new Logger::RealLogger{level, path, amount};
+		m_instance = new Logger::RealLogger{level, path, amount, is_config};
 
 		atexit([] { Logger::destroy(); });
 		signal(SIGABRT, handle_fatal_error);
@@ -120,13 +142,15 @@ void Logger::RealLogger::destroy()
 
 		delete m_level;
 		delete m_output_path;
-		delete m_file;
+
+		if (m_file != nullptr) delete m_file;
 
 		delete m_mutex;
 		delete m_con_var;
 		delete m_end;
 
-		delete do_flush;
+		delete m_do_flush;
+		delete m_is_config;
 
 		delete m_queue;
 		delete m_thr;
@@ -155,7 +179,10 @@ LogLevels Logger::RealLogger::real_get_level()
 	return *m_level;
 }
 
-void Logger::RealLogger::save_message(const Message& message) {
+void Logger::RealLogger::save_message(const Message& message)
+{
+	if (*m_is_config) return;
+
 	if (message.level != LOG_LEVEL_NO)
 	{
 		std::string time = std::format("[{:%H_%M_%S}]", std::chrono::system_clock::now());
@@ -213,14 +240,27 @@ void Logger::RealLogger::handle_fatal_error(int)
 	}
 	catch (const std::exception& ex)
 	{
-		std::string str{"Fatal error: "}; 
+		std::string str{"Fatal error: "};
 		str += ex.what();
 		Logger::RealLogger::save_message(Message{str, ERROR, std::source_location::current(),
 												 Logger::RealLogger::real_get_level(), std::thread::id{}});
 	}
 
-	
 	Logger::destroy();
+}
+
+void Logger::RealLogger::real_stop_config()
+{
+	std::lock_guard<std::mutex> lock{*m_mutex};
+	*m_is_config = 0;
+
+	file_init(*m_amount);
+}
+
+void Logger::RealLogger::set_output(const std::string& path)
+{
+	std::lock_guard<std::mutex> lock{*m_mutex};
+	*m_output_path = path;
 }
 
 // Logger
@@ -228,9 +268,10 @@ void Logger::RealLogger::handle_fatal_error(int)
 Logger::Logger(const std::source_location location) :
 	m_real{Logger::RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()} {};
 
-bool Logger::init(const LogLevels& level, const std::string& save_path, const unsigned int& amount)
+bool Logger::init(const LogLevels& level, const std::string& save_path, const unsigned int& amount,
+				  const bool& is_config)
 {
-	Logger::RealLogger* real = Logger::RealLogger::get_instance(level, save_path, amount);
+	Logger::RealLogger* real = Logger::RealLogger::get_instance(level, save_path, amount, is_config);
 	bool result = real != nullptr;
 
 	if (result)
@@ -302,6 +343,16 @@ void Logger::set_local_level(const LogLevels& level)
 LogLevels Logger::get_local_level() const
 {
 	return m_local_level;
+}
+
+void Logger::stop_config()
+{
+	RealLogger::real_stop_config();
+}
+
+void Logger::set_output_dir(const std::string& path)
+{
+	RealLogger::set_output(path);
 }
 
 // Buffer

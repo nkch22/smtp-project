@@ -215,18 +215,24 @@ private:
 		static std::condition_variable* m_con_var;
 		static bool* m_end;
 
-		static bool* do_flush;
+		static bool* m_do_flush;
+
+		static bool* m_is_config;
+
+		static unsigned int* m_amount;
 
 		static queue* m_queue;
 		static std::thread* m_thr;
 
-		RealLogger(const LogLevels&, const std::string&, const unsigned int&);
+		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&);
 
 		~RealLogger() = default;
 
+		static void file_init(const unsigned int&);
+
 	public:
 		static RealLogger* get_instance();
-		static RealLogger* get_instance(const LogLevels&, const std::string&, const unsigned int&);
+		static RealLogger* get_instance(const LogLevels&, const std::string&, const unsigned int&, const bool&);
 
 		static void destroy();
 
@@ -239,6 +245,10 @@ private:
 		static void save_message(const Message&);
 
 		static void handle_fatal_error(int);
+
+		static void real_stop_config();
+
+		static void set_output(const std::string&);
 	};
 
 	RealLogger* m_real;
@@ -275,7 +285,7 @@ public:
 	 */
 
 	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int& amount = DEFAULT_AMOUNT);
+					 const unsigned int& amount = DEFAULT_AMOUNT, const bool& is_config = false);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -404,5 +414,9 @@ public:
 	 *
 	 *  @return Local log level value
 	 */
+
+	static void stop_config();
+
+	static void set_output_dir(const std::string&);
 };
 } // namespace logger
