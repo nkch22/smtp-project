@@ -1,5 +1,5 @@
 include_directories(include)
-include_directories(example)
+add_subdirectory(example)
 
 add_library(client STATIC)
 add_subdirectory(source)

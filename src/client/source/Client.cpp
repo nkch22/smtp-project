@@ -1,15 +1,43 @@
 #include "Client.hpp"
 
 #include "Command.hpp"
+#include "SSLSocket.h"
+#include "Socket.h"
 namespace SMTP
 {
 
-ClientImpl::~ClientImpl()
+std::mutex Client::s_Mutex;
+Client* Client::s_Instance;
+
+Client::~Client()
 {
 	if (m_socket) Quit();
 }
 
-void ClientImpl::Connect(const std::string& server, uint16_t port)
+bool Client::Init()
+{
+	std::lock_guard<std::mutex> lock(s_Mutex);
+
+	if (!s_Instance)
+	{
+		s_Instance = new Client(std::make_unique<Socket>(), std::make_unique<AuthLogin>());
+	}
+
+	return s_Instance != nullptr;
+}
+
+void Client::Shutdown()
+{
+	std::lock_guard<std::mutex> lock(s_Mutex);
+
+	if (s_Instance)
+	{
+		delete s_Instance;
+		s_Instance = nullptr;
+	}
+}
+
+void Client::Connect(const std::string& server, uint16_t port)
 {
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 	if (!m_authenticator) throw std::runtime_error("Authenticator not set");
@@ -22,10 +50,10 @@ void ClientImpl::Connect(const std::string& server, uint16_t port)
 	m_socket->Send(Command::EHLO(server));
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 
-	m_authenticator->Authenticate(*m_socket, "username", "password");
+	m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
-void ClientImpl::SendMail(const Mail& mail)
+void Client::SendMail(const Mail& mail)
 {
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 
@@ -47,7 +75,7 @@ void ClientImpl::SendMail(const Mail& mail)
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 }
 
-void ClientImpl::Quit()
+void Client::Quit()
 {
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 
@@ -58,25 +86,41 @@ void ClientImpl::Quit()
 	m_socket->Disconnect();
 }
 
-void ClientImpl::set_authenticator(std::unique_ptr<IAuthenticator> authenticator)
+void Client::set_authenticator(std::unique_ptr<IAuthenticator> authenticator)
 {
 	m_authenticator = std::move(authenticator);
 }
 
-bool Client::Init(std::unique_ptr<IAuthenticator> authenticator /*= nullptr*/)
+void Client::set_socket(std::unique_ptr<ISocket> socket)
 {
-	m_socket = std::make_unique<Socket>();
-	m_authenticator = authenticator ? std::move(authenticator) : std::make_unique<AuthLogin>();
+	if (m_socket && m_socket->IsConnected()) Quit();
 
-	return true;
+	m_socket = std::move(socket);
 }
 
-bool SSLClient::Init(std::unique_ptr<IAuthenticator> authenticator /*= nullptr*/)
+void Client::set_username(const std::string& username)
 {
-	m_socket = std::make_unique<SSLSocket>();
-	m_authenticator = authenticator ? std::move(authenticator) : std::make_unique<AuthLogin>();
+	m_username = username;
+}
 
-	return true;
+void Client::set_password(const std::string& password)
+{
+	m_password = password;
+}
+
+Client* Client::get_instance()
+{
+	return s_Instance;
+}
+
+std::string Client::get_username() const
+{
+	return m_username;
+}
+
+std::string Client::get_password() const
+{
+	return m_password;
 }
 
 } // namespace SMTP

@@ -5,10 +5,9 @@
  * @version 0.1
  * @date 2025-02-23
  *
- * This file defines the `ClientImpl` class, which is used as a base class for
+ * This file defines the `Client` class, which is used as a base class for
  * sending email messages over SMTP. It provides methods for connecting to
  * an SMTP server, sending email, and quitting the session. Two derived classes
- * (`Client` and `SSLClient`) provide support for regular and SSL connections.
  *
  * @copyright Copyright (c) 2025
  */
@@ -21,9 +20,8 @@
 #include <memory>
 
 #include "Authenticator.hpp"
+#include "ISocket.h"
 #include "Mail.hpp"
-#include "SSLSocket.h"
-#include "Socket.h"
 
 namespace SMTP
 {
@@ -31,30 +29,40 @@ namespace SMTP
 /**
  * @brief Base class for SMTP client implementation.
  *
- * The `ClientImpl` class provides the core functionality for connecting
+ * The `Client` class provides the core functionality for connecting
  * to an SMTP server, sending mail, and quitting the session. It also allows
  * for setting an authenticator, which can be used for authentication
  * during the connection process.
- *
- * The derived classes `Client` and `SSLClient` specialize in regular
- * and SSL connections respectively.
  */
-class ClientImpl
+class Client
 {
+protected:
+	Client() = default;
+	Client(std::unique_ptr<ISocket> socket, std::unique_ptr<IAuthenticator> authenticator) :
+		m_socket(std::move(socket)), m_authenticator(std::move(authenticator))
+	{
+	}
+	~Client();
+
 public:
-	ClientImpl() = default;
-	virtual ~ClientImpl();
+	Client(const Client&) = delete;
+	Client& operator=(const Client&) = delete;
 
 	/**
-	 * @brief Initializes the SMTP client with an optional authenticator.
+	 * @brief Initializes the SMTP client.
 	 *
-	 * This method is used to initialize the client with an optional authenticator
-	 * for handling authentication during the SMTP connection.
+	 * This function sets up necessary resources for the client.
 	 *
-	 * @param authenticator An optional authenticator object for handling authentication.
-	 * @return `true` if initialization is successful, `false` otherwise.
+	 * @return True if initialization succeeds, false otherwise.
 	 */
-	virtual bool Init(std::unique_ptr<IAuthenticator> authenticator = nullptr) = 0;
+	static bool Init();
+
+	/**
+	 * @brief Shuts down the SMTP client.
+	 *
+	 * This function releases resources allocated by the client.
+	 */
+	static void Shutdown();
 
 	/**
 	 * @brief Connects to the SMTP server.
@@ -84,6 +92,27 @@ public:
 	void Quit();
 
 	/**
+	 * @brief Get the singleton instance of the Client.
+	 *
+	 * @return Pointer to the Client instance.
+	 */
+	static Client* get_instance();
+
+	/**
+	 * @brief Get the username of the client.
+	 *
+	 * @return The username as a string.
+	 */
+	std::string get_username() const;
+
+	/**
+	 * @brief Get the password of the client.
+	 *
+	 * @return The password as a string.
+	 */
+	std::string get_password() const;
+
+	/**
 	 * @brief Sets the authenticator for authentication.
 	 *
 	 * This method allows setting a custom authenticator for handling the SMTP
@@ -93,60 +122,49 @@ public:
 	 */
 	void set_authenticator(std::unique_ptr<IAuthenticator> authenticator);
 
+	/**
+	 * @brief Sets the socket.
+	 *
+	 * This method allows setting a custom socket for handling the SMTP
+	 * connection process.
+	 *
+	 * @param socket The socket object to use.
+	 */
+	void set_socket(std::unique_ptr<ISocket> socket);
+
+	/**
+	 * @brief Set the username for authentication.
+	 *
+	 * @param username The username as a string.
+	 */
+	void set_username(const std::string& username);
+
+	/**
+	 * @brief Set the password for authentication.
+	 *
+	 * @param password The password as a string.
+	 */
+	void set_password(const std::string& password);
+
 protected:
-	/** The socket used for connecting to the SMTP server. */
+	/** @brief The socket used for connecting to the SMTP server. */
 	std::unique_ptr<ISocket> m_socket;
 
-	/** The authenticator used for authentication. */
+	/** @brief The authenticator used for authentication. */
 	std::unique_ptr<IAuthenticator> m_authenticator;
-};
 
-/**
- * @brief Client class for regular SMTP connections.
- *
- * The `Client` class implements the `Init` method from `ClientImpl` and provides
- * functionality for sending emails over a regular SMTP connection.
- */
-class Client : public ClientImpl
-{
-public:
-	Client() = default;
-	~Client() = default;
+	/** @brief Username used for authentication. */
+	std::string m_username;
 
-	/**
-	 * @brief Initializes the client with an optional authenticator.
-	 *
-	 * This method overrides the `Init` method from `ClientImpl` to implement the
-	 * initialization logic specific to regular SMTP connections.
-	 *
-	 * @param authenticator An optional authenticator object for handling authentication.
-	 * @return `true` if initialization is successful, `false` otherwise.
-	 */
-	bool Init(std::unique_ptr<IAuthenticator> authenticator = nullptr) override;
-};
+	/** @brief User password used for authentication. */
+	std::string m_password;
 
-/**
- * @brief Client class for SMTP connections over SSL.
- *
- * The `SSLClient` class implements the `Init` method from `ClientImpl` and provides
- * functionality for sending emails over an SMTP connection secured with SSL/TLS.
- */
-class SSLClient : public ClientImpl
-{
-public:
-	SSLClient() = default;
-	~SSLClient() = default;
+private:
+	/** @brief Singleton instance of the Client. */
+	static Client* s_Instance;
 
-	/**
-	 * @brief Initializes the client with an optional authenticator.
-	 *
-	 * This method overrides the `Init` method from `ClientImpl` to implement the
-	 * initialization logic specific to SSL-secured SMTP connections.
-	 *
-	 * @param authenticator An optional authenticator object for handling authentication.
-	 * @return `true` if initialization is successful, `false` otherwise.
-	 */
-	bool Init(std::unique_ptr<IAuthenticator> authenticator = nullptr) override;
+	/** @brief Mutex for thread safety. */
+	static std::mutex s_Mutex;
 };
 
 } // namespace SMTP
