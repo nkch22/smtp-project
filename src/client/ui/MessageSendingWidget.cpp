@@ -81,6 +81,21 @@ QValidator::State MessageSendingWidget::GetEmailLineEditState(const QLineEdit* l
 	return validator->validate(email_text, pos);
 }
 
+std::vector<std::string> MessageSendingWidget::GetRecipientsEmails() const
+{
+	std::vector<std::string> out_recipients{};
+
+	const QString recipients{m_from_line_edit->text()};
+	QStringList recipients_list{recipients.split(';', Qt::SkipEmptyParts, Qt::CaseInsensitive)};
+	out_recipients.reserve(recipients_list.size());
+	for (const QString& string : recipients_list)
+	{
+		out_recipients.push_back(string.toUtf8().constData());
+	}
+
+	return out_recipients;
+}
+
 void MessageSendingWidget::OnSendButtonClicked()
 {
 	SMTP::Client* client{SMTP::Client::get_instance()};
@@ -91,6 +106,7 @@ void MessageSendingWidget::OnSendButtonClicked()
 	const std::string subject{m_subject_line_edit->text().toUtf8().constData()};
 	const std::string body{m_body_text_edit->toPlainText().toUtf8().constData()};
 
-	SMTP::Mail mail{subject, from, {to}, body};
+	const std::vector recipients_array{GetRecipientsEmails()};
+	SMTP::Mail mail{subject, from, recipients_array, body};
 	client->SendMail(mail);
 }

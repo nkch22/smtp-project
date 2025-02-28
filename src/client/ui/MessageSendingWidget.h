@@ -45,6 +45,13 @@ private:
 	static QValidator::State GetEmailLineEditState(const QLineEdit* line_edit,
 												   const QRegularExpressionValidator* validator);
 
+	/**
+	 * @brief Splits to_line_edit by ';' delimiter to get the array of recipients
+	 *
+	 * @return Array of recipients
+	 */
+	std::vector<std::string> GetRecipientsEmails() const;
+
 	QPointer<QRegularExpressionValidator> m_email_validator;
 
 	QPointer<QLineEdit> m_from_line_edit;
