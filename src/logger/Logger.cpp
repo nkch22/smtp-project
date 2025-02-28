@@ -228,6 +228,8 @@ void Logger::RealLogger::handle_fatal_error(int)
 
 void Logger::RealLogger::real_stop_config()
 {
+	if (!m_is_config) return;
+
 	file_init(m_amount);
 
 	{

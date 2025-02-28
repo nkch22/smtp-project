@@ -43,6 +43,13 @@ namespace logger
 /*! @def DEFAULT_PATH
  *	@brief Default output path
  */
+/*! @def DEFAULT_CONFIG
+*	@brief Default config flag value
+*/
+/*! @def DEFAULT_FLUSH
+ *	@brief Default flush flag value
+ */
+
 /*! @def DEFAULT_COLOR
  *	@brief Default console color
  */
@@ -174,14 +181,13 @@ public:
  *
  *	@warning So, before using logger, user must initialize it with init()
  *
- *	@warning init() method will delete Logger singleton AFTER program ends
+ *	@warning init() method will delete Logger singleton AFTER program ends or crashes
  *
- *  @warning @attention Don't use init() more than once
- *
- *	@warning Every saving message methods (save_message(), save_warning(), save_error()) ignores log levels, except log
- *level NO
+ *  @warning Don't use init() more than once
  *
  *	@warning Using saving methods without previous init() call in any other place is undefined behavior
+ * 
+ *  @warning By setting flush value to false, Logger will stop storing any log messages
  */
 class Logger
 {
@@ -294,9 +300,11 @@ public:
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
-	 *	@important level - is global log level on start, default value = 1
-	 *	@important save_path - is path to output directory,	default value = ""
-	 *	@important amount - is amount of how many logs can be in log folder, default value = 30
+	 *	@important @a level - is global log level on start, default value = 1
+	 *	@important @a save_path - is path to output directory,	default value = ""
+	 *	@important @a amount - is amount of how many logs can be in log folder, default value = 30
+	 *	@important @a is_config - is flag to stop printing messages to console and file, default value = false
+	 *	@important @a do_flush - is flag to stop storing any messages (if set to false), default value = true
 	 *
 	 *	It will save message of successful initialization
 	 *
@@ -421,9 +429,27 @@ public:
 	 */
 
 	static void stop_config();
+	/*! @fn stop_config()
+	*	@brief Logger configuration stopper
+	*	
+	*	Allows logger to write messages by stopping its configuration
+	* 
+	*	@attention Can be used only if @a is_config in init() was set to true
+	*	@attention Can be used only once
+	*/
 
 	static void set_output_dir(const std::string&);
+	/*! @fn set_output_dir(const std::string&)
+	*	@brief Output directory setter
+	* 
+	*	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
+	*/
 
 	static void set_flush(const bool&);
+	/*! @fn set_flush(const bool&)
+	*	@brief Flush setter
+	*	
+	*	@attention If flush was set to false, logger won't store any log messages 
+	*/
 };
 } // namespace logger
