@@ -17,5 +17,7 @@ int main(int argc, char* argv[])
 	UserInterface::MainWindow window{};
 	window.show();
 
+	QObject::connect(&app, &QApplication::aboutToQuit, [] { SMTP::Client::Shutdown(); });
+
 	return app.exec();
 }
