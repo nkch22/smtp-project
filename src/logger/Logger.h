@@ -207,22 +207,21 @@ private:
 
 		static RealLogger* m_instance;
 
-		static LogLevels* m_level;
-		static std::string* m_output_path;
-		static std::ofstream* m_file;
+		static LogLevels m_level;
+		static std::string m_output_path;
+		static std::ofstream m_file;
 
-		static std::mutex* m_mutex;
-		static std::condition_variable* m_con_var;
-		static bool* m_end;
+		static std::mutex m_mutex;
+		static std::condition_variable m_con_var;
 
-		static bool* m_do_flush;
+		static bool m_end;
+		static bool m_do_flush;
+		static bool m_is_config;
 
-		static bool* m_is_config;
+		static unsigned int m_amount;
 
-		static unsigned int* m_amount;
-
-		static queue* m_queue;
-		static std::thread* m_thr;
+		static queue m_queue;
+		static std::thread m_thr;
 
 		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&);
 

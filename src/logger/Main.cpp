@@ -46,7 +46,7 @@ int lv_glob(int a, int b) {
 
 
 int main() {
-	Logger::init(LOG_LEVEL_TRACE, "qwerty", 1, true);
+	Logger::init(LOG_LEVEL_TRACE, "", 1, true);
 
 	lv3(3,5);
 	lv3(3, 5);

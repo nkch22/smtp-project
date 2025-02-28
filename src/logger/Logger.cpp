@@ -6,21 +6,21 @@ using namespace logger;
 
 Logger::RealLogger* Logger::RealLogger::m_instance = nullptr;
 
-LogLevels* Logger::RealLogger::m_level = nullptr;
-std::string* Logger::RealLogger::m_output_path = nullptr;
-std::ofstream* Logger::RealLogger::m_file = nullptr;
+LogLevels Logger::RealLogger::m_level;
+std::string Logger::RealLogger::m_output_path;
+std::ofstream Logger::RealLogger::m_file;
 
-std::mutex* Logger::RealLogger::m_mutex = nullptr;
-std::condition_variable* Logger::RealLogger::m_con_var = nullptr;
-bool* Logger::RealLogger::m_end = nullptr;
+std::mutex Logger::RealLogger::m_mutex{};
+std::condition_variable Logger::RealLogger::m_con_var;
 
-bool* Logger::RealLogger::m_do_flush = nullptr;
-bool* Logger::RealLogger::m_is_config = nullptr;
+bool Logger::RealLogger::m_end;
+bool Logger::RealLogger::m_do_flush;
+bool Logger::RealLogger::m_is_config;
 
-unsigned int* Logger::RealLogger::m_amount = nullptr;
+unsigned int Logger::RealLogger::m_amount;
 
-Logger::RealLogger::queue* Logger::RealLogger::m_queue = nullptr;
-std::thread* Logger::RealLogger::m_thr = nullptr;
+Logger::RealLogger::queue Logger::RealLogger::m_queue;
+std::thread Logger::RealLogger::m_thr;
 
 Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save, const unsigned int& amount,
 							   const bool& is_config)
@@ -28,46 +28,41 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 	if (amount <= 0) throw std::invalid_argument{"logs amount cannot be less than 1"};
 	if (_level < LOG_LEVEL_NO || _level > LOG_LEVEL_TRACE) throw std::invalid_argument{"invalid log level"};
 
-	m_level = new LogLevels{_level};
-	m_mutex = new std::mutex;
+	m_level = _level;
 
-	m_output_path = new std::string{_save};
+	m_output_path = _save;
 
-	m_con_var = new std::condition_variable;
-	m_end = new bool{0};
+	m_end = 0;
 
-	m_do_flush = new bool{1};
-	m_is_config = new bool{is_config};
+	m_do_flush = 1;
+	m_is_config = is_config;
 
-	m_amount = new unsigned int{amount};
-
-	m_queue = new queue;
+	m_amount = amount;
 
 	if (!is_config) file_init(amount);
 
-	m_thr = new std::thread{[]
+	m_thr = std::thread{[]
+						{
+							while (true)
 							{
-								while (true)
+								Message message;
 								{
-									Message message;
+									std::unique_lock<std::mutex> lock{m_mutex};
+
+									m_con_var.wait(lock, [] { return m_end || (!m_queue.empty() && !m_is_config); });
+
+									if (m_end && (m_queue.empty() || m_is_config)) return;
+
+									if (!m_is_config)
 									{
-										std::unique_lock<std::mutex> lock{*m_mutex};
-
-										m_con_var->wait(lock,
-														[] { return *m_end || (!m_queue->empty() && !*m_is_config); });
-
-										if (*m_end && (m_queue->empty() || *m_is_config)) return;
-
-										if (!*m_is_config)
-										{
-											message = m_queue->front();
-											m_queue->pop();
-										}
+										message = m_queue.front();
+										m_queue.pop();
 									}
-
-									save_message(message);
 								}
-							}};
+
+								save_message(message);
+							}
+						}};
 };
 
 void Logger::RealLogger::file_init(const unsigned int& amount)
@@ -75,11 +70,11 @@ void Logger::RealLogger::file_init(const unsigned int& amount)
 	std::string log_dir{"Logs"};
 
 	bool error = 0;
-	if (std::filesystem::is_directory(*m_output_path))
+	if (std::filesystem::is_directory(m_output_path))
 	{
-		log_dir = *m_output_path + "/Logs";
+		log_dir = m_output_path + "/Logs";
 	}
-	else if (std::filesystem::is_regular_file(*m_output_path))
+	else if (m_output_path != "")
 		error = 1;
 
 	if (std::filesystem::is_directory(log_dir))
@@ -101,12 +96,13 @@ void Logger::RealLogger::file_init(const unsigned int& amount)
 		std::filesystem::create_directory(log_dir);
 	}
 
-	std::string buff_name =
-		log_dir + "/log_" + std::format("{:%d-%m-%y-%H_%M_%S}", std::chrono::system_clock::now()) + ".txt";
-	m_file = new std::ofstream{buff_name};
+	std::string buff_name = log_dir + "/log_";
+	buff_name += std::format("{:%d-%m-%y-%H_%M_%S}", std::chrono::system_clock::now()) + ".txt";
+
+	m_file = std::ofstream{buff_name};
 
 	if (error)
-		real_save("invalid output path, default will be used", WARNING, std::source_location::current(), *m_level,
+		real_save("invalid output path, default will be used", WARNING, std::source_location::current(), m_level,
 				  std::this_thread::get_id());
 }
 
@@ -133,27 +129,12 @@ void Logger::RealLogger::destroy()
 	if (m_instance != nullptr)
 	{
 		{
-			std::unique_lock<std::mutex> lock{*m_mutex};
-			*m_end = 1;
+			std::unique_lock<std::mutex> lock{m_mutex};
+			m_end = 1;
 		}
-		m_con_var->notify_all();
+		m_con_var.notify_all();
 
-		m_thr->join();
-
-		delete m_level;
-		delete m_output_path;
-
-		if (m_file != nullptr) delete m_file;
-
-		delete m_mutex;
-		delete m_con_var;
-		delete m_end;
-
-		delete m_do_flush;
-		delete m_is_config;
-
-		delete m_queue;
-		delete m_thr;
+		m_thr.join();
 
 		delete m_instance;
 		m_instance = nullptr;
@@ -163,25 +144,27 @@ void Logger::RealLogger::destroy()
 void Logger::RealLogger::real_save(const std::string& str, const Logger::MessageTypes& type,
 								   const std::source_location& location, const LogLevels& level, std::thread::id id)
 {
-	std::lock_guard<std::mutex> lock{*m_mutex};
-	m_queue->emplace(Message{str, type, location, level, id});
-	m_con_var->notify_all();
+	{
+		std::unique_lock<std::mutex> lock{m_mutex};
+		m_queue.emplace(Message{str, type, location, level, id});
+	}
+	m_con_var.notify_all();
 }
 
 void Logger::RealLogger::real_set_level(const LogLevels& _level)
 {
-	std::lock_guard<std::mutex> lock{*m_mutex};
-	*m_level = _level;
+	std::unique_lock<std::mutex> lock{m_mutex};
+	m_level = _level;
 }
 LogLevels Logger::RealLogger::real_get_level()
 {
-	std::lock_guard<std::mutex> lock{*m_mutex};
-	return *m_level;
+	std::unique_lock<std::mutex> lock{m_mutex};
+	return m_level;
 }
 
 void Logger::RealLogger::save_message(const Message& message)
 {
-	if (*m_is_config) return;
+	if (m_is_config) return;
 
 	if (message.level != LOG_LEVEL_NO)
 	{
@@ -208,7 +191,7 @@ void Logger::RealLogger::save_message(const Message& message)
 		func_name += "]";
 
 		{
-			std::lock_guard<std::mutex> lock{*m_mutex};
+			std::unique_lock<std::mutex> lock{m_mutex};
 			std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
 
 			switch (message.type)
@@ -226,8 +209,8 @@ void Logger::RealLogger::save_message(const Message& message)
 
 			std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
 
-			*m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
-					<< message.msg << "\n";
+			m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
+				   << message.msg << "\n";
 		}
 	}
 }
@@ -251,16 +234,16 @@ void Logger::RealLogger::handle_fatal_error(int)
 
 void Logger::RealLogger::real_stop_config()
 {
-	std::lock_guard<std::mutex> lock{*m_mutex};
-	*m_is_config = 0;
+	file_init(m_amount);
+	m_is_config = 0;
 
-	file_init(*m_amount);
+	m_con_var.notify_all();
 }
 
 void Logger::RealLogger::set_output(const std::string& path)
 {
-	std::lock_guard<std::mutex> lock{*m_mutex};
-	*m_output_path = path;
+	std::unique_lock<std::mutex> lock{m_mutex};
+	m_output_path = path;
 }
 
 // Logger
