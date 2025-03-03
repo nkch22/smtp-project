@@ -7,10 +7,10 @@ add_library(concurrency STATIC
         src/ThreadPool/ThreadPool.cpp
 
         # To make IDE happy
-        include/Concurrency/Sync/WaitGroup.h
-        include/Concurrency/ThreadPool/ThreadPool.h
-        include/Concurrency/ThreadPool/Task.h
-        include/Concurrency/DataStructures/UnboundedBlockingMPMCQueue.h
+        include/Concurrency/WaitGroup.h
+        include/Concurrency/ThreadPool.h
+        include/Concurrency/Task.h
+        include/Concurrency/UnboundedBlockingMPMCQueue.h
 )
 target_include_directories(concurrency PUBLIC include)
 

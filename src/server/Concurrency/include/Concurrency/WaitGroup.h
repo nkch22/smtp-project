@@ -18,6 +18,8 @@ namespace concurrency
 class WaitGroup
 {
 public:
+    WaitGroup() = default;
+
 	/// @brief Deleted copy constructor to prevent copying.
 	WaitGroup(const WaitGroup&) = delete;
 
