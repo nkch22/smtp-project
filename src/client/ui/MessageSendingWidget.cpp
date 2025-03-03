@@ -85,7 +85,7 @@ std::vector<std::string> MessageSendingWidget::GetRecipientsEmails() const
 {
 	std::vector<std::string> out_recipients{};
 
-	const QString recipients{m_from_line_edit->text()};
+	const QString recipients{m_to_line_edit->text()};
 	QStringList recipients_list{recipients.split(';', Qt::SkipEmptyParts, Qt::CaseInsensitive)};
 	out_recipients.reserve(recipients_list.size());
 	for (const QString& string : recipients_list)
