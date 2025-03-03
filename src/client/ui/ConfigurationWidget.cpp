@@ -5,6 +5,8 @@
 #include <QGroupBox>
 #include <QLineEdit>
 
+using namespace UserInterface;
+
 ConfigurationWidget::ConfigurationWidget(QWidget* parent) : QWidget{parent}
 {
 	const QPointer main_layout{new QVBoxLayout{this}};
