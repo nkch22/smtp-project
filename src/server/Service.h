@@ -130,7 +130,6 @@ private:
 	 * Creates and starts worker threads to process tasks in the io_context.
 	 */
 	void SpawnWorkers();
-	void SpawnWorker();
 
 	/**
 	 * @brief Joins worker threads.
@@ -145,5 +144,5 @@ private:
 	asio::io_context::work m_work;
 	std::vector<std::thread> m_workers;
 	std::atomic<bool> m_is_started{false};
-	constexpr size_t m_threads_count;
+	const size_t m_threads_count;
 };
