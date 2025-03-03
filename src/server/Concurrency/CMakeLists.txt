@@ -16,3 +16,5 @@ target_include_directories(concurrency PUBLIC include)
 
 # for some potential private headers
 target_include_directories(concurrency PRIVATE src)
+
+add_subdirectory(tests)
