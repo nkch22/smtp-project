@@ -217,14 +217,9 @@ public:
 	template<typename T>
 	T Get() const
 	{
-		try
-		{
-			return std::get<T>(m_value);
-		}
-		catch (const std::bad_variant_access&)
-		{
-			throw std::runtime_error("JSON conversion error: type mismatch");
-		}
+		if (!std::holds_alternative<T>(m_value)) throw std::runtime_error("JSON conversion error: type mismatch");
+
+		return std::get<T>(m_value);
 	}
 
 	/**
@@ -357,6 +352,8 @@ public:
 
 private:
 	static std::string EscapeString(const std::string& input);
+	static bool isNonPrintableChar(char c);
+	static std::string convertToUnicodeEscape(char c);
 
 private:
 	Value m_value; ///< Underlying storage for the JSON value.

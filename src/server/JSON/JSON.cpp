@@ -237,16 +237,10 @@ std::string JSON::EscapeString(const std::string& input)
 		case '\t':
 			return "\\t";
 		default:
-			if (static_cast<unsigned char>(c) < 0x20 || static_cast<unsigned char>(c) > 0x7E)
-			{
-				std::ostringstream oss;
-				oss << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)c;
-				return oss.str();
-			}
+			if (isNonPrintableChar(c))
+				return convertToUnicodeEscape(c);
 			else
-			{
 				return {c};
-			}
 		}
 	};
 
@@ -254,5 +248,20 @@ std::string JSON::EscapeString(const std::string& input)
 	for (char c : input) output += escape_char(c); // Getting the escaped character.
 
 	return output;
+}
+
+// Check if the character is non-printable (outside the printable ASCII range)
+bool JSON::isNonPrintableChar(char c)
+{
+	auto uc = static_cast<unsigned char>(c);
+	return uc < 0x20 || uc > 0x7E;
+}
+
+// Convert a non-printable character to a Unicode escape sequence
+std::string JSON::convertToUnicodeEscape(char c)
+{
+	std::ostringstream oss;
+	oss << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(static_cast<unsigned char>(c));
+	return oss.str();
 }
 } // namespace ISXJson
