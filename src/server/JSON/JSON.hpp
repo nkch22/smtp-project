@@ -352,8 +352,8 @@ public:
 
 private:
 	static std::string EscapeString(const std::string& input);
-	static bool isNonPrintableChar(char c);
-	static std::string convertToUnicodeEscape(char c);
+	static bool IsNonPrintableChar(char c);
+	static std::string ConvertToUnicodeEscape(char c);
 
 private:
 	Value m_value; ///< Underlying storage for the JSON value.

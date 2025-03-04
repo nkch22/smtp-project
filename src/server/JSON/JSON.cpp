@@ -237,10 +237,7 @@ std::string JSON::EscapeString(const std::string& input)
 		case '\t':
 			return "\\t";
 		default:
-			if (isNonPrintableChar(c))
-				return convertToUnicodeEscape(c);
-			else
-				return {c};
+			return IsNonPrintableChar(c) ? ConvertToUnicodeEscape(c) : std::string{c};
 		}
 	};
 
@@ -251,14 +248,14 @@ std::string JSON::EscapeString(const std::string& input)
 }
 
 // Check if the character is non-printable (outside the printable ASCII range)
-bool JSON::isNonPrintableChar(char c)
+bool JSON::IsNonPrintableChar(char c)
 {
 	auto uc = static_cast<unsigned char>(c);
 	return uc < 0x20 || uc > 0x7E;
 }
 
 // Convert a non-printable character to a Unicode escape sequence
-std::string JSON::convertToUnicodeEscape(char c)
+std::string JSON::ConvertToUnicodeEscape(char c)
 {
 	std::ostringstream oss;
 	oss << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(static_cast<unsigned char>(c));

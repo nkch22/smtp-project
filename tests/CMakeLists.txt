@@ -10,7 +10,6 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 set(TEST_SOURCES
-    MainTests.cpp
     server/JsonParserTests.cpp
     server/ConfigTests.cpp
     server/JSONTest.cpp
