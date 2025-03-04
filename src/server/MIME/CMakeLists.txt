@@ -2,6 +2,10 @@ set(MIME_SOURCES
     ContentType.cpp
     ContentTransferEncoding.cpp
     Header.cpp
+    MimeUtils.cpp
+    Body.cpp
+    MimeEntity.cpp
+    MimeBuilder.cpp
 )
 
 set(MIME_HEADERS
@@ -12,10 +16,12 @@ set(MIME_HEADERS
     IMimeParser.hpp
     MimeEntity.hpp
     MimeUtils.hpp
+    MimeBuilder.hpp
 )
 
 add_library(mime STATIC ${MIME_SOURCES} ${MIME_HEADERS})
 target_include_directories(mime PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
 target_link_libraries(mime PUBLIC encoding)
+
 

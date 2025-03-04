@@ -38,8 +38,8 @@ public:
 public:
 	std::string Str() const;
 
-	bool IsBinarySafe() const;	   // Can handle 8-bit data
-	bool RequiresEncoding() const; // Needs encoding/decoding
+	bool IsBinarySafe() const;	   
+	bool RequiresEncoding() const;
 
 private:
 	static bool IsValid7Bit(const std::vector<uint8_t>& data);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -15,6 +14,11 @@ class Body
 public:
 	Body();
 	~Body();
+
+	Body(const Body&) = delete;
+	Body& operator=(const Body&) = delete;
+	Body(Body&&) noexcept;
+	Body& operator=(Body&&) noexcept;
 
 public:
 	void Set(const std::string& content);
@@ -50,10 +54,11 @@ public:
 	bool IsMultipart() const;
 
 private:
-	std::string m_content;
-	std::string m_preamble;
-	std::string m_epilogue;
-	std::string m_boundary;
-	std::vector<std::shared_ptr<MimeEntity>> m_parts;
+	class Impl;
+	std::unique_ptr<Impl> m_p_impl;
 };
+
+// Stream operator declaration
+std::ostream& operator<<(std::ostream& os, const Body& body);
+
 } // namespace ISXMime

@@ -25,24 +25,41 @@ std::string ContentTransferEncoding::Str() const
 
 std::string ContentTransferEncoding::Encode(const std::vector<uint8_t>& data) const
 {
-	if (m_type == SEVEN_BIT && !IsValid7Bit(data)) return "";
+	if (m_type == SEVEN_BIT)
+	{
+		if (!IsValid7Bit(data))
+			throw std::runtime_error("Data contains characters that cannot be represented in 7bit encoding");
 
-	if (m_type == EIGHT_BIT && !IsValid8Bit(data)) return "";
+		return {reinterpret_cast<const char*>(data.data()), data.size()};
+	}
 
-	if (!RequiresEncoding()) return {reinterpret_cast<const char*>(data.data()), data.size()};
+	if (m_type == EIGHT_BIT)
+	{
+		if (!IsValid8Bit(data))
+			throw std::runtime_error("Data contains null characters that cannot be represented in 8bit encoding");
+
+		return {reinterpret_cast<const char*>(data.data()), data.size()};
+	}
+
+	if (m_type == BINARY) return {reinterpret_cast<const char*>(data.data()), data.size()};
+
+	if (m_type == UNKNOWN) throw std::runtime_error("Cannot encode data with unknown content transfer encoding");
 
 	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder(TypeToString(m_type));
-	if (!encoder) return "";
+	if (!encoder) throw std::runtime_error("Failed to create encoder for " + std::string(TypeToString(m_type)));
 
 	return encoder->Encode(data);
 }
 
 std::vector<uint8_t> ContentTransferEncoding::Decode(const std::string& encoded) const
 {
-	if (!RequiresEncoding()) return {encoded.begin(), encoded.end()};
+	// For 7bit, 8bit, and binary, no decoding is needed
+	if (m_type == SEVEN_BIT || m_type == EIGHT_BIT || m_type == BINARY) return {encoded.begin(), encoded.end()};
+
+	if (m_type == UNKNOWN) throw std::runtime_error("Cannot decode data with unknown content transfer encoding");
 
 	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder(TypeToString(m_type));
-	if (!encoder) return {};
+	if (!encoder) throw std::runtime_error("Failed to create decoder for " + std::string(TypeToString(m_type)));
 
 	return encoder->Decode(encoded);
 }
@@ -59,17 +76,12 @@ bool ContentTransferEncoding::RequiresEncoding() const
 
 bool ContentTransferEncoding::IsValid7Bit(const std::vector<uint8_t>& data)
 {
-	return std::ranges::all_of(data,
-							   [](uint8_t c) { return (c >= 32 && c <= 126) || c == '\r' || c == '\n' || c == '\t'; });
+	return std::ranges::all_of(data, [](uint8_t c) { return c >= 1 && c <= 127; });
 }
 
 bool ContentTransferEncoding::IsValid8Bit(const std::vector<uint8_t>& data)
 {
-	return std::ranges::all_of(data,
-							   [](uint8_t c)
-							   {
-								   return c != 0; // 8bit allows any non-null character
-							   });
+	return std::ranges::all_of(data, [](uint8_t c) { return c != 0; });
 }
 
 const char* ContentTransferEncoding::TypeToString(Type type)

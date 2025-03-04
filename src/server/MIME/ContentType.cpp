@@ -205,7 +205,7 @@ std::string ContentType::Str() const
 		bool need_quotes = false;
 		for (char c : param.second)
 		{
-			if (!std::isalnum(c) && c != '-' && c != '_' && c != '.')
+			if ((std::isalnum(c) == 0) && c != '-' && c != '_' && c != '.')
 			{
 				need_quotes = true;
 				break;

@@ -14,7 +14,7 @@ namespace
 std::string ToLower(const std::string& str)
 {
 	std::string lower = str;
-	std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+	std::ranges::transform(lower, lower.begin(), [](unsigned char c) { return std::tolower(c); });
 	return lower;
 }
 } // namespace

@@ -2,7 +2,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <regex>
 #include <sstream>
+
+#include "../Encoding/EncoderFactory.hpp"
 
 namespace ISXMime
 {
@@ -120,6 +123,112 @@ std::ostream& operator<<(std::ostream& os, const Header& header)
 	os << "\r\n";
 
 	return os;
+}
+
+std::string Header::EncodeFieldValue(const std::string& value, const std::string& charset) const
+{
+	// check if encoding is needed - only encode if there are non-ASCII characters
+	bool needs_encoding = false;
+	for (unsigned char c : value)
+	{
+		if (c == 0 || c > 127 || c == '=')
+		{
+			needs_encoding = true;
+			break;
+		}
+	}
+
+	if (!needs_encoding)
+	{
+		return value;
+	}
+
+	size_t non_ascii_count = 0;
+	for (unsigned char c : value)
+		if (c > 127) non_ascii_count++;
+
+	// if more than 30% of characters are non-ASCII, use Base64
+	bool use_base64 = (non_ascii_count > value.size() * 0.3);
+
+	std::string encoding_type = use_base64 ? "B" : "Q";
+	std::string encoded;
+
+	if (use_base64)
+	{
+		// Base64 encoding
+		auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("base64");
+		std::vector<uint8_t> data(value.begin(), value.end());
+		encoded = encoder->Encode(data);
+
+		// Remove any line breaks that base64 encoder might have added
+		encoded.erase(std::remove(encoded.begin(), encoded.end(), '\r'), encoded.end());
+		encoded.erase(std::remove(encoded.begin(), encoded.end(), '\n'), encoded.end());
+	}
+	else
+	{
+		// Q-encoding (similar to quoted-printable but with spaces encoded as '_')
+		auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("quoted-printable");
+		std::vector<uint8_t> data(value.begin(), value.end());
+		encoded = encoder->Encode(data);
+
+		size_t pos = 0;
+		while ((pos = encoded.find("=\r\n", pos)) != std::string::npos) encoded.erase(pos, 3);
+
+		// spaces are encoded as underscore (not as =20)
+		pos = 0;
+		while ((pos = encoded.find("=20", pos)) != std::string::npos) encoded.replace(pos, 3, "_");
+	}
+
+	// =?charset?encoding?encoded-text?=
+	return "=?" + charset + "?" + encoding_type + "?" + encoded + "?=";
+}
+
+std::string Header::DecodeFieldValue(const std::string& encoded_value) const
+{
+	std::regex encoded_word_regex("=\\?([^?]*)\\?([bqBQ])\\?([^?]*)\\?=");
+	std::string result = encoded_value;
+
+	// Find and process all encoded-word sections
+	std::string::const_iterator search_start(result.cbegin());
+	std::smatch match;
+
+	while (std::regex_search(search_start, result.cend(), match, encoded_word_regex))
+	{
+		// Get the offset from the beginning of the string
+		size_t match_pos = std::distance(result.cbegin(), match[0].first);
+		size_t match_length = match[0].length();
+
+		std::string charset = match[1].str();
+		char encoding_type = std::toupper(match[2].str()[0]);
+		std::string encoded_text = match[3].str();
+
+		std::string decoded;
+		if (encoding_type == 'B')
+		{
+			// Base64 encoding
+			auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("base64");
+			auto data = encoder->Decode(encoded_text);
+			decoded = std::string(data.begin(), data.end());
+		}
+		else if (encoding_type == 'Q')
+		{
+			// Q-encoding (variant of quoted-printable)
+			// convert underscore back to space
+			std::replace(encoded_text.begin(), encoded_text.end(), '_', ' ');
+
+			auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("quoted-printable");
+			auto data = encoder->Decode(encoded_text);
+			decoded = std::string(data.begin(), data.end());
+		}
+
+		result.replace(match_pos, match_length, decoded);
+
+		search_start = result.cbegin() + match_pos + decoded.length();
+
+		if (search_start >= result.cend()) break;
+	}
+
+	return result;
 }
 
 } // namespace ISXMime

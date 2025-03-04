@@ -38,6 +38,13 @@ public:
 	std::string GetFieldCaseInsensitive(const std::string& name) const;
 
 public:
+	std::string EncodeFieldValue(const std::string& value, const std::string& charset = "UTF-8") const;
+	std::string DecodeFieldValue(const std::string& encoded_value) const;
+
+public:
+	void NormalizeFieldName(std::string& lower_name);
+
+public:
 	friend std::ostream& operator<<(std::ostream& os, const Header& header);
 
 private:
