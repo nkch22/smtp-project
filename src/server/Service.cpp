@@ -2,7 +2,10 @@
 
 #include <iostream>
 
-Service::Service(size_t threads_count) : m_work(m_context), m_workers(threads_count), m_threads_count(threads_count) {}
+Service::Service(size_t threads_count) :
+	m_work(m_context), m_workers(threads_count), m_is_started(false), m_threads_count(threads_count)
+{
+}
 
 bool Service::Start()
 {

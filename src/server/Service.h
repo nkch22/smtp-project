@@ -143,6 +143,6 @@ private:
 	/** Keeps the io_context active to prevent premature exit. */
 	asio::io_context::work m_work;
 	std::vector<std::thread> m_workers;
-	std::atomic<bool> m_is_started{false};
+	std::atomic<bool> m_is_started;
 	const size_t m_threads_count;
 };
