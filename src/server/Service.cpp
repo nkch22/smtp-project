@@ -45,7 +45,7 @@ bool Service::Stop()
 	return true;
 }
 
-asio::io_service& Service::GetAsioService() noexcept
+asio::io_context& Service::GetAsioService() noexcept
 {
 	return m_context;
 }

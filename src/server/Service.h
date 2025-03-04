@@ -44,7 +44,7 @@ public:
 	 * @brief Provides access to the underlying ASIO io_service.
 	 * @return Reference to the ASIO io_service instance.
 	 */
-	virtual asio::io_service& GetAsioService() noexcept;
+	virtual asio::io_context& GetAsioService() noexcept;
 
 	/**
 	 * @brief Dispatches the given handler.
