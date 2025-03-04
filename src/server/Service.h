@@ -12,6 +12,10 @@
 class Service
 {
 public:
+	template<typename CompletionHandler>
+	using AsyncResult = typename asio::async_result<asio::decay_t<CompletionHandler>, void()>::return_type;
+
+public:
 	/**
 	 * @brief Constructs a Service with a specified number of worker threads.
 	 * @param threads_count Number of worker threads to spawn.
@@ -57,8 +61,7 @@ public:
 	 * @return The asynchronous result of the handler.
 	 */
 	template<typename CompletionHandler>
-	typename asio::async_result<asio::decay_t<CompletionHandler>, void()>::return_type Dispatch(
-		CompletionHandler&& handler)
+	AsyncResult<CompletionHandler> Dispatch(CompletionHandler&& handler)
 	{
 		return m_context.dispatch(handler);
 	}
@@ -74,7 +77,7 @@ public:
 	 * @return The asynchronous result of the handler.
 	 */
 	template<typename CompletionHandler>
-	typename asio::async_result<asio::decay_t<CompletionHandler>, void()>::return_type Post(CompletionHandler&& handler)
+	AsyncResult<CompletionHandler> Post(CompletionHandler&& handler)
 	{
 		return m_context.post(handler);
 	}
