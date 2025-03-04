@@ -3,6 +3,7 @@ add_executable(json_tests
     JSONTest.cpp
     JsonParserTests.cpp
     SerializerTests.cpp
+    BinarySerializerTests.cpp
 )
 
 target_link_libraries(json_tests PRIVATE 
