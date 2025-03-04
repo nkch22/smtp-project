@@ -9,7 +9,10 @@ Service::Service(size_t threads_count) :
 
 bool Service::Start()
 {
-	assert(!m_is_started.load() && "Asio context is already started");
+	if (m_is_started)
+	{
+		return false;
+	}
 
 	auto start_handler = [this]
 	{
@@ -27,7 +30,10 @@ bool Service::Start()
 
 bool Service::Stop()
 {
-	assert(!m_is_started && "Asio service is not started!");
+	if (!m_is_started)
+	{
+		return false;
+	}
 
 	auto stop_handler = [this]
 	{
