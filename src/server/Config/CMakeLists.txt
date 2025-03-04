@@ -13,12 +13,3 @@ target_link_libraries(config
     json
 )
 
-install(TARGETS config
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-)
-
-install(FILES 
-    Config.hpp
-    DESTINATION include/server/Config
-) 
