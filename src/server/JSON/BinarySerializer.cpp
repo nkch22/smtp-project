@@ -11,6 +11,7 @@
 #include "BinarySerializer.hpp"
 
 #include <cstring>
+#include <limits>
 
 namespace ISXJson
 {
@@ -90,7 +91,7 @@ void BinarySerializer::WriteString(std::vector<uint8_t>& buffer, const std::stri
 {
 	const auto LENGTH = static_cast<uint32_t>(str.length());
 
-	if (LENGTH < 256)
+	if (LENGTH < std::numeric_limits<uint16_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING8));
 		WriteUint8(buffer, static_cast<uint8_t>(LENGTH));
@@ -132,17 +133,17 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 		{
 			int64_t intValue = static_cast<int64_t>(intpart);
 
-			if (intValue >= -128 && intValue <= 127)
+			if (intValue >= std::numeric_limits<int8_t>::min() && intValue <= std::numeric_limits<int8_t>::max())
 			{
 				buffer.push_back(static_cast<uint8_t>(FormatType::INT8));
 				WriteUint8(buffer, static_cast<uint8_t>(intValue));
 			}
-			else if (intValue >= -32768 && intValue <= 32767)
+			else if (intValue >= std::numeric_limits<int16_t>::min() && intValue <= std::numeric_limits<int16_t>::max())
 			{
 				buffer.push_back(static_cast<uint8_t>(FormatType::INT16));
 				WriteUint16(buffer, static_cast<uint16_t>(intValue));
 			}
-			else if (intValue >= -2147483648LL && intValue <= 2147483647LL)
+			else if (intValue >= std::numeric_limits<int32_t>::min() && intValue <= std::numeric_limits<int32_t>::max())
 			{
 				buffer.push_back(static_cast<uint8_t>(FormatType::INT32));
 				WriteUint32(buffer, static_cast<uint32_t>(intValue));
