@@ -222,10 +222,14 @@ private:
 		STRING8 = 0xD9,	 ///< String with 8-bit length
 		STRING16 = 0xDA, ///< String with 16-bit length
 		STRING32 = 0xDB, ///< String with 32-bit length
+		STRING64 = 0xDC, ///< String with 64-bit length
 		ARRAY16 = 0xDC,	 ///< Array with 16-bit item count
 		ARRAY32 = 0xDD,	 ///< Array with 32-bit item count
+		ARRAY64 = 0xDD,   ///< Array with 64-bit item count
 		MAP16 = 0xDE,	 ///< Map with 16-bit pair count
-		MAP32 = 0xDF	 ///< Map with 32-bit pair count
+		MAP32 = 0xDF,	 ///< Map with 32-bit pair count
+		MAP64 = 0xDE,     ///< Map with 64-bit pair count
+		UINT64 = 0xDD, ///< 64-bit unsigned integer
 	};
 
 private:
@@ -243,7 +247,7 @@ private:
 	static uint32_t ReadUint32(const std::vector<uint8_t>& buffer, size_t& pos);
 	static uint64_t ReadUint64(const std::vector<uint8_t>& buffer, size_t& pos);
 	static double ReadDouble(const std::vector<uint8_t>& buffer, size_t& pos);
-	static std::string ReadString(const std::vector<uint8_t>& buffer, size_t& pos, uint32_t length);
+	static std::string ReadString(const std::vector<uint8_t>& buffer, size_t& pos, size_t length);
 	static JSON DeserializeValue(const std::vector<uint8_t>& buffer, size_t& pos);
 };
 

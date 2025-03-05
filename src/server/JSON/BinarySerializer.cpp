@@ -89,25 +89,29 @@ void BinarySerializer::WriteDouble(std::vector<uint8_t>& buffer, double value)
 
 void BinarySerializer::WriteString(std::vector<uint8_t>& buffer, const std::string& str)
 {
-	const auto LENGTH = static_cast<uint32_t>(str.length());
+	const size_t LENGTH = str.length();
 
-	if (LENGTH < std::numeric_limits<uint16_t>::max())
+	if (LENGTH < std::numeric_limits<uint8_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING8));
 		WriteUint8(buffer, static_cast<uint8_t>(LENGTH));
 	}
-	else if (LENGTH < 65536)
+	else if (LENGTH < std::numeric_limits<uint16_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING16));
 		WriteUint16(buffer, static_cast<uint16_t>(LENGTH));
 	}
-	else
+	else if (LENGTH < std::numeric_limits<uint32_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING32));
-		WriteUint32(buffer, LENGTH);
+		WriteUint32(buffer, static_cast<uint32_t>(LENGTH));
+	}
+	else
+	{
+		buffer.push_back(static_cast<uint8_t>(FormatType::STRING64));
+		WriteUint64(buffer, static_cast<uint64_t>(LENGTH));
 	}
 
-	// Add string bytes
 	buffer.insert(buffer.end(), str.begin(), str.end());
 }
 
@@ -131,27 +135,39 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 		// Check if the number is an integer
 		if (std::modf(number, &intpart) == 0.0)
 		{
-			int64_t intValue = static_cast<int64_t>(intpart);
-
-			if (intValue >= std::numeric_limits<int8_t>::min() && intValue <= std::numeric_limits<int8_t>::max())
+			double doubleValue = intpart;
+			if (doubleValue > std::numeric_limits<int64_t>::max())
 			{
-				buffer.push_back(static_cast<uint8_t>(FormatType::INT8));
-				WriteUint8(buffer, static_cast<uint8_t>(intValue));
-			}
-			else if (intValue >= std::numeric_limits<int16_t>::min() && intValue <= std::numeric_limits<int16_t>::max())
-			{
-				buffer.push_back(static_cast<uint8_t>(FormatType::INT16));
-				WriteUint16(buffer, static_cast<uint16_t>(intValue));
-			}
-			else if (intValue >= std::numeric_limits<int32_t>::min() && intValue <= std::numeric_limits<int32_t>::max())
-			{
-				buffer.push_back(static_cast<uint8_t>(FormatType::INT32));
-				WriteUint32(buffer, static_cast<uint32_t>(intValue));
+				// If the number exceeds INT64_MAX, use uint64_t
+				uint64_t uintValue = static_cast<uint64_t>(doubleValue);
+				buffer.push_back(static_cast<uint8_t>(FormatType::UINT64));
+				WriteUint64(buffer, uintValue);
 			}
 			else
 			{
-				buffer.push_back(static_cast<uint8_t>(FormatType::INT64));
-				WriteUint64(buffer, static_cast<uint64_t>(intValue));
+				// Otherwise, handle as INT64 or smaller
+				int64_t intValue = static_cast<int64_t>(doubleValue);
+				if (intValue >= std::numeric_limits<int8_t>::min() && intValue <= std::numeric_limits<int8_t>::max())
+				{
+					// Handle as INT8
+					buffer.push_back(static_cast<uint8_t>(FormatType::INT8));
+					WriteUint8(buffer, static_cast<uint8_t>(intValue));
+				}
+				else if (intValue >= std::numeric_limits<int16_t>::min() && intValue <= std::numeric_limits<int16_t>::max())
+				{
+					buffer.push_back(static_cast<uint8_t>(FormatType::INT16));
+					WriteUint16(buffer, static_cast<uint16_t>(intValue));
+				}
+				else if (intValue >= std::numeric_limits<int32_t>::min() && intValue <= std::numeric_limits<int32_t>::max())
+				{
+					buffer.push_back(static_cast<uint8_t>(FormatType::INT32));
+					WriteUint32(buffer, static_cast<uint32_t>(intValue));
+				}
+				else
+				{
+					buffer.push_back(static_cast<uint8_t>(FormatType::INT64));
+					WriteUint64(buffer, static_cast<uint64_t>(intValue));
+				}
 			}
 		}
 		else
@@ -170,17 +186,22 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 	case JSON::Type::ARRAY:
 	{
 		const auto& array = json.AsArray();
-		const auto SIZE = static_cast<uint32_t>(array.size());
+		const size_t SIZE = array.size();
 
-		if (SIZE < 65536)
+		if (SIZE < std::numeric_limits<uint16_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::ARRAY16));
 			WriteUint16(buffer, static_cast<uint16_t>(SIZE));
 		}
-		else
+		else if (SIZE < std::numeric_limits<uint32_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::ARRAY32));
-			WriteUint32(buffer, SIZE);
+			WriteUint32(buffer, static_cast<uint32_t>(SIZE));
+		}
+		else
+		{
+			buffer.push_back(static_cast<uint8_t>(FormatType::ARRAY64));
+			WriteUint64(buffer, static_cast<uint64_t>(SIZE));
 		}
 
 		for (const auto& element : array)
@@ -193,17 +214,22 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 	case JSON::Type::OBJECT:
 	{
 		const auto& object = json.AsObject();
-		const auto SIZE = static_cast<uint32_t>(object.size());
+		const size_t SIZE = object.size();
 
-		if (SIZE < 65536)
+		if (SIZE < std::numeric_limits<uint16_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::MAP16));
 			WriteUint16(buffer, static_cast<uint16_t>(SIZE));
 		}
-		else
+		else if (SIZE < std::numeric_limits<uint32_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::MAP32));
-			WriteUint32(buffer, SIZE);
+			WriteUint32(buffer, static_cast<uint32_t>(SIZE));
+		}
+		else
+		{
+			buffer.push_back(static_cast<uint8_t>(FormatType::MAP64));
+			WriteUint64(buffer, static_cast<uint64_t>(SIZE));
 		}
 
 		for (const auto& [key, value] : object)
@@ -275,7 +301,7 @@ double BinarySerializer::ReadDouble(const std::vector<uint8_t>& buffer, size_t& 
 	return value;
 }
 
-std::string BinarySerializer::ReadString(const std::vector<uint8_t>& buffer, size_t& pos, uint32_t length)
+std::string BinarySerializer::ReadString(const std::vector<uint8_t>& buffer, size_t& pos, size_t length)
 {
 	if (pos + length > buffer.size()) throw std::runtime_error("Reading past end of buffer");
 
