@@ -223,13 +223,13 @@ private:
 		STRING8 = 0xD9,	 ///< String with 8-bit length
 		STRING16 = 0xDA, ///< String with 16-bit length
 		STRING32 = 0xDB, ///< String with 32-bit length
-		STRING64 = 0xDC, ///< String with 64-bit length
+		STRING64 = 0xE2, ///< String with 64-bit length
 		ARRAY16 = 0xDC,	 ///< Array with 16-bit item count
 		ARRAY32 = 0xDD,	 ///< Array with 32-bit item count
-		ARRAY64 = 0xDD,   ///< Array with 64-bit item count
+		ARRAY64 = 0xE0,   ///< Array with 64-bit item count
 		MAP16 = 0xDE,	 ///< Map with 16-bit pair count
 		MAP32 = 0xDF,	 ///< Map with 32-bit pair count
-		MAP64 = 0xDE,     ///< Map with 64-bit pair count
+		MAP64 = 0xE1,     ///< Map with 64-bit pair count
 	};
 
 private:

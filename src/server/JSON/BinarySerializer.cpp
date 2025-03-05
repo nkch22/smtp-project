@@ -177,12 +177,12 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 		const auto& array = json.AsArray();
 		const size_t SIZE = array.size();
 
-		if (SIZE < std::numeric_limits<uint16_t>::max())
+		if (SIZE <= std::numeric_limits<uint16_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::ARRAY16));
 			WriteUint16(buffer, static_cast<uint16_t>(SIZE));
 		}
-		else if (SIZE < std::numeric_limits<uint32_t>::max())
+		else if (SIZE <= std::numeric_limits<uint32_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::ARRAY32));
 			WriteUint32(buffer, static_cast<uint32_t>(SIZE));
@@ -205,12 +205,12 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 		const auto& object = json.AsObject();
 		const size_t SIZE = object.size();
 
-		if (SIZE < std::numeric_limits<uint16_t>::max())
+		if (SIZE <= std::numeric_limits<uint16_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::MAP16));
 			WriteUint16(buffer, static_cast<uint16_t>(SIZE));
 		}
-		else if (SIZE < std::numeric_limits<uint32_t>::max())
+		else if (SIZE <= std::numeric_limits<uint32_t>::max())
 		{
 			buffer.push_back(static_cast<uint8_t>(FormatType::MAP32));
 			WriteUint32(buffer, static_cast<uint32_t>(SIZE));
@@ -365,6 +365,12 @@ JSON BinarySerializer::DeserializeValue(const std::vector<uint8_t>& buffer, size
 		return JSON(ReadString(buffer, pos, length));
 	}
 
+	case FormatType::STRING64:
+	{
+		uint64_t length = ReadUint64(buffer, pos);
+		return JSON(ReadString(buffer, pos, length));
+	}
+
 	case FormatType::ARRAY16:
 	case FormatType::ARRAY32:
 	{
@@ -380,6 +386,21 @@ JSON BinarySerializer::DeserializeValue(const std::vector<uint8_t>& buffer, size
 			throw std::runtime_error(std::string("Error deserializing array element: ") + e.what());
 		}
 
+		return JSON(array);
+	}
+
+	case FormatType::ARRAY64:
+	{
+		uint64_t size = ReadUint64(buffer, pos);
+		JSON::Array array;
+		try
+		{
+			for (uint64_t i = 0; i < size; ++i) array.push_back(DeserializeValue(buffer, pos));
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error deserializing array element: ") + e.what());
+		}
 		return JSON(array);
 	}
 
@@ -411,6 +432,60 @@ JSON BinarySerializer::DeserializeValue(const std::vector<uint8_t>& buffer, size
 				else if (key_type == FormatType::STRING32)
 				{
 					uint32_t length = ReadUint32(buffer, pos);
+					key = ReadString(buffer, pos, length);
+				}
+				else if (key_type == FormatType::STRING64)
+				{
+					uint64_t length = ReadUint64(buffer, pos);
+					key = ReadString(buffer, pos, length);
+				}
+				else
+				{
+					throw std::runtime_error("Object key must be a string");
+				}
+
+				object[key] = DeserializeValue(buffer, pos);
+			}
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error deserializing object: ") + e.what());
+		}
+
+		return JSON(object);
+	}
+
+	case FormatType::MAP64:
+	{
+		uint64_t size = ReadUint64(buffer, pos);
+		JSON::Object object;
+		try
+		{
+			for (uint64_t i = 0; i < size; ++i)
+			{
+				if (pos >= buffer.size()) throw std::runtime_error("Reading past end of buffer when reading map key");
+
+				auto key_type = static_cast<FormatType>(buffer[pos++]);
+				std::string key;
+
+				if (key_type == FormatType::STRING8)
+				{
+					uint8_t length = ReadUint8(buffer, pos);
+					key = ReadString(buffer, pos, length);
+				}
+				else if (key_type == FormatType::STRING16)
+				{
+					uint16_t length = ReadUint16(buffer, pos);
+					key = ReadString(buffer, pos, length);
+				}
+				else if (key_type == FormatType::STRING32)
+				{
+					uint32_t length = ReadUint32(buffer, pos);
+					key = ReadString(buffer, pos, length);
+				}
+				else if (key_type == FormatType::STRING64)
+				{
+					uint64_t length = ReadUint64(buffer, pos);
 					key = ReadString(buffer, pos, length);
 				}
 				else
