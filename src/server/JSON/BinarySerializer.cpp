@@ -91,17 +91,17 @@ void BinarySerializer::WriteString(std::vector<uint8_t>& buffer, const std::stri
 {
 	const size_t LENGTH = str.length();
 
-	if (LENGTH < std::numeric_limits<uint8_t>::max())
+	if (LENGTH <= std::numeric_limits<uint8_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING8));
 		WriteUint8(buffer, static_cast<uint8_t>(LENGTH));
 	}
-	else if (LENGTH < std::numeric_limits<uint16_t>::max())
+	else if (LENGTH <= std::numeric_limits<uint16_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING16));
 		WriteUint16(buffer, static_cast<uint16_t>(LENGTH));
 	}
-	else if (LENGTH < std::numeric_limits<uint32_t>::max())
+	else if (LENGTH <= std::numeric_limits<uint32_t>::max())
 	{
 		buffer.push_back(static_cast<uint8_t>(FormatType::STRING32));
 		WriteUint32(buffer, static_cast<uint32_t>(LENGTH));
