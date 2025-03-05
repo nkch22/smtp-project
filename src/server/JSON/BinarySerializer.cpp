@@ -135,40 +135,28 @@ void BinarySerializer::SerializeValue(std::vector<uint8_t>& buffer, const JSON& 
 		// Check if the number is an integer
 		if (std::modf(number, &intpart) == 0.0)
 		{
-			double double_value = intpart;
-			if (double_value > std::numeric_limits<int64_t>::max())
+			auto int_value = static_cast<int64_t>(intpart);
+			if (int_value >= std::numeric_limits<int8_t>::min() && int_value <= std::numeric_limits<int8_t>::max())
 			{
-				// If the number exceeds INT64_MAX, use uint64_t
-				auto uint_value = static_cast<uint64_t>(double_value);
-				buffer.push_back(static_cast<uint8_t>(FormatType::UINT64));
-				WriteUint64(buffer, uint_value);
+				buffer.push_back(static_cast<uint8_t>(FormatType::INT8));
+				WriteUint8(buffer, static_cast<uint8_t>(int_value));
+			}
+			else if (int_value >= std::numeric_limits<int16_t>::min()
+					 && int_value <= std::numeric_limits<int16_t>::max())
+			{
+				buffer.push_back(static_cast<uint8_t>(FormatType::INT16));
+				WriteUint16(buffer, static_cast<uint16_t>(int_value));
+			}
+			else if (int_value >= std::numeric_limits<int32_t>::min()
+					 && int_value <= std::numeric_limits<int32_t>::max())
+			{
+				buffer.push_back(static_cast<uint8_t>(FormatType::INT32));
+				WriteUint32(buffer, static_cast<uint32_t>(int_value));
 			}
 			else
 			{
-				// Otherwise, handle as INT64 or smaller
-				auto int_value = static_cast<int64_t>(double_value);
-				if (int_value >= std::numeric_limits<int8_t>::min() && int_value <= std::numeric_limits<int8_t>::max())
-				{
-					buffer.push_back(static_cast<uint8_t>(FormatType::INT8));
-					WriteUint8(buffer, static_cast<uint8_t>(int_value));
-				}
-				else if (int_value >= std::numeric_limits<int16_t>::min()
-						 && int_value <= std::numeric_limits<int16_t>::max())
-				{
-					buffer.push_back(static_cast<uint8_t>(FormatType::INT16));
-					WriteUint16(buffer, static_cast<uint16_t>(int_value));
-				}
-				else if (int_value >= std::numeric_limits<int32_t>::min()
-						 && int_value <= std::numeric_limits<int32_t>::max())
-				{
-					buffer.push_back(static_cast<uint8_t>(FormatType::INT32));
-					WriteUint32(buffer, static_cast<uint32_t>(int_value));
-				}
-				else
-				{
-					buffer.push_back(static_cast<uint8_t>(FormatType::INT64));
-					WriteUint64(buffer, static_cast<uint64_t>(int_value));
-				}
+				buffer.push_back(static_cast<uint8_t>(FormatType::INT64));
+				WriteUint64(buffer, static_cast<uint64_t>(int_value));
 			}
 		}
 		else
