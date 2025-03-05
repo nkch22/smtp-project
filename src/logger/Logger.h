@@ -16,9 +16,153 @@
 #include <thread>
 
 /*!
-	@file Logger.h
-	@brief Interface of Logger shared library
-*/
+ *	@file Logger.h
+ *	@brief Interface of Logger shared library
+ *
+ *	This file contains logger interface
+ *
+ *	@section usage_example Usage example
+ *	@code
+ *
+ *	#include "Logger.h"
+ *	#include <sstream>
+ * 
+ *	void NoArgsNoRet();
+ *	int ArgsRet(int a);
+ *
+ *	int LocalLevel(int a);
+ *
+ *	int MessageOutput(int a, int b);
+ * 
+ *	class Test;
+ *	void CustomClass(Test);
+ *
+ *	void ArgsWithoutLogging(int* a, int b);
+ *
+ *	int main()
+ *	{
+ *		logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
+ *		//every instance of Logger will have trace log level
+ *
+ *		NoArgsNoRet();
+ *		ArgsRet(5);
+ *
+ *		LocalLevel(5);
+ *		MessageOutput(1, 0);
+ *
+ *		Test t;
+ *		CustomClass(t);
+ *
+ *		int a = 6;
+ *		ArgsWithoutLogging(&a, 5);
+ *	}
+ *
+ *	void NoArgsNoRet()
+ *	{
+ *		logger::Logger log;	   // creates logger variable
+ *		log.save_func_start(); // saves function start without arguments
+ *
+ *		// some logic, that not need to be logged
+ *
+ *		log.save_return_nothing(); // saves function end
+ *	}
+ *	int ArgsRet(int a)
+ *	{
+ *		logger::Logger log;
+ *		log.save_arguments(a); // saves function start with a parameter (might be more parameters)
+ *
+ *		int b = a++; // some logic, that not need to be logged
+ *
+ *		log.save_return(b); // saves function return with b output
+ *		return b;
+ *	}
+ *
+ *	int LocalLevel(int a)
+ *	{
+ *		logger::Logger log;
+ *		log.set_local_level(
+ *			logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
+ *		// Global log level won't be affected
+ *		log.save_arguments(a); // because of debug log level will be replaced with save_func_start()
+ *
+ *		int b = a++; // some logic, that not need to be logged
+ *
+ *		log.save_return(b); // because of debug log level will be replaced with save_return_nothing()
+ *		return b;
+ *	}
+ *
+ *	int MessageOutput(int a, int b)
+ *	{
+ *		logger::Logger log;
+ *		log.save_arguments(a, b);
+ *
+ *		int c = 0;
+ *		try
+ *		{
+ *			if (b == 0) throw std::invalid_argument("b can't be 0");
+ *
+ *			c = a / b;
+ *		}
+ *		catch (std::invalid_argument& ex)
+ *		{
+ *			log.save_error(ex.what());	 // saves exception message with error flag
+ *			log.save_warning(ex.what()); // are also valid
+ *			log.save_message(ex.what()); // the only difference is message type flag
+ *			// you can use any of them based on your logic
+ *		}
+ *
+ *		log.save_return(c);
+ *		return c;
+ *	}
+ *
+ *	class Test
+ *	{
+ *	private:
+ *		int a;
+ *		int* ptr;
+ *
+ *		void* none;
+ *
+ *	public:
+ *		Test() : a{5}, ptr{&a}, none{nullptr} {}
+ *
+ *		// all you need to have to pass custom class into logger save args and return methods is this operator overload
+ *		friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
+ *		{
+ *			buff << obj.a; //Buffer has default operator for int, see Buffer Documentation page for more
+ *
+ *			//if there is none you need, than make it yourself
+ *			//the main goal of every buffer operator<< is to convert data into std::string
+ *			std::stringstream st;
+ *			st << obj.ptr;
+ *			buff << st.str();
+ *
+ *			//if you dont want to log value of some variable, than dont do it
+ *
+ *			//no logging for 'none' void ptr
+ *
+ *			return buff;
+ *		}
+ *	};
+ *	void CustomClass(Test obj) {
+ *		logger::Logger log;
+ *		log.save_arguments(obj); //if you have overloakded operator, just pass it to the method
+ *		//any type, that is not in default buffer operators, need to have overloaded one
+ *		// if dont and you want to log it, method will throw exception
+ *
+ *		log.save_return_nothing();
+ *	}
+ *
+ *	void ArgsWithoutLogging(int* a, int b) {
+ *		logger::Logger log;
+ *
+ *		log.save_arguments(b); //you choose what to save
+ *		//if you dont want to log any parameters, than use save_func_start()
+ *
+ *		log.save_return_nothing();
+ *	}
+ *	@endcode
+ */
 
 namespace logger
 {
@@ -44,8 +188,8 @@ namespace logger
  *	@brief Default output path
  */
 /*! @def DEFAULT_CONFIG
-*	@brief Default config flag value
-*/
+ *	@brief Default config flag value
+ */
 /*! @def DEFAULT_FLUSH
  *	@brief Default flush flag value
  */
@@ -186,7 +330,7 @@ public:
  *  @warning Don't use init() more than once
  *
  *	@warning Using saving methods without previous init() call in any other place is undefined behavior
- * 
+ *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
  */
 class Logger
@@ -430,26 +574,26 @@ public:
 
 	static void stop_config();
 	/*! @fn stop_config()
-	*	@brief Logger configuration stopper
-	*	
-	*	Allows logger to write messages by stopping its configuration
-	* 
-	*	@attention Can be used only if @a is_config in init() was set to true
-	*	@attention Can be used only once
-	*/
+	 *	@brief Logger configuration stopper
+	 *
+	 *	Allows logger to write messages by stopping its configuration
+	 *
+	 *	@attention Can be used only if @a is_config in init() was set to true
+	 *	@attention Can be used only once
+	 */
 
 	static void set_output_dir(const std::string&);
 	/*! @fn set_output_dir(const std::string&)
-	*	@brief Output directory setter
-	* 
-	*	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
-	*/
+	 *	@brief Output directory setter
+	 *
+	 *	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
+	 */
 
 	static void set_flush(const bool&);
 	/*! @fn set_flush(const bool&)
-	*	@brief Flush setter
-	*	
-	*	@attention If flush was set to false, logger won't store any log messages 
-	*/
+	 *	@brief Flush setter
+	 *
+	 *	@attention If flush was set to false, logger won't store any log messages
+	 */
 };
 } // namespace logger

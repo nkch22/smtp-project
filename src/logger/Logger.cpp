@@ -246,10 +246,10 @@ void Logger::RealLogger::set_output(const std::string& path)
 	m_output_path = path;
 }
 
-void Logger::RealLogger::real_set_flush(const bool& value) {
+void Logger::RealLogger::real_set_flush(const bool& value)
+{
 	m_do_flush = value;
 }
-
 
 // Logger
 
@@ -296,10 +296,7 @@ void Logger::save_message(const std::string& msg)
 
 void Logger::set_global_level(const LogLevels& _level)
 {
-	if (_level >= LOG_LEVEL_NO && _level <= LOG_LEVEL_TRACE)
-		m_real->real_set_level(_level);
-	else
-		throw std::invalid_argument{"invalid level argumet"};
+	m_real->real_set_level(_level);
 }
 LogLevels Logger::get_global_level() const
 {
