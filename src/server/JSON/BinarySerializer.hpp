@@ -218,6 +218,7 @@ private:
 		INT16 = 0xD1,	 ///< 16-bit signed integer
 		INT32 = 0xD2,	 ///< 32-bit signed integer
 		INT64 = 0xD3,	 ///< 64-bit signed integer
+        UINT64 = 0xDD, ///< 64-bit unsigned integer
 		FLOAT64 = 0xCB,	 ///< 64-bit floating point number
 		STRING8 = 0xD9,	 ///< String with 8-bit length
 		STRING16 = 0xDA, ///< String with 16-bit length
@@ -229,7 +230,6 @@ private:
 		MAP16 = 0xDE,	 ///< Map with 16-bit pair count
 		MAP32 = 0xDF,	 ///< Map with 32-bit pair count
 		MAP64 = 0xDE,     ///< Map with 64-bit pair count
-		UINT64 = 0xDD, ///< 64-bit unsigned integer
 	};
 
 private:
