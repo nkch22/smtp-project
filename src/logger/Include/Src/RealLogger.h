@@ -46,13 +46,13 @@ public:
 
 	static void destroy();
 
-	void real_save(const std::string&, const MessageTypes, const std::source_location&, const logger::LogLevels level,
+	void save_to_queue(const std::string&, const MessageTypes, const std::source_location&, const logger::LogLevels level,
 				   std::thread::id id = std::this_thread::get_id());
 
 	void real_set_level(const logger::LogLevels);
 	logger::LogLevels real_get_level();
 
-	void save_message(const Message&);
+	void flush_message(const Message&);
 
 	static void handle_fatal_error(int);
 

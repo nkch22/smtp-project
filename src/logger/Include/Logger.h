@@ -47,20 +47,20 @@
  *	void NoArgsNoRet()
  *	{
  *		logger::Logger log;	   // creates logger variable
- *		log.save_func_start(); // saves function start without arguments
+ *		log.log_func_start(); // saves function start without arguments
  *
  *		// some logic, that not need to be logged
  *
- *		log.save_return_nothing(); // saves function end
+ *		log.log_return_nothing(); // saves function end
  *	}
  *	int ArgsRet(int a)
  *	{
  *		logger::Logger log;
- *		log.save_arguments(a); // saves function start with a parameter (might be more parameters)
+ *		log.log_arguments(a); // saves function start with a parameter (might be more parameters)
  *
  *		int b = a++; // some logic, that not need to be logged
  *
- *		log.save_return(b); // saves function return with b output
+ *		log.log_return(b); // saves function return with b output
  *		return b;
  *	}
  *
@@ -70,18 +70,18 @@
  *		log.set_local_level(
  *			logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
  *		// Global log level won't be affected
- *		log.save_arguments(a); // because of debug log level will be replaced with save_func_start()
+ *		log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
  *
  *		int b = a++; // some logic, that not need to be logged
  *
- *		log.save_return(b); // because of debug log level will be replaced with save_return_nothing()
+ *		log.log_return(b); // because of debug log level will be replaced with log_return_nothing()
  *		return b;
  *	}
  *
  *	int MessageOutput(int a, int b)
  *	{
  *		logger::Logger log;
- *		log.save_arguments(a, b);
+ *		log.log_arguments(a, b);
  *
  *		int c = 0;
  *		try
@@ -92,13 +92,13 @@
  *		}
  *		catch (std::invalid_argument& ex)
  *		{
- *			log.save_error(ex.what());	 // saves exception message with error flag
- *			log.save_warning(ex.what()); // are also valid
- *			log.save_message(ex.what()); // the only difference is message type flag
+ *			log.log_error(ex.what());	 // saves exception message with error flag
+ *			log.log_warning(ex.what()); // are also valid
+ *			log.log_message(ex.what()); // the only difference is message type flag
  *			// you can use any of them based on your logic
  *		}
  *
- *		log.save_return(c);
+ *		log.log_return(c);
  *		return c;
  *	}
  *
@@ -133,20 +133,20 @@
  *	};
  *	void CustomClass(Test obj) {
  *		logger::Logger log;
- *		log.save_arguments(obj); //if you have overloakded operator, just pass it to the method
+ *		log.log_arguments(obj); //if you have overloakded operator, just pass it to the method
  *		//any type, that is not in default buffer operators, need to have overloaded one
  *		// if dont and you want to log it, method will throw exception
  *
- *		log.save_return_nothing();
+ *		log.log_return_nothing();
  *	}
  *
  *	void ArgsWithoutLogging(int* a, int b) {
  *		logger::Logger log;
  *
- *		log.save_arguments(b); //you choose what to save
- *		//if you dont want to log any parameters, than use save_func_start()
+ *		log.log_arguments(b); //you choose what to save
+ *		//if you dont want to log any parameters, than use log_func_start()
  *
- *		log.save_return_nothing();
+ *		log.log_return_nothing();
  *	}
  *	@endcode
  */
@@ -316,12 +316,12 @@ private:
 	LogLevels m_local_level;
 
 	template<typename T>
-	void save_argument(const T& value)
+	void log_argument(const T& value)
 	{
 		m_buff << value;
 	}
 
-	void save_arguments();
+	void log_arguments();
 
 public:
 	Logger(const std::source_location location = std::source_location::current());
@@ -366,8 +366,8 @@ public:
 	 *	@return initialization state (true or false)
 	 */
 
-	void save_error(const std::string&);
-	/*! @fn save_error(const std::string&)
+	void log_error(const std::string&);
+	/*! @fn log_error(const std::string&)
 	 *	@brief It saves error
 	 *
 	 *	Saves messages with error flag
@@ -375,15 +375,15 @@ public:
 	 *	@attention It won`t stop function execution!
 	 */
 
-	void save_warning(const std::string&);
-	/*! @fn save_warning(const std::string&)
+	void log_warning(const std::string&);
+	/*! @fn log_warning(const std::string&)
 	 *  @brief It saves warning
 	 *
 	 *  Saves message with warning flag
 	 */
 
-	void save_message(const std::string&);
-	/*! @fn save_message(const std::string&)
+	void log_message(const std::string&);
+	/*! @fn log_message(const std::string&)
 	 *  @brief It saves message
 	 *
 	 *   Saves message with information flag
@@ -406,25 +406,25 @@ public:
 	 */
 
 	template<typename T>
-	void save_return(const T& value)
+	void log_return(const T& value)
 	{
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			m_buff << value;
-			temp_wrap::save_return(m_buff.get(), m_location, m_local_level);
+			temp_wrap::log_return(m_buff.get(), m_location, m_local_level);
 			m_buff.clear();
 		}
 		else
-			this->save_return_nothing();
+			this->log_return_nothing();
 	}
-	/*! @fn save_return(const T&)
+	/*! @fn log_return(const T&)
 	 *	@brief It saves return value of funtion
 	 *
 	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
 	 */
 
-	void save_return_nothing();
-	/*! @fn save_return_nothing()
+	void log_return_nothing();
+	/*! @fn log_return_nothing()
 		@brief It save end of function execution
 
 		It saves end of function execution as information message
@@ -433,17 +433,17 @@ public:
 	*/
 
 	template<typename T, typename... Args>
-	void save_arguments(const T& first, Args&... args)
+	void log_arguments(const T& first, Args&... args)
 	{
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
-			save_argument(first);
-			save_arguments(std::forward<Args>(args)...);
+			log_argument(first);
+			log_arguments(std::forward<Args>(args)...);
 		}
 		else
-			this->save_func_start();
+			this->log_func_start();
 	}
-	/*! @fn save_arguments(const T& first, Args&... args)
+	/*! @fn log_arguments(const T& first, Args&... args)
 	 *	@brief It saves input arguments
 	 *
 	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
@@ -451,8 +451,8 @@ public:
 	 *	This method should be called at the beginning of parameterized function
 	 */
 
-	void save_func_start();
-	/*! @fn save_func_start()
+	void log_func_start();
+	/*! @fn log_func_start()
 		@brief It saves start of function
 
 		It saves message that function has successfully started

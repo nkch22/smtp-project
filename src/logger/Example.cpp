@@ -62,20 +62,20 @@ int main()
 void NoArgsNoRet()
 {
 	logger::Logger log;	   // creates logger variable
-	log.save_func_start(); // saves function start without arguments
+	log.log_func_start(); // saves function start without arguments
 
 	// some logic, that not need to be logged
 
-	log.save_return_nothing(); // saves function end
+	log.log_return_nothing(); // saves function end
 }
 int ArgsRet(int a)
 {
 	logger::Logger log;
-	log.save_arguments(a); // saves function start with a parameter (might be more parameters)
+	log.log_arguments(a); // saves function start with a parameter (might be more parameters)
 
 	int b = a++; // some logic, that not need to be logged
 
-	log.save_return(b); // saves function return with b output
+	log.log_return(b); // saves function return with b output
 	return b;
 }
 
@@ -86,18 +86,18 @@ int LocalLevel(int a)
 		logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
 	// Global log level won't be affected
 
-	log.save_arguments(a); // because of debug log level will be replaced with save_func_start()
+	log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
 
 	int b = a++; // some logic, that not need to be logged
 
-	log.save_return(b); // because of debug log level will be replaced with save_return_nothing()
+	log.log_return(b); // because of debug log level will be replaced with log_return_nothing()
 	return b;
 }
 
 int MessageOutput(int a, int b)
 {
 	logger::Logger log;
-	log.save_arguments(a, b);
+	log.log_arguments(a, b);
 
 	int c = 0;
 	try
@@ -108,32 +108,32 @@ int MessageOutput(int a, int b)
 	}
 	catch (std::invalid_argument& ex)
 	{
-		log.save_error(ex.what());	 // saves exception message with error flag
-		log.save_warning(ex.what()); // are also valid
-		log.save_message(ex.what()); // the only difference is message type flag
+		log.log_error(ex.what());	 // saves exception message with error flag
+		log.log_warning(ex.what()); // are also valid
+		log.log_message(ex.what()); // the only difference is message type flag
 
 		// you can use any of them based on your logic
 	}
 
-	log.save_return(c);
+	log.log_return(c);
 	return c;
 }
 
 
 void CustomClass(Test& obj) {
 	logger::Logger log;
-	log.save_arguments(obj); //if you have overloaded operator, just pass it to the method
+	log.log_arguments(obj); //if you have overloaded operator, just pass it to the method
 	//any type, that is not in default buffer operators, need to have overloaded one
 	// if dont and you want to log it, method will throw exception
 
-	log.save_return_nothing();
+	log.log_return_nothing();
 }
 
 void ArgsWithoutLogging(int*, int b) {
 	logger::Logger log;
 
-	log.save_arguments(b); //you choose what to save
-	//if you dont want to log any parameters, than use save_func_start()
+	log.log_arguments(b); //you choose what to save
+	//if you dont want to log any parameters, than use log_func_start()
 
-	log.save_return_nothing();
+	log.log_return_nothing();
 }

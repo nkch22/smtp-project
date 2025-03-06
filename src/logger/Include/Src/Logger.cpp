@@ -28,7 +28,7 @@ RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const u
 								{
 									while (!m_queue.empty())
 									{
-										save_message(m_queue.front());
+										flush_message(m_queue.front());
 										m_queue.pop();
 									}
 									break;
@@ -40,7 +40,7 @@ RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const u
 
 								while (!localQueue.empty())
 								{
-									save_message(localQueue.front());
+									flush_message(localQueue.front());
 									localQueue.pop();
 								}
 
@@ -86,7 +86,7 @@ void RealLogger::file_init(const unsigned int amount)
 	m_file = std::ofstream{buff_name};
 
 	if (error)
-		real_save("invalid output path, default will be used", WARNING, std::source_location::current(), m_level,
+		save_to_queue("invalid output path, default will be used", WARNING, std::source_location::current(), m_level,
 				  std::this_thread::get_id());
 }
 
@@ -120,7 +120,7 @@ void RealLogger::destroy()
 	m_instance = nullptr;
 }
 
-void RealLogger::real_save(const std::string& str, const MessageTypes type,
+void RealLogger::save_to_queue(const std::string& str, const MessageTypes type,
 								   const std::source_location& location, const LogLevels level, std::thread::id id)
 {
 	if (!m_do_flush) return;
@@ -143,7 +143,7 @@ LogLevels RealLogger::real_get_level()
 	return m_level;
 }
 
-void RealLogger::save_message(const Message& message)
+void RealLogger::flush_message(const Message& message)
 {
 	if (message.level == LOG_LEVEL_NO) return;
 
@@ -202,7 +202,7 @@ void RealLogger::handle_fatal_error(int)
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->save_message(Message{str, ERROR, std::source_location::current(),
+		buff->flush_message(Message{str, ERROR, std::source_location::current(),
 												 buff->real_get_level(), std::thread::id{}});
 	}
 
@@ -248,7 +248,7 @@ bool Logger::init(const LogLevels level, const std::string& save_path, const uns
 	if (result)
 	{
 		Logger log;
-		log.save_message("logger is successfully initialized");
+		log.log_message("logger is successfully initialized");
 	}
 
 	return result;
@@ -257,25 +257,25 @@ bool Logger::init(const LogLevels level, const std::string& save_path, const uns
 void Logger::destroy()
 {
 	auto buff = RealLogger::get_instance();
-	buff->real_save("logger is destroyed", INFORMATION, std::source_location::current(),
+	buff->save_to_queue("logger is destroyed", INFORMATION, std::source_location::current(),
 								 buff->real_get_level(), std::thread::id{});
 
 	RealLogger::destroy();
 }
 
-void Logger::save_error(const std::string& msg)
+void Logger::log_error(const std::string& msg)
 {
-	m_real->real_save(msg, ERROR, m_location, m_local_level);
+	m_real->save_to_queue(msg, ERROR, m_location, m_local_level);
 }
 
-void Logger::save_warning(const std::string& msg)
+void Logger::log_warning(const std::string& msg)
 {
-	m_real->real_save(msg, WARNING, m_location, m_local_level);
+	m_real->save_to_queue(msg, WARNING, m_location, m_local_level);
 }
 
-void Logger::save_message(const std::string& msg)
+void Logger::log_message(const std::string& msg)
 {
-	m_real->real_save(msg, INFORMATION, m_location, m_local_level);
+	m_real->save_to_queue(msg, INFORMATION, m_location, m_local_level);
 }
 
 void Logger::set_global_level(const LogLevels _level)
@@ -287,20 +287,20 @@ LogLevels Logger::get_global_level() const
 	return m_real->real_get_level();
 }
 
-void Logger::save_return_nothing()
+void Logger::log_return_nothing()
 {
 	if (m_local_level >= LOG_LEVEL_DEBUG)
-		m_real->real_save("successfully executed", INFORMATION, m_location, m_local_level);
+		m_real->save_to_queue("successfully executed", INFORMATION, m_location, m_local_level);
 }
 
-void Logger::save_func_start()
+void Logger::log_func_start()
 {
-	if (m_local_level >= LOG_LEVEL_DEBUG) m_real->real_save("started", INFORMATION, m_location, m_local_level);
+	if (m_local_level >= LOG_LEVEL_DEBUG) m_real->save_to_queue("started", INFORMATION, m_location, m_local_level);
 }
 
-void Logger::save_arguments()
+void Logger::log_arguments()
 {
-	m_real->real_save({"arguments: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
+	m_real->save_to_queue({"arguments: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
 	m_buff.clear();
 }
 
