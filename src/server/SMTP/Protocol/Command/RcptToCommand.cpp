@@ -14,6 +14,10 @@ Response RcptToCommand::CreateResponse(const Options& options)
 
 OptionalCommand RcptToCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<RcptToCommand>();
+    }
     return std::nullopt;
 }
 

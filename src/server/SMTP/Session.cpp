@@ -7,8 +7,9 @@ namespace SMTP
 
 Session::Session(std::shared_ptr<asio::io_context> io_context,
                  std::shared_ptr<asio::ssl::context> ssl_context,
+                 std::shared_ptr<SSL::SessionRegister> session_register,
                  std::shared_ptr<Protocol::Parser> smtp_parser)
-    : SSL::SessionBase{io_context, ssl_context}
+    : SSL::SessionBase{io_context, ssl_context, session_register}
     , m_smtp_parser{smtp_parser}
 {
 }

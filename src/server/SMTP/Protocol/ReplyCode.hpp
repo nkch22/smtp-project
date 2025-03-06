@@ -1,4 +1,14 @@
 #pragma once
+/**
+ * @file ReplyCode.hpp
+ * @author Oleksandr
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-04
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 
 #include <type_traits>
 

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <format>
+#include <print>
 
 namespace SMTP
 {
@@ -17,14 +18,14 @@ EhloCommand::EhloCommand(const std::string client_domain)
 Response EhloCommand::CreateResponse(const Options& options)
 {
     constexpr std::string_view extension_format{"250-{}\r\n"sv};
-    std::string response_string{""};
     const auto extensions{FillExtensions(options)};
+    std::string response_string{""};
+    response_string += std::format("{} greets {}\r\n", options.domain_name, m_client_domain);
     for(const auto& extension : extensions)
     {
         response_string += std::format(extension_format, extension);
     }
-    response_string += std::format("{} greets {}\r\n", options.domain_name, m_client_domain);
-    const Response response{ReplyCode::Ok, response_string};
+    const Response response{ReplyCode::Ok, response_string, false};
     return response;
 }
 
@@ -51,7 +52,21 @@ std::vector<std::string> EhloCommand::FillExtensions(const Options& options) con
 
 OptionalCommand EhloCommand::TryParseCommand(const std::string& request, const Options options)
 {
+    if(const auto position{request.find(COMMAND)};
+       position != std::string::npos)
+    {
+        auto client_name{request.substr(position + std::size(COMMAND))};
+        client_name = RemoveWhitespaces(client_name);
+        return std::make_unique<EhloCommand>(client_name);
+    }
     return std::nullopt;
+}
+
+std::string EhloCommand::RemoveWhitespaces(const std::string& string)
+{
+    auto copy{string};
+    copy.erase(std::remove_if(std::begin(copy), std::end(copy), ::isspace), std::end(copy));
+    return copy;
 }
 
 }

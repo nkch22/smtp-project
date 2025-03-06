@@ -14,6 +14,10 @@ Response AuthCommand::CreateResponse(const Options& options)
 
 OptionalCommand AuthCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<AuthCommand>();
+    }
     return std::nullopt;
 }
 

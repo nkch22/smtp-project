@@ -1,5 +1,14 @@
 #include "Response.hpp"
-
+/**
+ * @file Response.cpp
+ * @author Oleksandr (olexandrfedorych@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-04
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <format>
 
 namespace SMTP
@@ -8,8 +17,10 @@ namespace SMTP
 namespace Protocol
 {
 
-Response::Response(const ReplyCode reply_code, const OptionalMessage message)
-    : m_reply_code{reply_code}, m_message{message}
+Response::Response(const ReplyCode reply_code, const OptionalMessage message, const bool add_crlf)
+    : m_reply_code{reply_code}
+    , m_message{message}
+    , m_add_crlf{add_crlf}
 {
 }
 
@@ -25,11 +36,20 @@ Response::OptionalMessage Response::get_message() const noexcept
 
 std::string Response::CreateStringResponse() const noexcept
 {
-    if(!m_message.has_value())
+    std::string string_response{};
+    if(m_message.has_value())
     {
-        return std::format("{}\r\n", to_underlying(get_reply_code()), get_message().value());
+        string_response = std::format("{} {}", to_underlying(get_reply_code()), get_message().value());
     }
-    return std::format("{} {}\r\n", to_underlying(get_reply_code()), get_message().value());
+    else
+    {
+        string_response = std::format("{}", to_underlying(get_reply_code()));
+    }
+    if(m_add_crlf)
+    {
+        return std::format("{}\r\n", string_response);
+    }
+    return std::format("{}", string_response);
 }
 
 }

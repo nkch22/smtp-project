@@ -14,6 +14,10 @@ Response RsetCommand::CreateResponse(const Options& options)
 
 OptionalCommand RsetCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<RsetCommand>();
+    }
     return std::nullopt;
 }
 

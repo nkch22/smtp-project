@@ -14,6 +14,10 @@ Response NoopCommand::CreateResponse(const Options& options)
 
 OptionalCommand NoopCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<NoopCommand>();
+    }
     return std::nullopt;
 }
 

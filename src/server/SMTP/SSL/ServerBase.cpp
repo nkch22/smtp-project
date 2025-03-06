@@ -16,14 +16,13 @@ ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
     , m_started{false}
     , m_acceptor{*m_io_context}
     , m_endpoint{asio::ip::tcp::v4(), port}
-    , m_sessions{}
-    , m_sessions_mutex{}
+    , m_session_register{std::make_shared<SessionRegister>()}
 {
 }
 
 std::shared_ptr<SSL::SessionBase> ServerBase::CreateSession()
 {
-    return std::make_shared<SessionBase>(m_io_context, m_ssl_context);
+    return std::make_shared<SessionBase>(m_io_context, m_ssl_context, m_session_register);
 }
 
 void ServerBase::Start()
@@ -68,9 +67,8 @@ void ServerBase::Stop()
             return;
         }
         m_acceptor.close();
-        DisconnectAll();
+        m_session_register->Clear();
         m_started = false;
-        m_sessions.clear();
         OnStopped();
     }};
     m_io_context->post(stop_handler);
@@ -148,11 +146,7 @@ void ServerBase::DisconnectAll()
             return;
         }
         
-        std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
-        for(auto& session : m_sessions)
-        {
-            session->Disconnect();
-        }
+        m_session_register->DisconnectAll();
     }};
     m_io_context->dispatch(disconnect_all_handler);
 }
@@ -167,11 +161,7 @@ bool ServerBase::Multicast(const std::string_view data)
     {
         return true;
     }
-    std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
-    for(auto& session : m_sessions)
-    {
-        session->Send(data);
-    }
+    m_session_register->Multicast(data);
     return true;
 }
 

@@ -9,7 +9,8 @@ namespace SSL
 {
 
 SessionBase::SessionBase(std::shared_ptr<asio::io_context> io_context, 
-                         std::shared_ptr<asio::ssl::context> ssl_context)
+                         std::shared_ptr<asio::ssl::context> ssl_context, 
+                         std::shared_ptr<SessionRegister> session_register)
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
     , m_connected{false}
@@ -20,6 +21,7 @@ SessionBase::SessionBase(std::shared_ptr<asio::io_context> io_context,
     , m_receive_buffer{}
     , m_send_buffer{}
     , m_send_mutex{}
+    , m_session_register{session_register}
 {
 }
 
@@ -82,6 +84,7 @@ void SessionBase::Disconnect()
             m_connected = false;
             m_receiving = false;
             m_sending = false;
+            m_session_register->UnregisterSession(self);
             ClearBuffers();
             OnDisconnected();
         }};

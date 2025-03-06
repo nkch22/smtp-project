@@ -14,6 +14,10 @@ Response MailFromCommand::CreateResponse(const Options& options)
 
 OptionalCommand MailFromCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<MailFromCommand>();
+    }
     return std::nullopt;
 }
 

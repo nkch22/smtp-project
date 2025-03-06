@@ -14,6 +14,10 @@ Response DataCommand::CreateResponse(const Options& options)
 
 OptionalCommand DataCommand::TryParseCommand(const std::string& request, const Options& options)
 {
+    if(request.contains(COMMAND))
+    {
+        return std::make_unique<DataCommand>();
+    }
     return std::nullopt;
 }
 
