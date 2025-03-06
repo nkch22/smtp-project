@@ -6,122 +6,85 @@
   },
   "configurePresets": [
     {
-      "name": "DebugASan",
+      "name": "LinuxDebugASan",
       "description": "Debug build with address sanitizers",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
         "CMAKE_BUILD_TYPE": "Debug",
         "ASAN": "TRUE"
       }
     },
     {
-      "name": "DebugTSan",
+      "name": "LinuxDebugTSan",
       "description": "Debug build with thread sanitizers",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
         "CMAKE_BUILD_TYPE": "Debug",
         "TSAN": "TRUE"
       }
     },
     {
-      "name": "Release",
+      "name": "LinuxRelease",
       "description": "Release build",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": false,
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
-        "name": "windows-base",
-        "hidden": true,
-        "generator": "Ninja",
-        "binaryDir": "${sourceDir}/build/${presetName}",
-        "installDir": "${sourceDir}/install/${presetName}",
-        "cacheVariables": {
-            "CMAKE_C_COMPILER": "clang.exe",
-            "CMAKE_CXX_COMPILER": "clang.exe",
-            "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        },
-        "condition": {
-            "type": "equals",
-            "lhs": "${hostSystemName}",
-            "rhs": "Windows"
-        }
-    },
-    {
-      "name": "x64-debug-asan",
-      "displayName": "x64 Debug",
-      "inherits": "windows-base",
+      "name": "windows-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
       "architecture": {
         "value": "x64",
         "strategy": "external"
       },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "WindowsDebugASan",
+      "displayName": "Debug build with address sanitizers",
+      "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "ASAN": "TRUE"
       }
     },
     {
-      "name": "x64-debug-tsan",
-      "displayName": "x64 Debug",
+      "name": "WindowsRelease",
+      "displayName": "Release build",
       "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "WindowsDebugTsan",
+      "displayName": "Debug build with thread sanitizers",
+      "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "TSAN": "TRUE"
       }
-    },
-
-    {
-        "name": "x64-release",
-        "displayName": "x64 Release",
-        "inherits": "x64-debug",
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Release"
-        }
-    },
-    {
-        "name": "x86-debug-asan",
-        "displayName": "x86 Debug",
-        "inherits": "windows-base",
-        "architecture": {
-            "value": "x86",
-            "strategy": "external"
-        },
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Debug",
-            "ASAN": "TRUE"
-        }
-    },
-    {
-      "name": "x86-debug-tsan",
-      "displayName": "x86 Debug",
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "TSAN": "TRUE"
-      }
-    },
-    {
-        "name": "x86-release",
-        "displayName": "x86 Release",
-        "inherits": "x86-debug",
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Release"
-        }
     }
-    ]
+  ]
 }

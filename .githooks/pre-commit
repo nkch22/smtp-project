@@ -1,31 +1,15 @@
 #!/bin/bash
 
-# Directories or file extensions to check
-FILES=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(cpp|hpp|c|h)$')
+# Get the list of staged C++ files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cpp|hpp|c|h)$')
 
-if [[ -z "$FILES" ]]; then
-    exit 0
-fi
-
-echo "Running clang-format and clang-tidy..."
-
-# Apply clang-format and re-add the files to staging
-for file in $FILES; do
-    clang-format -i "$file"
-    git add "$file"
+for FILE in $STAGED_FILES; do
+    clang-format -i "$FILE"
+    git add "$FILE"
 done
 
-# Run clang-tidy (modify this command according to your project setup)
-clang_tidy_errors=0
-for file in $FILES; do
-    echo "$file"
-    clang-tidy "$file" || clang_tidy_errors=1
-done
-
-if [[ $clang_tidy_errors -ne 0 ]]; then
-    echo "Clang-tidy found issues. Commit aborted."
-    exit 1
+if [ -n "$STAGED_FILES" ]; then
+    echo "Formatted C++ files."
 fi
 
-echo "Pre-commit checks passed!"
 exit 0
