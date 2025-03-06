@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Include/Logger.h"
 #include <sstream>
 
 class Test
@@ -36,7 +36,7 @@ int LocalLevel(int a);
 
 int MessageOutput(int a, int b);
 
-void CustomClass(Test);
+void CustomClass(Test&);
 
 void ArgsWithoutLogging(int* a, int b);
 
@@ -120,7 +120,7 @@ int MessageOutput(int a, int b)
 }
 
 
-void CustomClass(Test obj) {
+void CustomClass(Test& obj) {
 	logger::Logger log;
 	log.save_arguments(obj); //if you have overloaded operator, just pass it to the method
 	//any type, that is not in default buffer operators, need to have overloaded one

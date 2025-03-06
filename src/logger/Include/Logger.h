@@ -1,6 +1,6 @@
 #pragma once
-#include "SharedInclude.h"
-#include "TemplateWrapper.h"
+#include "Src/SharedInclude.h"
+#include "Src/TemplateWrapper.h"
 
 /*!
  *	@file Logger.h
