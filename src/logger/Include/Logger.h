@@ -337,7 +337,7 @@ public:
 	/*! @fn destroy()
 	*	@brief Destroy method
 	* 
-	*	Destroyes global values
+	*	Destroys global values
 	*/
 
 	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,

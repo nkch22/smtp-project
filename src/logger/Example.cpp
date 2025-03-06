@@ -1,6 +1,8 @@
 #include "Include/Logger.h"
 #include <sstream>
 
+namespace example
+{
 class Test
 {
 private:
@@ -29,39 +31,9 @@ public:
 	}
 };
 
-void NoArgsNoRet();
-int ArgsRet(int a);
-
-int LocalLevel(int a);
-
-int MessageOutput(int a, int b);
-
-void CustomClass(Test&);
-
-void ArgsWithoutLogging(int* a, int b);
-
-int main()
-{
-	logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
-	//every instance of Logger will have trace log level
-
-	NoArgsNoRet();
-	ArgsRet(5);
-
-	LocalLevel(5);
-
-	MessageOutput(1, 0);
-
-	Test t;
-	CustomClass(t);
-
-	int a = 6;
-	ArgsWithoutLogging(&a, 5);
-}
-
 void NoArgsNoRet()
 {
-	logger::Logger log;	   // creates logger variable
+	logger::Logger log;	  // creates logger variable
 	log.log_func_start(); // saves function start without arguments
 
 	// some logic, that not need to be logged
@@ -108,7 +80,7 @@ int MessageOutput(int a, int b)
 	}
 	catch (std::invalid_argument& ex)
 	{
-		log.log_error(ex.what());	 // saves exception message with error flag
+		log.log_error(ex.what());	// saves exception message with error flag
 		log.log_warning(ex.what()); // are also valid
 		log.log_message(ex.what()); // the only difference is message type flag
 
@@ -119,21 +91,45 @@ int MessageOutput(int a, int b)
 	return c;
 }
 
-
-void CustomClass(Test& obj) {
+void CustomClass(Test& obj)
+{
 	logger::Logger log;
-	log.log_arguments(obj); //if you have overloaded operator, just pass it to the method
-	//any type, that is not in default buffer operators, need to have overloaded one
-	// if dont and you want to log it, method will throw exception
+	log.log_arguments(obj); // if you have overloaded operator, just pass it to the method
+	// any type, that is not in default buffer operators, need to have overloaded one
+	//  if dont and you want to log it, method will throw exception
 
 	log.log_return_nothing();
 }
 
-void ArgsWithoutLogging(int*, int b) {
+void ArgsWithoutLogging(int*, int b)
+{
 	logger::Logger log;
 
-	log.log_arguments(b); //you choose what to save
-	//if you dont want to log any parameters, than use log_func_start()
+	log.log_arguments(b); // you choose what to save
+	// if you dont want to log any parameters, than use log_func_start()
 
 	log.log_return_nothing();
 }
+}
+
+using namespace example;
+
+int main()
+{
+	logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
+	//every instance of Logger will have trace log level
+
+	NoArgsNoRet();
+	ArgsRet(5);
+
+	LocalLevel(5);
+
+	MessageOutput(1, 0);
+
+	Test t;
+	CustomClass(t);
+
+	int a = 6;
+	ArgsWithoutLogging(&a, 5);
+}
+
