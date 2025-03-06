@@ -2,6 +2,8 @@
 #include "Src/SharedInclude.h"
 #include "Src/TemplateWrapper.h"
 
+class RealLogger;
+
 /*!
  *	@file Logger.h
  *	@brief Interface of Logger shared library
@@ -150,9 +152,6 @@
  *	}
  *	@endcode
  */
-
-class RealLogger;
-
 namespace logger
 {
 /*! @def DEFAULT_LEVEL
@@ -189,7 +188,6 @@ namespace logger
  *
  *	This class is used to transform different variables into std::stiring for futher saving by Logger
  */
-
 class Buffer
 {
 private:
@@ -244,7 +242,6 @@ public:
 	{
 		throw std::exception{};
 	}
-
 	/*! @fn operator<<(const std::string&)
 	 * @brief Default overloaded operator<< with const string&.
 	 * Spesifies how buffer writes given variables into string buffer
@@ -257,16 +254,16 @@ public:
 	/*! @fn operator<<(const char*)
 		@brief Default overloaded operator<< with const char*
 	*/
-	/*! @fn operator<<(const int&)
+	/*! @fn operator<<(const int)
 		@brief Default overloaded operator<< with const int&
 	*/
-	/*! @fn operator<<(const unsigned int&)
+	/*! @fn operator<<(const unsigned int)
 		@brief Default overloaded operator<< with const unsigned int&
 	*/
-	/*! @fn operator<<(const double&)
+	/*! @fn operator<<(const double)
 		@brief Default overloaded operator<< with const double&
 	*/
-	/*! @fn operator<<(const bool&)
+	/*! @fn operator<<(const bool)
 		@brief Default overloaded operator<< with const bool&
 	*/
 	/*! @fn operator<<(const T&)
@@ -301,8 +298,6 @@ public:
  *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
  */
-
-
 class Logger
 {
 private:
@@ -339,6 +334,11 @@ public:
 	 */
 
 	static void destroy();
+	/*! @fn destroy()
+	*	@brief Destroy method
+	* 
+	*	Destroyes global values
+	*/
 
 	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = false,
