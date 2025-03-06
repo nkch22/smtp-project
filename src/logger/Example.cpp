@@ -1,6 +1,34 @@
 #include "Logger.h"
 #include <sstream>
 
+class Test
+{
+private:
+	int a;
+
+	int* ptr;
+
+public:
+	Test() : a{5}, ptr{new int{a}} {}
+	~Test() { delete ptr; }
+
+	// all you need to have to pass custom class into logger save args and return methods is this operator overload
+	friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
+	{
+		buff << obj.a; // Buffer has default operator for int, see Buffer Documentation page for more
+
+		// if there is none you need, than make it yourself
+		// the main goal of every buffer operator<< is to convert data into std::string
+		std::stringstream st;
+		st << obj.ptr;
+		buff << st.str();
+
+		// if you dont want to log value of some variable, than dont do it
+
+		return buff;
+	}
+};
+
 void NoArgsNoRet();
 int ArgsRet(int a);
 
@@ -8,7 +36,6 @@ int LocalLevel(int a);
 
 int MessageOutput(int a, int b);
 
-class Test;
 void CustomClass(Test);
 
 void ArgsWithoutLogging(int* a, int b);
@@ -92,36 +119,7 @@ int MessageOutput(int a, int b)
 	return c;
 }
 
-class Test
-{
-private:
-	int a;
 
-	int* ptr;
-
-	void* none;
-
-public:
-	Test() : a{5}, ptr{&a}, none{nullptr} {}
-
-	// all you need to have to pass custom class into logger save args and return methods is this operator overload
-	friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
-	{
-		buff << obj.a; //Buffer has default operator for int, see Buffer Documentation page for more 
-
-		//if there is none you need, than make it yourself
-		//the main goal of every buffer operator<< is to convert data into std::string
-		std::stringstream st;
-		st << obj.ptr;
-		buff << st.str();
-
-		//if you dont want to log value of some variable, than dont do it
-		
-		//no logging for 'none' void ptr
-
-		return buff;
-	}
-};
 void CustomClass(Test obj) {
 	logger::Logger log;
 	log.save_arguments(obj); //if you have overloaded operator, just pass it to the method
@@ -131,7 +129,7 @@ void CustomClass(Test obj) {
 	log.save_return_nothing();
 }
 
-void ArgsWithoutLogging(int* a, int b) {
+void ArgsWithoutLogging(int*, int b) {
 	logger::Logger log;
 
 	log.save_arguments(b); //you choose what to save

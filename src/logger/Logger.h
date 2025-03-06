@@ -1,19 +1,6 @@
 #pragma once
-
-#include <algorithm>
-#include <chrono>
-#include <condition_variable>
-#include <csignal>
-#include <exception>
-#include <filesystem>
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <source_location>
-#include <string>
-#include <thread>
+#include "SharedInclude.h"
+#include "TemplateWrapper.h"
 
 /*!
  *	@file Logger.h
@@ -164,20 +151,10 @@
  *	@endcode
  */
 
+class RealLogger;
+
 namespace logger
 {
-
-#define DEFAULT_LEVEL LOG_LEVEL_PROD
-#define DEFAULT_AMOUNT 30
-#define DEFAULT_PATH ""
-#define DEFAULT_CONFIG false
-#define DEFAULT_FLUSH true
-
-#define DEFAULT_COLOR "\033[0m"
-#define ERROR_COLOR "\033[41m"
-#define WARNING_COLOR "\033[43m"
-#define INFORMATION_COLOR "\033[42m"
-
 /*! @def DEFAULT_LEVEL
  *	@brief Default log level
  */
@@ -206,15 +183,6 @@ namespace logger
 /*! @def INFORMATION_COLOR
  *	@brief Information console color
  */
-
-//! Enum for log levels
-enum LogLevels
-{
-	LOG_LEVEL_NO,
-	LOG_LEVEL_PROD,
-	LOG_LEVEL_DEBUG,
-	LOG_LEVEL_TRACE
-};
 
 /*! @class Buffer
  *  @brief Logger class, that is used to transform variables into string
@@ -266,10 +234,10 @@ public:
 	Buffer& operator<<(const std::string&);
 	Buffer& operator<<(const char*);
 
-	Buffer& operator<<(const int&);
-	Buffer& operator<<(const unsigned int&);
-	Buffer& operator<<(const double&);
-	Buffer& operator<<(const bool&);
+	Buffer& operator<<(const int);
+	Buffer& operator<<(const unsigned int);
+	Buffer& operator<<(const double);
+	Buffer& operator<<(const bool);
 
 	template<typename T>
 	Buffer& operator<<(const T&)
@@ -333,77 +301,11 @@ public:
  *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
  */
+
+
 class Logger
 {
 private:
-	enum MessageTypes
-	{
-		ERROR,
-		WARNING,
-		INFORMATION
-	};
-
-	class RealLogger
-	{
-	private:
-		struct Message
-		{
-			std::string msg;
-			Logger::MessageTypes type;
-			std::source_location location;
-			LogLevels level;
-			std::thread::id thr_id;
-		};
-
-		using queue = std::queue<Message>;
-
-		static RealLogger* m_instance;
-
-		static LogLevels m_level;
-		static std::string m_output_path;
-		static std::ofstream m_file;
-
-		static std::mutex m_mutex;
-		static std::condition_variable m_con_var;
-
-		static bool m_end;
-		static bool m_do_flush;
-		static bool m_is_config;
-
-		static unsigned int m_amount;
-
-		static queue m_queue;
-		static std::thread m_thr;
-
-		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&, const bool&);
-
-		~RealLogger() = default;
-
-		static void file_init(const unsigned int&);
-
-	public:
-		static RealLogger* get_instance(const LogLevels& = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
-										const unsigned int& amount = DEFAULT_AMOUNT,
-										const bool& is_config = DEFAULT_CONFIG, const bool& do_flush = DEFAULT_FLUSH);
-
-		static void destroy();
-
-		static void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
-							  const LogLevels& level, std::thread::id id = std::this_thread::get_id());
-
-		static void real_set_level(const LogLevels&);
-		static LogLevels real_get_level();
-
-		static void save_message(const Message&);
-
-		static void handle_fatal_error(int);
-
-		static void real_stop_config();
-
-		static void set_output(const std::string&);
-
-		static void real_set_flush(const bool&);
-	};
 
 	RealLogger* m_real;
 
@@ -421,8 +323,6 @@ private:
 
 	void save_arguments();
 
-	static void destroy();
-
 public:
 	Logger(const std::source_location location = std::source_location::current());
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
@@ -438,9 +338,11 @@ public:
 	 *	Trivial destructor
 	 */
 
-	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int& amount = DEFAULT_AMOUNT, const bool& is_config = false,
-					 const bool& do_flush = true);
+	static void destroy();
+
+	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
+					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = false,
+					 const bool do_flush = true);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -487,7 +389,7 @@ public:
 	 *   Saves message with information flag
 	 */
 
-	void set_global_level(const LogLevels&);
+	void set_global_level(const LogLevels);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
@@ -509,7 +411,7 @@ public:
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			m_buff << value;
-			m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
+			temp_wrap::save_return(m_buff.get(), m_location, m_local_level);
 			m_buff.clear();
 		}
 		else
@@ -556,7 +458,7 @@ public:
 		It saves message that function has successfully started
 	*/
 
-	void set_local_level(const LogLevels&);
+	void set_local_level(const LogLevels);
 	/*! @fn set_local_level(const LogLevels&)
 	 *	@brief Local log level setter
 	 *
@@ -589,7 +491,7 @@ public:
 	 *	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
 	 */
 
-	static void set_flush(const bool&);
+	static void set_flush(const bool);
 	/*! @fn set_flush(const bool&)
 	 *	@brief Flush setter
 	 *
