@@ -25,14 +25,6 @@ public:
 
 	static std::string ConvertToQuotedPrintableHeader(const std::string& text);
 
-	static std::shared_ptr<MimeEntity> CreateBasicEmail(const std::string& from, const std::string& to,
-														const std::string& subject, const std::string& body,
-														bool isHtml = false);
-
-	static std::shared_ptr<MimeEntity> CreateMultipartEmail(const std::string& from, const std::string& to,
-															const std::string& subject, const std::string& body,
-															const std::vector<std::string>& attachmentPaths);
-
 	static std::string GetContentTypeDescription(const ContentType& contentType);
 
 	static std::string NormalizeHeaderFieldName(const std::string& name);
