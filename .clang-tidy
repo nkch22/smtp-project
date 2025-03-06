@@ -117,4 +117,3 @@ CheckOptions:
   - key: readability-identifier-naming.GlobalVariablePattern
     value: '^(g_|s_)[a-z][a-z0-9_]*$'
 ...
-
