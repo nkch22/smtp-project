@@ -43,21 +43,24 @@ Logger::RealLogger::RealLogger(const LogLevels& _level, const std::string& _save
 
 	m_thr = std::thread{[]
 						{
+							std::unique_lock<std::mutex> lock{m_mutex};
 							while (true)
 							{
-								Message message;
-								{
-									std::unique_lock<std::mutex> lock{m_mutex};
+								m_con_var.wait(lock, [] { return m_end || (!m_queue.empty() && !m_is_config); });
 
-									m_con_var.wait(lock, [] { return m_end || (!m_queue.empty() && !m_is_config); });
+								if (m_end && (m_queue.empty() || m_is_config)) return;
 
-									if (m_end && (m_queue.empty() || m_is_config)) return;
+								Logger::RealLogger::queue localQueue;
+								localQueue.swap(m_queue);
 
-									message = m_queue.front();
-									m_queue.pop();
+								lock.unlock();
+
+								while (!localQueue.empty()) {
+									save_message(localQueue.front());
+									localQueue.pop();
 								}
 
-								save_message(message);
+								lock.lock();
 							}
 						}};
 };
