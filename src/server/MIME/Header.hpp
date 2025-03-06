@@ -36,6 +36,9 @@ public:
 
 	bool HasFieldCaseInsensitive(const std::string& name) const;
 	std::string GetFieldCaseInsensitive(const std::string& name) const;
+	
+	// Return all header fields
+	const std::map<std::string, std::string>& GetAllFields() const;
 
 public:
 	std::string EncodeFieldValue(const std::string& value, const std::string& charset = "UTF-8") const;

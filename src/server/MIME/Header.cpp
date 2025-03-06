@@ -231,4 +231,9 @@ std::string Header::DecodeFieldValue(const std::string& encoded_value) const
 	return result;
 }
 
+const std::map<std::string, std::string>& Header::GetAllFields() const
+{
+	return m_fields;
+}
+
 } // namespace ISXMime
