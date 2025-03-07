@@ -2,9 +2,9 @@
 
 #include <map>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
-#include <random>
 
 #include "ContentType.hpp"
 #include "MimeEntity.hpp"
@@ -35,10 +35,10 @@ public:
 	static std::string GenerateMimeBoundary();
 	static std::string EncodeFilename(const std::string& filename, const std::string& charset = "UTF-8");
 	static std::string DecodeFilename(const std::string& encoded_filename);
-	
+
 	// RFC 2231 support for parameter value continuations
-	static std::string EncodeParameterValue(const std::string& name, const std::string& value, 
-                                           const std::string& charset = "UTF-8");
+	static std::string EncodeParameterValue(const std::string& name, const std::string& value,
+											const std::string& charset = "UTF-8");
 
 	std::string DecodeBase64(const std::string& encoded_text);
 	std::string DecodeQuotedPrintable(const std::string& encoded_text);

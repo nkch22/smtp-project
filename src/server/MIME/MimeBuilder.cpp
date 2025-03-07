@@ -13,21 +13,76 @@
 namespace ISXMime
 {
 
-MimeBuilder::MimeBuilder() = default;
+MimeBuilder::MimeBuilder() : m_email_type(EmailType::Simple), m_type_manually_set(false) {}
+
+MimeBuilder MimeBuilder::Create()
+{
+	return {};
+}
 
 MimeBuilder MimeBuilder::CreateTextEmail()
 {
-	return {};
+	auto builder = Create();
+	builder.SetEmailType(EmailType::Simple);
+	return builder;
 }
 
 MimeBuilder MimeBuilder::CreateHtmlEmail()
 {
-	return {};
+	auto builder = Create();
+	builder.SetEmailType(EmailType::Simple);
+	return builder;
 }
 
 MimeBuilder MimeBuilder::CreateMultipartEmail()
 {
-	return {};
+	auto builder = Create();
+	builder.SetEmailType(EmailType::Alternative);
+	return builder;
+}
+
+MimeBuilder& MimeBuilder::SetEmailType(EmailType type)
+{
+	m_email_type = type;
+	m_type_manually_set = true;
+	return *this;
+}
+
+EmailType MimeBuilder::GetEmailType() const
+{
+	return m_email_type;
+}
+
+void MimeBuilder::UpdateEmailType()
+{
+	if (m_type_manually_set) return;
+
+	bool has_inline_attachments = false;
+	for (const auto& attachment : m_attachments)
+	{
+		if (attachment.is_inline)
+		{
+			has_inline_attachments = true;
+			break;
+		}
+	}
+
+	// determine email type based on content
+	if (!m_attachments.empty())
+	{
+		if (has_inline_attachments)
+			m_email_type = EmailType::Related;
+		else
+			m_email_type = EmailType::Mixed;
+	}
+	else if (m_content.text_body.has_value() && m_content.html_body.has_value())
+	{
+		m_email_type = EmailType::Alternative;
+	}
+	else
+	{
+		m_email_type = EmailType::Simple;
+	}
 }
 
 MimeBuilder& MimeBuilder::From(const std::string& from)
@@ -75,10 +130,12 @@ MimeBuilder& MimeBuilder::AddCustomHeader(const std::string& name, const std::st
 	return *this;
 }
 
+// modified content methods to update email type automatically
 MimeBuilder& MimeBuilder::TextBody(const std::string& text, const std::string& charset)
 {
 	m_content.text_body = text;
 	m_content.text_charset = charset;
+	UpdateEmailType();
 	return *this;
 }
 
@@ -86,6 +143,7 @@ MimeBuilder& MimeBuilder::HtmlBody(const std::string& html, const std::string& c
 {
 	m_content.html_body = html;
 	m_content.html_charset = charset;
+	UpdateEmailType();
 	return *this;
 }
 
@@ -113,6 +171,7 @@ MimeBuilder& MimeBuilder::AddAttachment(const std::string& filePath)
 	attachment.is_inline = false;
 
 	m_attachments.push_back(std::move(attachment));
+	UpdateEmailType();
 	return *this;
 }
 
@@ -126,6 +185,7 @@ MimeBuilder& MimeBuilder::AddAttachment(const std::string& fileName, const std::
 	attachment.is_inline = false;
 
 	m_attachments.push_back(std::move(attachment));
+	UpdateEmailType();
 	return *this;
 }
 
@@ -154,6 +214,7 @@ MimeBuilder& MimeBuilder::AddInlineAttachment(const std::string& filePath, const
 	attachment.is_inline = true;
 
 	m_attachments.push_back(std::move(attachment));
+	UpdateEmailType();
 	return *this;
 }
 
@@ -168,6 +229,7 @@ MimeBuilder& MimeBuilder::AddInlineAttachment(const std::string& fileName, const
 	attachment.is_inline = true;
 
 	m_attachments.push_back(std::move(attachment));
+	UpdateEmailType();
 	return *this;
 }
 
@@ -185,46 +247,110 @@ void MimeBuilder::ValidateRequiredFields() const
 std::shared_ptr<MimeEntity> MimeBuilder::Build()
 {
 	ValidateRequiredFields();
+	// final update of email type before building
+	UpdateEmailType();
+	return BuildBasedOnType();
+}
 
-	bool has_text = m_content.text_body.has_value();
-	bool has_html = m_content.html_body.has_value();
-	bool has_attachments = !m_attachments.empty();
-
-	std::shared_ptr<MimeEntity> content_entity;
-
-	if (has_text && has_html)
+std::shared_ptr<MimeEntity> MimeBuilder::BuildBasedOnType()
+{
+	switch (m_email_type)
 	{
-		// Multipart alternative for both text and HTML
-		content_entity = BuildMultipartAlternativeEmail();
-	}
-	else if (has_text)
+	case EmailType::Simple:
+		if (m_content.html_body.has_value())
+			return BuildHtmlOnlyEmail();
+		else
+			return BuildTextOnlyEmail();
+
+	case EmailType::Alternative:
+		return BuildMultipartAlternativeEmail();
+
+	case EmailType::Mixed:
 	{
-		// Text-only email
-		content_entity = BuildTextOnlyEmail();
-	}
-	else if (has_html)
-	{
-		// HTML-only email
-		content_entity = BuildHtmlOnlyEmail();
-	}
-	else
-	{
-		// Empty body with attachments only
-		content_entity = std::make_shared<MimeEntity>();
-		content_entity->GetHeader().SetContentType(ContentType::TextPlain());
-		content_entity->GetBody().Set("");
+		std::shared_ptr<MimeEntity> content_entity;
+
+		if (m_content.text_body.has_value() && m_content.html_body.has_value())
+			content_entity = BuildMultipartAlternativeEmail();
+		else if (m_content.html_body.has_value())
+			content_entity = BuildHtmlOnlyEmail();
+		else
+			content_entity = BuildTextOnlyEmail();
+
+		return BuildMultipartMixedEmail(content_entity);
 	}
 
-	AddStandardHeaders(content_entity);
+	case EmailType::Related:
+	{
+		std::shared_ptr<MimeEntity> content_entity;
 
-	if (has_attachments) return BuildMultipartMixedEmail(content_entity);
+		if (m_content.text_body.has_value() && m_content.html_body.has_value())
+			content_entity = BuildMultipartAlternativeEmail();
+		else if (m_content.html_body.has_value())
+			content_entity = BuildHtmlOnlyEmail();
+		else
+			content_entity = BuildTextOnlyEmail();
 
-	return content_entity;
+		return BuildMultipartRelatedEmail(content_entity);
+	}
+
+	default:
+		throw std::runtime_error("Unknown email type");
+	}
+}
+
+std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartRelatedEmail(std::shared_ptr<MimeEntity> contentEntity)
+{
+	auto entity = std::make_shared<MimeEntity>();
+	AddStandardHeaders(entity);
+
+	// create multipart/related content type with boundary
+	ContentType content_type = ContentType("multipart", "related");
+	std::string boundary = MimeUtils::GenerateMimeBoundary();
+	content_type.AddParameter("boundary", boundary);
+	entity->GetHeader().SetContentType(content_type);
+
+	// start building the body with preamble
+	std::stringstream body_stream;
+	body_stream << "This is a MIME multipart message.\r\n\r\n";
+
+	// add the content entity as the first part
+	body_stream << "--" << boundary << "\r\n";
+	body_stream << *contentEntity << "\r\n";
+
+	// add inline attachments
+	for (const auto& attachment : m_attachments)
+	{
+		if (attachment.is_inline)
+		{
+			body_stream << "--" << boundary << "\r\n";
+			auto attachment_entity = CreateAttachmentEntity(attachment);
+			body_stream << *attachment_entity << "\r\n";
+		}
+	}
+
+	// add regular attachments
+	for (const auto& attachment : m_attachments)
+	{
+		if (!attachment.is_inline)
+		{
+			body_stream << "--" << boundary << "\r\n";
+			auto attachment_entity = CreateAttachmentEntity(attachment);
+			body_stream << *attachment_entity << "\r\n";
+		}
+	}
+
+	body_stream << "--" << boundary << "--\r\n";
+
+	entity->GetBody().Set(body_stream.str());
+
+	return entity;
 }
 
 std::shared_ptr<MimeEntity> MimeBuilder::BuildTextOnlyEmail()
 {
 	auto entity = std::make_shared<MimeEntity>();
+	AddStandardHeaders(entity);
+
 	entity->GetHeader().SetContentType(ContentType::TextPlain());
 
 	if (m_content.text_charset.has_value())
@@ -244,6 +370,8 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildTextOnlyEmail()
 std::shared_ptr<MimeEntity> MimeBuilder::BuildHtmlOnlyEmail()
 {
 	auto entity = std::make_shared<MimeEntity>();
+	AddStandardHeaders(entity);
+
 	entity->GetHeader().SetContentType(ContentType::TextHtml());
 
 	if (m_content.html_charset.has_value())
@@ -263,18 +391,19 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildHtmlOnlyEmail()
 std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartAlternativeEmail()
 {
 	auto entity = std::make_shared<MimeEntity>();
+	AddStandardHeaders(entity);
 
-	// Create multipart/alternative content type with boundary
+	// create multipart/alternative content type with boundary
 	ContentType content_type = ContentType::MultipartAlternative();
 	std::string boundary = MimeUtils::GenerateMimeBoundary();
 	content_type.AddParameter("boundary", boundary);
 	entity->GetHeader().SetContentType(content_type);
 
-	// Start building the body with preamble
+	// start building the body with preamble
 	std::stringstream body_stream;
 	body_stream << "This is a MIME multipart message.\r\n\r\n";
 
-	// Add text part
+	// add text part
 	if (m_content.text_body.has_value())
 	{
 		body_stream << "--" << boundary << "\r\n";
@@ -287,7 +416,7 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartAlternativeEmail()
 		body_stream << qp_encoder->Encode(text_data) << "\r\n\r\n";
 	}
 
-	// Add HTML part
+	// add HTML part
 	if (m_content.html_body.has_value())
 	{
 		body_stream << "--" << boundary << "\r\n";
@@ -300,7 +429,6 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartAlternativeEmail()
 		body_stream << qp_encoder->Encode(html_data) << "\r\n\r\n";
 	}
 
-	// Close with boundary
 	body_stream << "--" << boundary << "--\r\n";
 
 	entity->GetBody().Set(body_stream.str());
@@ -312,10 +440,8 @@ std::shared_ptr<MimeEntity> MimeBuilder::CreateAttachmentEntity(const Attachment
 {
 	auto entity = std::make_shared<MimeEntity>();
 
-	// Set content type
 	entity->GetHeader().SetContentType(ContentType(attachment.mime_type));
 
-	// Set content transfer encoding
 	entity->GetHeader().SetContentTransferEncoding(ContentTransferEncoding(ContentTransferEncoding::BASE64));
 
 	// Handle filename encoding and Content-Disposition
@@ -334,7 +460,7 @@ std::shared_ptr<MimeEntity> MimeBuilder::CreateAttachmentEntity(const Attachment
 										 + MimeUtils::EncodeParameterValue("filename", attachment.file_name));
 	}
 
-	// Add Content-ID for inline attachments
+	// add Content-ID for inline attachments
 	if (attachment.is_inline && attachment.content_id.has_value())
 	{
 		std::string content_id = *attachment.content_id;
@@ -343,7 +469,7 @@ std::shared_ptr<MimeEntity> MimeBuilder::CreateAttachmentEntity(const Attachment
 		entity->GetHeader().AddField("Content-ID", content_id);
 	}
 
-	// Encode the data
+	// encode the data
 	auto base64_encoder = ISXEncoding::EncoderFactory::CreateEncoder("base64");
 	entity->GetBody().Set(base64_encoder->Encode(attachment.data));
 
@@ -353,44 +479,30 @@ std::shared_ptr<MimeEntity> MimeBuilder::CreateAttachmentEntity(const Attachment
 std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartMixedEmail(std::shared_ptr<MimeEntity> contentEntity)
 {
 	auto entity = std::make_shared<MimeEntity>();
+	AddStandardHeaders(entity);
 
-	// Create multipart/mixed content type with boundary
+	// create multipart/mixed content type with boundary
 	ContentType content_type = ContentType::MultipartMixed();
 	std::string boundary = MimeUtils::GenerateMimeBoundary();
 	content_type.AddParameter("boundary", boundary);
 	entity->GetHeader().SetContentType(content_type);
 
-	// Copy all headers from content entity except Content-Type and Content-Transfer-Encoding
-	auto& content_header = contentEntity->GetHeader();
-	auto& entity_header = entity->GetHeader();
-
-	for (const auto& field_pair : content_header.GetAllFields())
-	{
-		const std::string& name = field_pair.first;
-		const std::string& value = field_pair.second;
-
-		if (!Header::CaseInsensitiveCompare(name, "Content-Type")
-			&& !Header::CaseInsensitiveCompare(name, "Content-Transfer-Encoding"))
-		{
-			entity_header.AddField(name, value);
-		}
-	}
-
-	// Start building the body with preamble
+	// start building the body with preamble
 	std::stringstream body_stream;
 	body_stream << "This is a MIME multipart message.\r\n\r\n";
 
-	// Add the content part
+	// add the content part
 	body_stream << "--" << boundary << "\r\n";
 
-	// Add content headers
-	body_stream << "Content-Type: " << content_header.GetContentType().Str() << "\r\n";
-	body_stream << "Content-Transfer-Encoding: " << content_header.GetContentTransferEncoding().Str() << "\r\n\r\n";
+	// add content headers
+	body_stream << "Content-Type: " << contentEntity->GetHeader().GetContentType().Str() << "\r\n";
+	body_stream << "Content-Transfer-Encoding: " << contentEntity->GetHeader().GetContentTransferEncoding().Str()
+				<< "\r\n\r\n";
 
-	// Add content body
+	// add content body
 	body_stream << contentEntity->GetBody().Content() << "\r\n\r\n";
 
-	// Add all attachments
+	// add all attachments
 	for (const auto& attachment : m_attachments)
 	{
 		auto attachment_entity = CreateAttachmentEntity(attachment);
@@ -400,7 +512,6 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartMixedEmail(std::shared_pt
 		body_stream << attachment_entity->GetBody().Content() << "\r\n\r\n";
 	}
 
-	// Close with boundary
 	body_stream << "--" << boundary << "--\r\n";
 
 	entity->GetBody().Set(body_stream.str());
@@ -410,33 +521,26 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartMixedEmail(std::shared_pt
 
 void MimeBuilder::AddStandardHeaders(std::shared_ptr<MimeEntity> entity)
 {
-	// Add required headers
 	entity->GetHeader().AddField("From", m_from);
 	entity->GetHeader().AddField("To", m_to);
 
-	// Add subject with proper encoding if needed
 	if (!m_subject.empty()) entity->GetHeader().AddField("Subject", entity->GetHeader().EncodeFieldValue(m_subject));
 
-	// Add optional standard headers
 	if (!m_cc.empty()) entity->GetHeader().AddField("Cc", m_cc);
 	if (!m_bcc.empty()) entity->GetHeader().AddField("Bcc", m_bcc);
 	if (!m_reply_to.empty()) entity->GetHeader().AddField("Reply-To", m_reply_to);
 
-	// Add custom headers
 	for (const auto& header_pair : m_custom_headers)
 		entity->GetHeader().AddField(header_pair.first, header_pair.second);
 
-	// Add standard MIME headers
 	entity->GetHeader().AddField("MIME-Version", "1.0");
 
-	// Add date header
 	auto now = std::chrono::system_clock::now();
 	auto time = std::chrono::system_clock::to_time_t(now);
 	char time_buffer[128];
 	std::strftime(time_buffer, sizeof(time_buffer), "%a, %d %b %Y %H:%M:%S %z", std::localtime(&time));
 	entity->GetHeader().AddField("Date", time_buffer);
 
-	// Add Message-ID header
 	std::stringstream msg_id;
 	msg_id << "<" << std::hex << time << "." << reinterpret_cast<uintptr_t>(this) << "@"
 		   << (m_from.find('@') != std::string::npos ? m_from.substr(m_from.find('@') + 1) : "localhost") << ">";

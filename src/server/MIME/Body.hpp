@@ -1,6 +1,8 @@
 #pragma once
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -8,6 +10,20 @@
 namespace ISXMime
 {
 class MimeEntity;
+class ContentType;
+
+enum class MultipartType
+{
+	NONE,
+	MIXED,
+	ALTERNATIVE,
+	RELATED,
+	DIGEST,
+	FORM,
+	REPORT,
+	SIGNED,
+	ENCRYPTED
+};
 
 class Body
 {
@@ -48,17 +64,58 @@ public:
 	std::shared_ptr<MimeEntity> GetPart(size_t index) const;
 	size_t PartCount() const;
 
+	void SetMultipartType(MultipartType type);
+	MultipartType GetMultipartType() const;
+	bool IsMultipart() const;
+
+public:
+	std::shared_ptr<MimeEntity> GetPartByContentType(const std::string& contentType) const;
+	std::shared_ptr<MimeEntity> GetPartByContentId(const std::string& contentId) const;
+	std::vector<std::shared_ptr<MimeEntity>> GetPartsByContentType(const std::string& contentType) const;
+
+	std::vector<std::shared_ptr<MimeEntity>> FindParts(const std::function<bool(const MimeEntity&)>& predicate) const;
+
+	std::vector<std::shared_ptr<MimeEntity>> FindPartsRecursive(
+		const std::function<bool(const MimeEntity&)>& predicate) const;
+
+public:
+	std::shared_ptr<MimeEntity> GetTextPart() const;
+	std::shared_ptr<MimeEntity> GetHtmlPart() const;
+	std::vector<std::shared_ptr<MimeEntity>> GetAttachments() const;
+	std::vector<std::shared_ptr<MimeEntity>> GetInlineAttachments() const;
+
+public:
+	void CreateMultipartBody(const std::vector<std::shared_ptr<MimeEntity>>& parts,
+							 MultipartType type = MultipartType::MIXED);
+
+	std::vector<uint8_t> GetBinaryContent() const;
+	void SetBinaryContent(const std::vector<uint8_t>& data);
+
 public:
 	friend std::ostream& operator<<(std::ostream& os, const Body& body);
 
-	bool IsMultipart() const;
+private:
+	void CollectPartsRecursive(const std::shared_ptr<MimeEntity>& entity,
+							   const std::function<bool(const MimeEntity&)>& predicate,
+							   std::vector<std::shared_ptr<MimeEntity>>& result) const;
+
+	std::string BuildMultipartContent() const;
 
 private:
 	class Impl;
 	std::unique_ptr<Impl> m_p_impl;
 };
 
-// Stream operator declaration
 std::ostream& operator<<(std::ostream& os, const Body& body);
+
+namespace BodyHelpers
+{
+std::string MultipartTypeToString(MultipartType type);
+MultipartType StringToMultipartType(const std::string& typeStr);
+
+ContentType CreateContentType(MultipartType type, const std::string& boundary);
+
+MultipartType ExtractMultipartType(const ContentType& contentType);
+} // namespace BodyHelpers
 
 } // namespace ISXMime

@@ -158,6 +158,27 @@ std::string MimeUtils::EncodeParameterValue(const std::string& name, const std::
 	return name + "*=" + charset + "''" + encoded;
 }
 
+std::string MimeUtils::DecodeBase64(const std::string& encoded_text)
+{
+	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("base64");
+	if (!encoder)
+		throw MimeException("Base64 encoder not available");
+
+	std::vector<uint8_t> decoded = encoder->Decode(encoded_text);
+
+	return {decoded.begin(), decoded.end()};
+}
+
+std::string MimeUtils::DecodeQuotedPrintable(const std::string& encoded_text)
+{
+	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("quoted-printable");
+	if (!encoder)
+		throw MimeException("Quoted-Printable encoder not available");
+
+	std::vector<uint8_t> decoded = encoder->Decode(encoded_text);
+
+	return {decoded.begin(), decoded.end()};
+}
 
 std::string MimeUtils::GetFileExtensionForMimeType(const ContentType& contentType)
 {
@@ -250,6 +271,14 @@ const std::map<std::string, std::string>& MimeUtils::GetCommonMimeTypes()
 																		 {"multipart/form-data", "MIME form data"}};
 
 	return COMMON_MIME_TYPES;
+}
+
+bool MimeUtils::CaseInsensitiveCompare(const std::string& a, const std::string& b)
+{
+	if (a.size() != b.size()) return false;
+
+	return std::equal(a.begin(), a.end(), b.begin(),
+					  [](char a_char, char b_char) { return std::tolower(a_char) == std::tolower(b_char); });
 }
 
 } // namespace ISXMime

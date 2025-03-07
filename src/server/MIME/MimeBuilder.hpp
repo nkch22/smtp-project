@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ContentType.hpp"
 #include "MimeEntity.hpp"
@@ -11,9 +12,18 @@
 namespace ISXMime
 {
 
+enum class EmailType
+{
+	Simple,       // Single part (text or html only)
+	Alternative,  // Multipart/alternative (text and html versions)
+	Mixed,        // Multipart/mixed (with attachments)
+	Related       // Multipart/related (with inline attachments)
+};
+
 class MimeBuilder
 {
 public:
+	// Standard builder methods for email headers
 	MimeBuilder& From(const std::string& from);
 	MimeBuilder& To(const std::string& to);
 	MimeBuilder& Subject(const std::string& subject);
@@ -23,10 +33,12 @@ public:
 	MimeBuilder& AddCustomHeader(const std::string& name, const std::string& value);
 
 public:
+	// Content methods - these will automatically update the email type
 	MimeBuilder& TextBody(const std::string& text, const std::string& charset = "UTF-8");
 	MimeBuilder& HtmlBody(const std::string& html, const std::string& charset = "UTF-8");
 
 public:
+	// Attachment methods - these will automatically update the email type to Mixed or Related
 	MimeBuilder& AddAttachment(const std::string& filePath);
 	MimeBuilder& AddAttachment(const std::string& fileName, const std::vector<uint8_t>& data,
 							   const std::string& mimeType = "application/octet-stream");
@@ -36,11 +48,20 @@ public:
 									 const std::string& mimeType = "application/octet-stream");
 
 public:
+	// Manual email type setting (optional, will be determined automatically if not set)
+	MimeBuilder& SetEmailType(EmailType type);
+	EmailType GetEmailType() const;
+
+public:
 	std::shared_ptr<MimeEntity> Build();
 	std::string ToString();
 	bool SaveToFile(const std::string& filePath);
 
 public:
+	// Single factory method that replaces the three specific ones
+	static MimeBuilder Create();
+	
+	// Keep these for backward compatibility
 	static MimeBuilder CreateTextEmail();
 	static MimeBuilder CreateHtmlEmail();
 	static MimeBuilder CreateMultipartEmail();
@@ -76,6 +97,12 @@ private:
 	std::string m_bcc;
 	std::string m_reply_to;
 	std::map<std::string, std::string> m_custom_headers;
+	EmailType m_email_type;
+	bool m_type_manually_set;
+
+private:
+	// Automatic content type detection
+	void UpdateEmailType();
 
 private:
 	void AddStandardHeaders(std::shared_ptr<MimeEntity> entity);
@@ -83,7 +110,11 @@ private:
 	std::shared_ptr<MimeEntity> BuildHtmlOnlyEmail();
 	std::shared_ptr<MimeEntity> BuildMultipartAlternativeEmail();
 	std::shared_ptr<MimeEntity> BuildMultipartMixedEmail(std::shared_ptr<MimeEntity> contentEntity);
+	std::shared_ptr<MimeEntity> BuildMultipartRelatedEmail(std::shared_ptr<MimeEntity> contentEntity);
 	std::shared_ptr<MimeEntity> CreateAttachmentEntity(const Attachment& attachment);
 	void ValidateRequiredFields() const;
+	
+	// Method that decides which build method to call based on email type
+	std::shared_ptr<MimeEntity> BuildBasedOnType();
 };
 } // namespace ISXMime
