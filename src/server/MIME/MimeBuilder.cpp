@@ -538,19 +538,43 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildMultipartMixedEmail(std::shared_pt
 
 void MimeBuilder::AddStandardHeaders(std::shared_ptr<MimeEntity> entity)
 {
-	entity->GetHeader().AddField("From", m_from);
-	entity->GetHeader().AddField("To", m_to);
+	entity->GetHeader().AddField("MIME-Version", "1.0");
 
-	if (!m_subject.empty()) entity->GetHeader().AddField("Subject", entity->GetHeader().EncodeFieldValue(m_subject));
+	if (!m_from.empty()) entity->GetHeader().AddField("From", m_from);
+
+	if (!m_to.empty()) entity->GetHeader().AddField("To", m_to);
 
 	if (!m_cc.empty()) entity->GetHeader().AddField("Cc", m_cc);
+
 	if (!m_bcc.empty()) entity->GetHeader().AddField("Bcc", m_bcc);
+
 	if (!m_reply_to.empty()) entity->GetHeader().AddField("Reply-To", m_reply_to);
 
 	for (const auto& header_pair : m_custom_headers)
 		entity->GetHeader().AddField(header_pair.first, header_pair.second);
 
-	entity->GetHeader().AddField("MIME-Version", "1.0");
+	if (!m_subject.empty())
+	{
+		bool has_non_ascii = false;
+		for (char c : m_subject)
+		{
+			if (static_cast<unsigned char>(c) > 127)
+			{
+				has_non_ascii = true;
+				break;
+			}
+		}
+
+		if (has_non_ascii)
+		{
+			std::string encoded_subject = MimeUtils::ConvertToQuotedPrintableHeader(m_subject);
+			entity->GetHeader().AddField("Subject", encoded_subject);
+		}
+		else
+		{
+			entity->GetHeader().AddField("Subject", m_subject);
+		}
+	}
 
 	auto now = std::chrono::system_clock::now();
 	auto time = std::chrono::system_clock::to_time_t(now);

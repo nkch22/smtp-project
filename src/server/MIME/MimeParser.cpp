@@ -142,10 +142,6 @@ std::shared_ptr<MimeEntity> MimeParser::ParseStream(std::istream& stream)
 
 		std::string body_content((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 
-		Body body;
-		body.Set(body_content);
-		entity->GetBody().Set(body_content);
-
 		std::cout << "ParseStream read body content (" << body_content.size() << " bytes):\n";
 		if (body_content.size() < 100)
 		{
@@ -155,6 +151,62 @@ std::shared_ptr<MimeEntity> MimeParser::ParseStream(std::istream& stream)
 		{
 			std::cout << "'" << body_content.substr(0, 100) << "..." << body_content.substr(body_content.size() - 20)
 					  << "'" << std::endl;
+		}
+
+		// Check if this is a multipart message
+		const ContentType& contentType = header.GetContentType();
+		if (contentType.IsMultipart())
+		{
+			// Extract the boundary
+			std::string boundary = ExtractBoundary(contentType);
+			if (!boundary.empty())
+			{
+				// Parse the multipart body
+				std::istringstream bodyStream(body_content);
+				Body parsedBody = ParseBodyWithBoundary(bodyStream, boundary);
+				
+				// Transfer the parts from parsedBody to entity's body
+				entity->GetBody().SetBoundary(parsedBody.Boundary());
+				entity->GetBody().SetPreamble(parsedBody.Preamble());
+				entity->GetBody().SetEpilogue(parsedBody.Epilogue());
+				entity->GetBody().SetMultipartType(parsedBody.GetMultipartType());
+				
+				// Add all parts
+				for (const auto& part : parsedBody.Parts()) {
+					entity->GetBody().AddPart(part);
+				}
+				
+				// Also set the raw content
+				entity->GetBody().Set(body_content);
+			}
+			else
+			{
+				// No boundary found, just set the raw content
+				entity->GetBody().Set(body_content);
+			}
+		}
+		else
+		{
+			// Not a multipart message, just set the raw content
+			entity->GetBody().Set(body_content);
+			
+			// If content transfer encoding is specified, decode the content
+			const ContentTransferEncoding& encoding = header.GetContentTransferEncoding();
+			std::string encoding_mechanism = encoding.Str();
+			
+			if (encoding_mechanism != "7bit" && 
+				encoding_mechanism != "8bit" && 
+				encoding_mechanism != "binary")
+			{
+				if (encoding_mechanism == "quoted-printable") {
+					std::string decoded = MimeUtils::DecodeQuotedPrintable(body_content);
+					entity->GetBody().Set(decoded);
+				}
+				else if (encoding_mechanism == "base64") {
+					std::string decoded = MimeUtils::DecodeBase64(body_content);
+					entity->GetBody().Set(decoded);
+				}
+			}
 		}
 
 		return entity;
@@ -300,22 +352,31 @@ Body MimeParser::ParseBody(std::istream& stream, const Header& header)
 
 Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& boundary)
 {
+	m_p_impl->current_recursion_depth++;
+	
+	if (m_p_impl->current_recursion_depth > m_p_impl->config.GetRecursionLimit())
+	{
+		m_p_impl->current_recursion_depth--;
+		if (m_p_impl->config.IsStrictMode()) throw MimeParserError("Maximum recursion depth exceeded");
+		return Body();
+	}
+	
 	std::string delimiter = "--" + boundary;
 	std::string end_delimiter = delimiter + "--";
 	std::string line;
 	std::string part_content;
 	std::vector<std::shared_ptr<MimeEntity>> parts;
-	size_t part_count = 0;
 	bool found_boundary = false;
-	std::string preamble;
-
-	// read preamble up to the first boundary
+	std::string preamble, epilogue;
+	size_t part_count = 0;
+	
+	// Read preamble up to the first boundary
 	std::stringstream preamble_stream;
 	while (std::getline(stream, line))
 	{
-		// remove any trailing CR
+		// Remove any trailing CR
 		if (!line.empty() && line.back() == '\r') line.pop_back();
-
+		
 		if (line == delimiter)
 		{
 			found_boundary = true;
@@ -323,29 +384,29 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 		}
 		preamble_stream << line << "\r\n";
 	}
-
+	
 	preamble = preamble_stream.str();
-
+	
 	if (!found_boundary)
 	{
 		stream.clear();
 		stream.seekg(0);
-
+		
 		std::string full_content((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-
+		
 		size_t boundary_pos = full_content.find(delimiter);
 		if (boundary_pos != std::string::npos)
 		{
 			found_boundary = true;
-
+			
 			preamble = full_content.substr(0, boundary_pos);
-
+			
 			stream.clear();
 			stream.seekg(0);
-
+			
 			std::string skip_content = full_content.substr(0, boundary_pos);
 			stream.ignore(skip_content.length());
-
+			
 			std::getline(stream, line);
 		}
 		else
@@ -353,17 +414,16 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 			throw MimeParserError("Could not find start boundary");
 		}
 	}
-
-	std::string epilogue;
+	
 	bool found_end_boundary = false;
 	while (std::getline(stream, line))
 	{
 		// CRLF to LF conversion
 		if (!line.empty() && line.back() == '\r') line.pop_back();
-
+		
 		if (line == end_delimiter)
 		{
-			// end of multipart content
+			// End of multipart content
 			if (!part_content.empty())
 			{
 				auto part = ParsePart(part_content, boundary);
@@ -371,7 +431,7 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 				{
 					parts.push_back(part);
 					part_count++;
-
+					
 					if (part_count > m_p_impl->config.GetMaxPartCount())
 					{
 						if (m_p_impl->config.IsStrictMode()) throw MimeParserError("Maximum part count exceeded");
@@ -383,7 +443,7 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 			found_end_boundary = true;
 			break;
 		}
-
+		
 		if (line == delimiter)
 		{
 			if (!part_content.empty())
@@ -393,7 +453,7 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 				{
 					parts.push_back(part);
 					part_count++;
-
+					
 					if (part_count > m_p_impl->config.GetMaxPartCount())
 					{
 						if (m_p_impl->config.IsStrictMode()) throw MimeParserError("Maximum part count exceeded");
@@ -408,14 +468,14 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 			part_content += line + "\r\n";
 		}
 	}
-
+	
 	if (!part_content.empty())
 	{
 		auto part = ParsePart(part_content, boundary);
 		if (part) parts.push_back(part);
 	}
-
-	// read epilogue if we found the end boundary
+	
+	// Read epilogue if we found the end boundary
 	if (found_end_boundary)
 	{
 		std::stringstream epilogue_stream;
@@ -427,35 +487,31 @@ Body MimeParser::ParseBodyWithBoundary(std::istream& stream, const std::string& 
 		}
 		epilogue = epilogue_stream.str();
 	}
-
+	
+	// Create and populate body object
 	Body body;
-
-	MultipartType multipart_type = MultipartType::MIXED;
-
+	
+	// Determine multipart type from the Content-Type
+	MultipartType multipartType = MultipartType::MIXED; // Default
+	
+	// Set boundary, preamble, and epilogue
 	body.SetBoundary(boundary);
-	if (!preamble.empty()) body.SetPreamble(preamble);
-	if (!epilogue.empty()) body.SetEpilogue(epilogue);
-
-	for (const auto& part : parts) body.AddPart(part);
-
-	body.SetMultipartType(multipart_type);
-
-	std::stringstream body_stream;
-
-	if (!preamble.empty()) body_stream << preamble;
-
-	for (const auto& part : parts)
-	{
-		body_stream << "--" << boundary << "\r\n";
-		body_stream << *part << "\r\n";
+	if (!preamble.empty())
+		body.SetPreamble(preamble);
+	if (!epilogue.empty())
+		body.SetEpilogue(epilogue);
+	
+	// Set the multipart type
+	body.SetMultipartType(multipartType);
+	
+	// Add all parts to the body
+	for (const auto& part : parts) {
+		body.AddPart(part);
 	}
-
-	body_stream << "--" << boundary << "--\r\n";
-
-	if (!epilogue.empty()) body_stream << epilogue;
-
-	body.Set(body_stream.str());
-
+	
+	m_p_impl->current_recursion_depth--;
+	
+	std::cout << "Found " << parts.size() << " parts in multipart content" << std::endl;
 	return body;
 }
 

@@ -330,27 +330,34 @@ void Body::CollectPartsRecursive(const std::shared_ptr<MimeEntity>& entity,
 // specialized getters for common content types
 std::shared_ptr<MimeEntity> Body::GetTextPart() const
 {
-	// first look for text/plain specifically
-	for (const auto& part : m_p_impl->parts)
-	{
-		const ContentType& ct = part->GetHeader().GetContentType();
-		if (ct.Type() == "text" && ct.Subtype() == "plain") return part;
-	}
+	auto text_parts = FindPartsRecursive(
+		[](const MimeEntity& part)
+		{
+			const ContentType& ct = part.GetHeader().GetContentType();
+			return (ct.Type() == "text" && ct.Subtype() == "plain");
+		});
 
-	// if not found, accept any text/* part
-	for (const auto& part : m_p_impl->parts)
-		if (part->GetHeader().GetContentType().Type() == "text") return part;
+	if (!text_parts.empty()) return text_parts[0];
+
+	auto any_text_parts =
+		FindPartsRecursive([](const MimeEntity& part) { return part.GetHeader().GetContentType().Type() == "text"; });
+
+	if (!any_text_parts.empty()) return any_text_parts[0];
 
 	return nullptr;
 }
 
 std::shared_ptr<MimeEntity> Body::GetHtmlPart() const
 {
-	for (const auto& part : m_p_impl->parts)
-	{
-		const ContentType& ct = part->GetHeader().GetContentType();
-		if (ct.Type() == "text" && ct.Subtype() == "html") return part;
-	}
+	auto html_parts = FindPartsRecursive(
+		[](const MimeEntity& part)
+		{
+			const ContentType& ct = part.GetHeader().GetContentType();
+			return (ct.Type() == "text" && ct.Subtype() == "html");
+		});
+
+	if (!html_parts.empty()) return html_parts[0]; 
+
 	return nullptr;
 }
 
