@@ -13,7 +13,7 @@
 namespace ISXMime
 {
 
-MimeBuilder::MimeBuilder() : m_email_type(EmailType::Simple), m_type_manually_set(false) {}
+MimeBuilder::MimeBuilder() : m_email_type(EmailType::SIMPLE), m_type_manually_set(false) {}
 
 MimeBuilder MimeBuilder::Create()
 {
@@ -23,21 +23,21 @@ MimeBuilder MimeBuilder::Create()
 MimeBuilder MimeBuilder::CreateTextEmail()
 {
 	auto builder = Create();
-	builder.SetEmailType(EmailType::Simple);
+	builder.SetEmailType(EmailType::SIMPLE);
 	return builder;
 }
 
 MimeBuilder MimeBuilder::CreateHtmlEmail()
 {
 	auto builder = Create();
-	builder.SetEmailType(EmailType::Simple);
+	builder.SetEmailType(EmailType::SIMPLE);
 	return builder;
 }
 
 MimeBuilder MimeBuilder::CreateMultipartEmail()
 {
 	auto builder = Create();
-	builder.SetEmailType(EmailType::Alternative);
+	builder.SetEmailType(EmailType::ALTERNATIVE);
 	return builder;
 }
 
@@ -71,17 +71,17 @@ void MimeBuilder::UpdateEmailType()
 	if (!m_attachments.empty())
 	{
 		if (has_inline_attachments)
-			m_email_type = EmailType::Related;
+			m_email_type = EmailType::RELATED;
 		else
-			m_email_type = EmailType::Mixed;
+			m_email_type = EmailType::MIXED;
 	}
 	else if (m_content.text_body.has_value() && m_content.html_body.has_value())
 	{
-		m_email_type = EmailType::Alternative;
+		m_email_type = EmailType::ALTERNATIVE;
 	}
 	else
 	{
-		m_email_type = EmailType::Simple;
+		m_email_type = EmailType::SIMPLE;
 	}
 }
 
@@ -99,7 +99,26 @@ MimeBuilder& MimeBuilder::To(const std::string& to)
 
 MimeBuilder& MimeBuilder::Subject(const std::string& subject)
 {
-	m_subject = subject;
+	bool has_non_ascii = false;
+	for (char c : subject)
+	{
+		if (static_cast<unsigned char>(c) > 127)
+		{
+			has_non_ascii = true;
+			break;
+		}
+	}
+
+	if (has_non_ascii)
+	{
+		std::string encoded_subject = MimeUtils::ConvertToQuotedPrintableHeader(subject);
+		m_subject = encoded_subject;
+	}
+	else
+	{
+		m_subject = subject;
+	}
+
 	return *this;
 }
 
@@ -256,16 +275,14 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildBasedOnType()
 {
 	switch (m_email_type)
 	{
-	case EmailType::Simple:
-		if (m_content.html_body.has_value())
-			return BuildHtmlOnlyEmail();
-		else
-			return BuildTextOnlyEmail();
+	case EmailType::SIMPLE:
+		if (m_content.html_body.has_value()) return BuildHtmlOnlyEmail();
+		return BuildTextOnlyEmail();
 
-	case EmailType::Alternative:
+	case EmailType::ALTERNATIVE:
 		return BuildMultipartAlternativeEmail();
 
-	case EmailType::Mixed:
+	case EmailType::MIXED:
 	{
 		std::shared_ptr<MimeEntity> content_entity;
 
@@ -279,7 +296,7 @@ std::shared_ptr<MimeEntity> MimeBuilder::BuildBasedOnType()
 		return BuildMultipartMixedEmail(content_entity);
 	}
 
-	case EmailType::Related:
+	case EmailType::RELATED:
 	{
 		std::shared_ptr<MimeEntity> content_entity;
 

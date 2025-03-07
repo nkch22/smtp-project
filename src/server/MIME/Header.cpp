@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "../Encoding/EncoderFactory.hpp"
+#include "MimeUtils.hpp"
 
 namespace ISXMime
 {
@@ -70,14 +71,12 @@ bool Header::HasFieldCaseInsensitive(const std::string& name) const
 
 void Header::AddField(const std::string& name, const std::string& value)
 {
-	if (name.empty()) return;
+	std::string normalized_name = MimeUtils::NormalizeHeaderFieldName(name);
+	m_fields[normalized_name] = value;
 
-	m_fields[name] = value;
-
-	if (Header::CaseInsensitiveCompare(name, "Content-Type"))
+	if (normalized_name == "Content-Type")
 		m_content_type = ContentType(value);
-
-	else if (Header::CaseInsensitiveCompare(name, "Content-Transfer-Encoding"))
+	else if (normalized_name == "Content-Transfer-Encoding")
 		m_content_transfer = ContentTransferEncoding(value);
 }
 

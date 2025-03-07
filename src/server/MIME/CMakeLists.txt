@@ -6,6 +6,7 @@ set(MIME_SOURCES
     Body.cpp
     MimeEntity.cpp
     MimeBuilder.cpp
+    MimeParser.cpp
 )
 
 set(MIME_HEADERS
@@ -13,10 +14,10 @@ set(MIME_HEADERS
     ContentTransferEncoding.hpp
     ContentType.hpp
     Header.hpp
-    IMimeParser.hpp
     MimeEntity.hpp
     MimeUtils.hpp
     MimeBuilder.hpp
+    MimeParser.hpp
 )
 
 add_library(mime STATIC ${MIME_SOURCES} ${MIME_HEADERS})

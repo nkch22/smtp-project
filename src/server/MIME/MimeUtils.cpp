@@ -16,12 +16,6 @@ namespace ISXMime
 
 std::string MimeUtils::GenerateMimeBoundary()
 {
-	// RFC 2046 recommends using a boundary that:
-	// 1. Is unique
-	// 2. Contains only 7-bit ASCII chars
-	// 3. Doesn't appear in any part of the message
-	// 4. Is no longer than 70 characters
-
 	auto now = std::chrono::system_clock::now();
 	auto time = std::chrono::system_clock::to_time_t(now);
 
@@ -161,8 +155,7 @@ std::string MimeUtils::EncodeParameterValue(const std::string& name, const std::
 std::string MimeUtils::DecodeBase64(const std::string& encoded_text)
 {
 	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("base64");
-	if (!encoder)
-		throw MimeException("Base64 encoder not available");
+	if (!encoder) throw MimeException("Base64 encoder not available");
 
 	std::vector<uint8_t> decoded = encoder->Decode(encoded_text);
 
@@ -172,8 +165,7 @@ std::string MimeUtils::DecodeBase64(const std::string& encoded_text)
 std::string MimeUtils::DecodeQuotedPrintable(const std::string& encoded_text)
 {
 	auto encoder = ISXEncoding::EncoderFactory::CreateEncoder("quoted-printable");
-	if (!encoder)
-		throw MimeException("Quoted-Printable encoder not available");
+	if (!encoder) throw MimeException("Quoted-Printable encoder not available");
 
 	std::vector<uint8_t> decoded = encoder->Decode(encoded_text);
 
@@ -279,6 +271,170 @@ bool MimeUtils::CaseInsensitiveCompare(const std::string& a, const std::string& 
 
 	return std::equal(a.begin(), a.end(), b.begin(),
 					  [](char a_char, char b_char) { return std::tolower(a_char) == std::tolower(b_char); });
+}
+
+std::string MimeUtils::GetContentTypeDescription(const ContentType& contentType)
+{
+	const std::string& type = contentType.Type();
+	const std::string& subtype = contentType.Subtype();
+
+	if (type == "text")
+	{
+		if (subtype == "plain") return "Plain Text";
+		if (subtype == "html") return "HTML Document";
+		if (subtype == "xml") return "XML Document";
+		if (subtype == "rtf") return "Rich Text Format";
+		if (subtype == "css") return "CSS Stylesheet";
+		if (subtype == "javascript") return "JavaScript Code";
+		return "Text Document";
+	}
+	if (type == "image")
+	{
+		if (subtype == "jpeg" || subtype == "jpg") return "JPEG Image";
+		if (subtype == "png") return "PNG Image";
+		if (subtype == "gif") return "GIF Image";
+		if (subtype == "bmp") return "Bitmap Image";
+		if (subtype == "tiff") return "TIFF Image";
+		if (subtype == "svg+xml") return "SVG Vector Image";
+		return "Image";
+	}
+	if (type == "audio")
+	{
+		if (subtype == "mpeg" || subtype == "mp3") return "MP3 Audio";
+		if (subtype == "wav") return "WAV Audio";
+		if (subtype == "ogg") return "OGG Audio";
+		if (subtype == "midi") return "MIDI Audio";
+		return "Audio";
+	}
+	if (type == "video")
+	{
+		if (subtype == "mp4") return "MP4 Video";
+		if (subtype == "mpeg") return "MPEG Video";
+		if (subtype == "quicktime") return "QuickTime Video";
+		if (subtype == "x-msvideo" || subtype == "avi") return "AVI Video";
+		if (subtype == "webm") return "WebM Video";
+		return "Video";
+	}
+	if (type == "application")
+	{
+		if (subtype == "pdf") return "PDF Document";
+		if (subtype == "msword") return "Word Document";
+		if (subtype == "vnd.ms-excel") return "Excel Spreadsheet";
+		if (subtype == "vnd.ms-powerpoint") return "PowerPoint Presentation";
+		if (subtype == "zip") return "ZIP Archive";
+		if (subtype == "x-rar-compressed") return "RAR Archive";
+		if (subtype == "json") return "JSON Data";
+		if (subtype == "xml") return "XML Data";
+		return "Application Data";
+	}
+	if (type == "multipart")
+	{
+		if (subtype == "alternative") return "Alternative Content Formats";
+		if (subtype == "mixed") return "Mixed Content";
+		if (subtype == "related") return "Related Content";
+		if (subtype == "form-data") return "Form Data";
+		return "Multi-part Content";
+	}
+
+	return contentType.Str();
+}
+
+std::string MimeUtils::NormalizeHeaderFieldName(const std::string& name)
+{
+	if (name.empty()) return name;
+
+	std::string lower_name;
+	lower_name.reserve(name.size());
+	std::ranges::transform(name, std::back_inserter(lower_name), [](unsigned char c) { return std::tolower(c); });
+
+	static const std::map<std::string, std::string> STANDARD_HEADERS = {{"content-type", "Content-Type"},
+																		{"content-transfer-encoding",
+																		 "Content-Transfer-Encoding"},
+																		{"content-disposition", "Content-Disposition"},
+																		{"content-id", "Content-ID"},
+																		{"content-description", "Content-Description"},
+																		{"content-language", "Content-Language"},
+																		{"content-location", "Content-Location"},
+																		{"from", "From"},
+																		{"to", "To"},
+																		{"cc", "Cc"},
+																		{"bcc", "Bcc"},
+																		{"subject", "Subject"},
+																		{"date", "Date"},
+																		{"message-id", "Message-ID"},
+																		{"in-reply-to", "In-Reply-To"},
+																		{"references", "References"},
+																		{"reply-to", "Reply-To"},
+																		{"mime-version", "MIME-Version"},
+																		{"user-agent", "User-Agent"},
+																		{"x-mailer", "X-Mailer"}};
+
+	auto it = STANDARD_HEADERS.find(lower_name);
+	if (it != STANDARD_HEADERS.end()) return it->second;
+
+	std::string result;
+	result.reserve(name.size());
+	bool capitalize_next = true;
+
+	for (char c : name)
+	{
+		if (c == '-')
+		{
+			result.push_back(c);
+			capitalize_next = true;
+		}
+		else if (capitalize_next)
+		{
+			result.push_back(std::toupper(c));
+			capitalize_next = false;
+		}
+		else
+		{
+			result.push_back(std::tolower(c));
+		}
+	}
+
+	return result;
+}
+
+std::string MimeUtils::ConvertToQuotedPrintableHeader(const std::string& text)
+{
+	bool needs_encoding = false;
+	for (char c : text)
+	{
+		if (static_cast<unsigned char>(c) > 127)
+		{
+			needs_encoding = true;
+			break;
+		}
+	}
+
+	if (!needs_encoding)
+	{
+		return text;
+	}
+
+	std::stringstream result;
+	result << "=?UTF-8?Q?";
+
+	for (unsigned char c : text)
+	{
+		if (c == ' ')
+		{
+			result << '_';
+		}
+		else if (c > 127 || c == '=' || c == '?' || c == '_' || c == '\t' || c < 32)
+		{
+			result << '=' << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+		}
+		else
+		{
+			result << c;
+		}
+	}
+
+	result << "?=";
+	return result.str();
 }
 
 } // namespace ISXMime
