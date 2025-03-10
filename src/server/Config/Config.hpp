@@ -68,6 +68,7 @@
 #include <string>
 
 #include "../JSON/Parser.hpp"
+#include "../Logger/Include/Logger.h"
 
 /**
  * @class Config
@@ -88,10 +89,19 @@ public:
 	 */
 	struct Server
 	{
+	public:
 		std::string server_name;		 ///< Server identifier (config key: "servername")
 		std::string server_display_name; ///< Server display name (config key: "serverdisplayname")
 		int port;						 ///< Listening port number (config key: "listenerport")
 		std::string ip;					 ///< IP address to bind to (config key: "ipaddress")
+
+	public:
+		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Server& obj)
+		{
+			buff << obj.server_name << obj.server_display_name << obj.port << obj.ip;
+
+			return buff;
+		}
 	};
 
 	/**
@@ -104,8 +114,17 @@ public:
 	 */
 	struct Communication
 	{
+	public:
 		bool blocking;		///< Blocking socket mode (config key: "blocking")
 		int socket_timeout; ///< Socket timeout in milliseconds (config key: "socket_timeout")
+							///
+	public:
+		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Communication& obj)
+		{
+			buff << obj.blocking << obj.socket_timeout;
+
+			return buff;
+		}
 	};
 
 	/**
@@ -119,9 +138,18 @@ public:
 	 */
 	struct Logging
 	{
+	public:
 		std::string logs_directory; ///< Directory path for log files (config key: "logs_directory")
 		int log_level;				///< Logging verbosity level (config key: "LogLevel")
 		bool flush;					///< Immediate flush setting (config key: "flush")
+
+	public:
+		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Logging& obj)
+		{
+			buff << '"' << obj.logs_directory << '"' << obj.log_level << obj.flush;
+
+			return buff;
+		}
 	};
 
 	/**
@@ -134,8 +162,17 @@ public:
 	 */
 	struct Threads
 	{
+	public:
 		int period_time;		 ///< Task processing interval in ms (config key: "Period_time")
 		int max_working_threads; ///< Maximum number of concurrent threads (config key: "maxworkingthreads")
+
+	public:
+		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Threads& obj)
+		{
+			buff << obj.period_time << obj.max_working_threads;
+
+			return buff;
+		}
 	};
 
 	/**
