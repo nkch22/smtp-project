@@ -16,8 +16,8 @@
 Config::Server Config::GetServer() const
 {
 	logger::Logger logger;
-logger.log_func_start();
-logger.log_return(m_server);
+	logger.log_func_start();
+	logger.log_return(m_server);
 
 	return m_server;
 }
@@ -33,7 +33,7 @@ Config::Communication Config::GetCommunication() const
 
 Config::Logging Config::GetLogging() const
 {
-logger::Logger logger;
+	logger::Logger logger;
 	logger.log_func_start();
 	logger.log_return(m_logging);
 

@@ -1,8 +1,9 @@
 #include "Initializer.hpp"
-#include "Logger/Include/Logger.h"
 
 #include <exception>
 #include <filesystem>
+
+#include "Logger/Include/Logger.h"
 
 void Initializer::Init(const std::filesystem::path& configPath)
 {
@@ -10,7 +11,7 @@ void Initializer::Init(const std::filesystem::path& configPath)
 
 	InitLogger(LoadConfig(configPath));
 
-    // InitServer
+	// InitServer
 }
 
 bool Initializer::StartLoggerWithDefaults()
@@ -23,14 +24,11 @@ Config Initializer::LoadConfig(const std::filesystem::path& configPath)
 	try
 	{
 		Config config(configPath);
-
 		return config;
 	}
 	catch (const std::exception& e)
 	{
 		logger::Logger::stop_config();
-        std::cout << "hello here";
-
 		throw e;
 	}
 }
@@ -46,6 +44,4 @@ void Initializer::InitLogger(const Config& config)
 	logger::Logger::stop_config();
 }
 
-void Initializer::InitServer()
-{
-}
+void Initializer::InitServer() {}
