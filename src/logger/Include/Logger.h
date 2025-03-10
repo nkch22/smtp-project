@@ -1,39 +1,159 @@
 #pragma once
+#include "Src/SharedInclude.h"
+#include "Src/TemplateWrapper.h"
 
-#include <algorithm>
-#include <chrono>
-#include <condition_variable>
-#include <csignal>
-#include <exception>
-#include <filesystem>
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <source_location>
-#include <string>
-#include <thread>
+class RealLogger;
 
 /*!
-	@file Logger.h
-	@brief Interface of Logger shared library
-*/
-
+ *	@file Logger.h
+ *	@brief Interface of Logger shared library
+ *
+ *	This file contains logger interface
+ *
+ *	@section usage_example Usage example
+ *	@code
+ *
+ *	#include "Logger.h"
+ *	#include <sstream>
+ * 
+ *	void NoArgsNoRet();
+ *	int ArgsRet(int a);
+ *
+ *	int LocalLevel(int a);
+ *
+ *	int MessageOutput(int a, int b);
+ * 
+ *	class Test;
+ *	void CustomClass(Test);
+ *
+ *	void ArgsWithoutLogging(int* a, int b);
+ *
+ *	int main()
+ *	{
+ *		logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
+ *		//every instance of Logger will have trace log level
+ *
+ *		NoArgsNoRet();
+ *		ArgsRet(5);
+ *
+ *		LocalLevel(5);
+ *		MessageOutput(1, 0);
+ *
+ *		Test t;
+ *		CustomClass(t);
+ *
+ *		int a = 6;
+ *		ArgsWithoutLogging(&a, 5);
+ *	}
+ *
+ *	void NoArgsNoRet()
+ *	{
+ *		logger::Logger log;	   // creates logger variable
+ *		log.log_func_start(); // saves function start without arguments
+ *
+ *		// some logic, that not need to be logged
+ *
+ *		log.log_return_nothing(); // saves function end
+ *	}
+ *	int ArgsRet(int a)
+ *	{
+ *		logger::Logger log;
+ *		log.log_arguments(a); // saves function start with a parameter (might be more parameters)
+ *
+ *		int b = a++; // some logic, that not need to be logged
+ *
+ *		log.log_return(b); // saves function return with b output
+ *		return b;
+ *	}
+ *
+ *	int LocalLevel(int a)
+ *	{
+ *		logger::Logger log;
+ *		log.set_local_level(
+ *			logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
+ *		// Global log level won't be affected
+ *		log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
+ *
+ *		int b = a++; // some logic, that not need to be logged
+ *
+ *		log.log_return(b); // because of debug log level will be replaced with log_return_nothing()
+ *		return b;
+ *	}
+ *
+ *	int MessageOutput(int a, int b)
+ *	{
+ *		logger::Logger log;
+ *		log.log_arguments(a, b);
+ *
+ *		int c = 0;
+ *		try
+ *		{
+ *			if (b == 0) throw std::invalid_argument("b can't be 0");
+ *
+ *			c = a / b;
+ *		}
+ *		catch (std::invalid_argument& ex)
+ *		{
+ *			log.log_error(ex.what());	 // saves exception message with error flag
+ *			log.log_warning(ex.what()); // are also valid
+ *			log.log_message(ex.what()); // the only difference is message type flag
+ *			// you can use any of them based on your logic
+ *		}
+ *
+ *		log.log_return(c);
+ *		return c;
+ *	}
+ *
+ *	class Test
+ *	{
+ *	private:
+ *		int a;
+ *		int* ptr;
+ *
+ *		void* none;
+ *
+ *	public:
+ *		Test() : a{5}, ptr{&a}, none{nullptr} {}
+ *
+ *		// all you need to have to pass custom class into logger save args and return methods is this operator overload
+ *		friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
+ *		{
+ *			buff << obj.a; //Buffer has default operator for int, see Buffer Documentation page for more
+ *
+ *			//if there is none you need, than make it yourself
+ *			//the main goal of every buffer operator<< is to convert data into std::string
+ *			std::stringstream st;
+ *			st << obj.ptr;
+ *			buff << st.str();
+ *
+ *			//if you dont want to log value of some variable, than dont do it
+ *
+ *			//no logging for 'none' void ptr
+ *
+ *			return buff;
+ *		}
+ *	};
+ *	void CustomClass(Test obj) {
+ *		logger::Logger log;
+ *		log.log_arguments(obj); //if you have overloakded operator, just pass it to the method
+ *		//any type, that is not in default buffer operators, need to have overloaded one
+ *		// if dont and you want to log it, method will throw exception
+ *
+ *		log.log_return_nothing();
+ *	}
+ *
+ *	void ArgsWithoutLogging(int* a, int b) {
+ *		logger::Logger log;
+ *
+ *		log.log_arguments(b); //you choose what to save
+ *		//if you dont want to log any parameters, than use log_func_start()
+ *
+ *		log.log_return_nothing();
+ *	}
+ *	@endcode
+ */
 namespace logger
 {
-
-#define DEFAULT_LEVEL LOG_LEVEL_PROD
-#define DEFAULT_AMOUNT 30
-#define DEFAULT_PATH ""
-#define DEFAULT_CONFIG false
-#define DEFAULT_FLUSH true
-
-#define DEFAULT_COLOR "\033[0m"
-#define ERROR_COLOR "\033[41m"
-#define WARNING_COLOR "\033[43m"
-#define INFORMATION_COLOR "\033[42m"
-
 /*! @def DEFAULT_LEVEL
  *	@brief Default log level
  */
@@ -44,8 +164,8 @@ namespace logger
  *	@brief Default output path
  */
 /*! @def DEFAULT_CONFIG
-*	@brief Default config flag value
-*/
+ *	@brief Default config flag value
+ */
 /*! @def DEFAULT_FLUSH
  *	@brief Default flush flag value
  */
@@ -63,21 +183,11 @@ namespace logger
  *	@brief Information console color
  */
 
-//! Enum for log levels
-enum LogLevels
-{
-	LOG_LEVEL_NO,
-	LOG_LEVEL_PROD,
-	LOG_LEVEL_DEBUG,
-	LOG_LEVEL_TRACE
-};
-
 /*! @class Buffer
  *  @brief Logger class, that is used to transform variables into string
  *
  *	This class is used to transform different variables into std::stiring for futher saving by Logger
  */
-
 class Buffer
 {
 private:
@@ -122,17 +232,16 @@ public:
 	Buffer& operator<<(const std::string&);
 	Buffer& operator<<(const char*);
 
-	Buffer& operator<<(const int&);
-	Buffer& operator<<(const unsigned int&);
-	Buffer& operator<<(const double&);
-	Buffer& operator<<(const bool&);
+	Buffer& operator<<(const int);
+	Buffer& operator<<(const unsigned int);
+	Buffer& operator<<(const double);
+	Buffer& operator<<(const bool);
 
 	template<typename T>
 	Buffer& operator<<(const T&)
 	{
 		throw std::exception{};
 	}
-
 	/*! @fn operator<<(const std::string&)
 	 * @brief Default overloaded operator<< with const string&.
 	 * Spesifies how buffer writes given variables into string buffer
@@ -145,16 +254,16 @@ public:
 	/*! @fn operator<<(const char*)
 		@brief Default overloaded operator<< with const char*
 	*/
-	/*! @fn operator<<(const int&)
+	/*! @fn operator<<(const int)
 		@brief Default overloaded operator<< with const int&
 	*/
-	/*! @fn operator<<(const unsigned int&)
+	/*! @fn operator<<(const unsigned int)
 		@brief Default overloaded operator<< with const unsigned int&
 	*/
-	/*! @fn operator<<(const double&)
+	/*! @fn operator<<(const double)
 		@brief Default overloaded operator<< with const double&
 	*/
-	/*! @fn operator<<(const bool&)
+	/*! @fn operator<<(const bool)
 		@brief Default overloaded operator<< with const bool&
 	*/
 	/*! @fn operator<<(const T&)
@@ -186,80 +295,12 @@ public:
  *  @warning Don't use init() more than once
  *
  *	@warning Using saving methods without previous init() call in any other place is undefined behavior
- * 
+ *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
  */
 class Logger
 {
 private:
-	enum MessageTypes
-	{
-		ERROR,
-		WARNING,
-		INFORMATION
-	};
-
-	class RealLogger
-	{
-	private:
-		struct Message
-		{
-			std::string msg;
-			Logger::MessageTypes type;
-			std::source_location location;
-			LogLevels level;
-			std::thread::id thr_id;
-		};
-
-		using queue = std::queue<Message>;
-
-		static RealLogger* m_instance;
-
-		static LogLevels m_level;
-		static std::string m_output_path;
-		static std::ofstream m_file;
-
-		static std::mutex m_mutex;
-		static std::condition_variable m_con_var;
-
-		static bool m_end;
-		static bool m_do_flush;
-		static bool m_is_config;
-
-		static unsigned int m_amount;
-
-		static queue m_queue;
-		static std::thread m_thr;
-
-		RealLogger(const LogLevels&, const std::string&, const unsigned int&, const bool&, const bool&);
-
-		~RealLogger() = default;
-
-		static void file_init(const unsigned int&);
-
-	public:
-		static RealLogger* get_instance(const LogLevels& = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
-										const unsigned int& amount = DEFAULT_AMOUNT,
-										const bool& is_config = DEFAULT_CONFIG, const bool& do_flush = DEFAULT_FLUSH);
-
-		static void destroy();
-
-		static void real_save(const std::string&, const Logger::MessageTypes&, const std::source_location&,
-							  const LogLevels& level, std::thread::id id = std::this_thread::get_id());
-
-		static void real_set_level(const LogLevels&);
-		static LogLevels real_get_level();
-
-		static void save_message(const Message&);
-
-		static void handle_fatal_error(int);
-
-		static void real_stop_config();
-
-		static void set_output(const std::string&);
-
-		static void real_set_flush(const bool&);
-	};
 
 	RealLogger* m_real;
 
@@ -270,14 +311,12 @@ private:
 	LogLevels m_local_level;
 
 	template<typename T>
-	void save_argument(const T& value)
+	void log_argument(const T& value)
 	{
 		m_buff << value;
 	}
 
-	void save_arguments();
-
-	static void destroy();
+	void log_arguments();
 
 public:
 	Logger(const std::source_location location = std::source_location::current());
@@ -294,9 +333,16 @@ public:
 	 *	Trivial destructor
 	 */
 
-	static bool init(const LogLevels& level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int& amount = DEFAULT_AMOUNT, const bool& is_config = false,
-					 const bool& do_flush = true);
+	static void destroy();
+	/*! @fn destroy()
+	*	@brief Destroy method
+	* 
+	*	Destroys global values
+	*/
+
+	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
+					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = false,
+					 const bool do_flush = true);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -320,8 +366,8 @@ public:
 	 *	@return initialization state (true or false)
 	 */
 
-	void save_error(const std::string&);
-	/*! @fn save_error(const std::string&)
+	void log_error(const std::string&);
+	/*! @fn log_error(const std::string&)
 	 *	@brief It saves error
 	 *
 	 *	Saves messages with error flag
@@ -329,21 +375,21 @@ public:
 	 *	@attention It won`t stop function execution!
 	 */
 
-	void save_warning(const std::string&);
-	/*! @fn save_warning(const std::string&)
+	void log_warning(const std::string&);
+	/*! @fn log_warning(const std::string&)
 	 *  @brief It saves warning
 	 *
 	 *  Saves message with warning flag
 	 */
 
-	void save_message(const std::string&);
-	/*! @fn save_message(const std::string&)
+	void log_message(const std::string&);
+	/*! @fn log_message(const std::string&)
 	 *  @brief It saves message
 	 *
 	 *   Saves message with information flag
 	 */
 
-	void set_global_level(const LogLevels&);
+	void set_global_level(const LogLevels);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
@@ -360,25 +406,25 @@ public:
 	 */
 
 	template<typename T>
-	void save_return(const T& value)
+	void log_return(const T& value)
 	{
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			m_buff << value;
-			m_real->real_save({"returned: " + m_buff.get()}, INFORMATION, m_location, m_local_level);
+			temp_wrap::log_return(m_buff.get(), m_location, m_local_level);
 			m_buff.clear();
 		}
 		else
-			this->save_return_nothing();
+			this->log_return_nothing();
 	}
-	/*! @fn save_return(const T&)
+	/*! @fn log_return(const T&)
 	 *	@brief It saves return value of funtion
 	 *
 	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
 	 */
 
-	void save_return_nothing();
-	/*! @fn save_return_nothing()
+	void log_return_nothing();
+	/*! @fn log_return_nothing()
 		@brief It save end of function execution
 
 		It saves end of function execution as information message
@@ -387,17 +433,17 @@ public:
 	*/
 
 	template<typename T, typename... Args>
-	void save_arguments(const T& first, Args&... args)
+	void log_arguments(const T& first, Args&... args)
 	{
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
-			save_argument(first);
-			save_arguments(std::forward<Args>(args)...);
+			log_argument(first);
+			log_arguments(std::forward<Args>(args)...);
 		}
 		else
-			this->save_func_start();
+			this->log_func_start();
 	}
-	/*! @fn save_arguments(const T& first, Args&... args)
+	/*! @fn log_arguments(const T& first, Args&... args)
 	 *	@brief It saves input arguments
 	 *
 	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
@@ -405,14 +451,14 @@ public:
 	 *	This method should be called at the beginning of parameterized function
 	 */
 
-	void save_func_start();
-	/*! @fn save_func_start()
+	void log_func_start();
+	/*! @fn log_func_start()
 		@brief It saves start of function
 
 		It saves message that function has successfully started
 	*/
 
-	void set_local_level(const LogLevels&);
+	void set_local_level(const LogLevels);
 	/*! @fn set_local_level(const LogLevels&)
 	 *	@brief Local log level setter
 	 *
@@ -430,26 +476,26 @@ public:
 
 	static void stop_config();
 	/*! @fn stop_config()
-	*	@brief Logger configuration stopper
-	*	
-	*	Allows logger to write messages by stopping its configuration
-	* 
-	*	@attention Can be used only if @a is_config in init() was set to true
-	*	@attention Can be used only once
-	*/
+	 *	@brief Logger configuration stopper
+	 *
+	 *	Allows logger to write messages by stopping its configuration
+	 *
+	 *	@attention Can be used only if @a is_config in init() was set to true
+	 *	@attention Can be used only once
+	 */
 
 	static void set_output_dir(const std::string&);
 	/*! @fn set_output_dir(const std::string&)
-	*	@brief Output directory setter
-	* 
-	*	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
-	*/
+	 *	@brief Output directory setter
+	 *
+	 *	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
+	 */
 
-	static void set_flush(const bool&);
+	static void set_flush(const bool);
 	/*! @fn set_flush(const bool&)
-	*	@brief Flush setter
-	*	
-	*	@attention If flush was set to false, logger won't store any log messages 
-	*/
+	 *	@brief Flush setter
+	 *
+	 *	@attention If flush was set to false, logger won't store any log messages
+	 */
 };
 } // namespace logger

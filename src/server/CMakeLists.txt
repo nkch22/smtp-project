@@ -1,5 +1,6 @@
 add_subdirectory(JSON)
 add_subdirectory(Config)
+add_subdirectory(DB)
 
 add_library(smtp STATIC)
 add_subdirectory(SMTP)
@@ -20,4 +21,5 @@ target_link_libraries(smtp_server
     PRIVATE
     json
     config
+    db
 )
