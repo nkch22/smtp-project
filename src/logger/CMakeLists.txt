@@ -1,8 +1,8 @@
-set(lib logger)
-set(exe log_main)
 
-add_library(${lib} SHARED "Logger.cpp")
+add_library(logger SHARED "Include/Src/Logger.cpp")
 
-add_executable(${exe} "Main.cpp")
+add_executable(example "Example.cpp")
+target_link_libraries(example logger)
 
-target_link_libraries(${exe} ${lib})
+add_executable(config_example "ConfigExample.cpp")
+target_link_libraries(config_example logger)
