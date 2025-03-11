@@ -67,8 +67,9 @@
 #include <filesystem>
 #include <string>
 
-#include "../JSON/Parser.hpp"
-#include "../Logger/Include/Logger.h"
+#include "../JSON/JSONAll.hpp"
+#include "../Logger/Include/Src/SerializationAdapter.hpp"
+#include "Macros.hpp"
 
 /**
  * @class Config
@@ -94,14 +95,6 @@ public:
 		std::string server_display_name; ///< Server display name (config key: "serverdisplayname")
 		int port;						 ///< Listening port number (config key: "listenerport")
 		std::string ip;					 ///< IP address to bind to (config key: "ipaddress")
-
-	public:
-		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Server& obj)
-		{
-			buff << obj.server_name << obj.server_display_name << obj.port << obj.ip;
-
-			return buff;
-		}
 	};
 
 	/**
@@ -117,14 +110,6 @@ public:
 	public:
 		bool blocking;		///< Blocking socket mode (config key: "blocking")
 		int socket_timeout; ///< Socket timeout in milliseconds (config key: "socket_timeout")
-							///
-	public:
-		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Communication& obj)
-		{
-			buff << obj.blocking << obj.socket_timeout;
-
-			return buff;
-		}
 	};
 
 	/**
@@ -142,14 +127,6 @@ public:
 		std::string logs_directory; ///< Directory path for log files (config key: "logs_directory")
 		int log_level;				///< Logging verbosity level (config key: "LogLevel")
 		bool flush;					///< Immediate flush setting (config key: "flush")
-
-	public:
-		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Logging& obj)
-		{
-			buff << '"' << obj.logs_directory << '"' << obj.log_level << obj.flush;
-
-			return buff;
-		}
 	};
 
 	/**
@@ -165,14 +142,6 @@ public:
 	public:
 		int period_time;		 ///< Task processing interval in ms (config key: "Period_time")
 		int max_working_threads; ///< Maximum number of concurrent threads (config key: "maxworkingthreads")
-
-	public:
-		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Threads& obj)
-		{
-			buff << obj.period_time << obj.max_working_threads;
-
-			return buff;
-		}
 	};
 
 	/**
@@ -222,3 +191,13 @@ private:
 	Logging m_logging;			   ///< Storage for logging configuration
 	Threads m_threads;			   ///< Storage for thread pool parameters
 };
+
+JSON_DEFINE_SERIALIZER(Config::Communication, blocking, socket_timeout)
+JSON_DEFINE_SERIALIZER(Config::Logging, logs_directory, log_level, flush)
+JSON_DEFINE_SERIALIZER(Config::Threads, period_time, max_working_threads)
+JSON_DEFINE_SERIALIZER(Config::Server, server_name, server_display_name, port, ip)
+
+DEFINE_LOGGABLE(Config::Server);
+DEFINE_LOGGABLE(Config::Communication);
+DEFINE_LOGGABLE(Config::Logging);
+DEFINE_LOGGABLE(Config::Threads);
