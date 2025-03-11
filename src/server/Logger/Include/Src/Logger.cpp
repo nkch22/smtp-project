@@ -366,6 +366,11 @@ Buffer& Buffer::operator<<(const char* str)
 	*m_real_buff += " ";
 	return *this;
 }
+Buffer& Buffer::operator<<(const char str) {
+	*m_real_buff += str;
+	*m_real_buff += " ";
+	return *this;
+}
 
 Buffer& Buffer::operator<<(const int value)
 {

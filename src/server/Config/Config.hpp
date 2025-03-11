@@ -146,7 +146,7 @@ public:
 	public:
 		friend logger::Buffer& operator<<(logger::Buffer& buff, const Config::Logging& obj)
 		{
-			buff << obj.logs_directory << obj.log_level << obj.flush;
+			buff << '"' << obj.logs_directory << '"' << obj.log_level << obj.flush;
 
 			return buff;
 		}
