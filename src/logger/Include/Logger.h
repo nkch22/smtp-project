@@ -231,6 +231,7 @@ public:
 
 	Buffer& operator<<(const std::string&);
 	Buffer& operator<<(const char*);
+	Buffer& operator<<(const char);
 
 	Buffer& operator<<(const int);
 	Buffer& operator<<(const unsigned int);
