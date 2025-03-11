@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config/Config.hpp"
+#include "../Config/Config.hpp"
 
 class Initializer
 {

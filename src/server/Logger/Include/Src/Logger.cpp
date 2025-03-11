@@ -99,7 +99,7 @@ RealLogger* RealLogger::get_instance(const LogLevels level, const std::string& p
 		m_instance = new RealLogger{level, path, amount, is_config, do_flush};
 
 		atexit([] { Logger::destroy(); });
-		signal(SIGABRT, handle_fatal_error);
+		std::set_terminate(handle_fatal_error);
 	}
 	return m_instance;
 }
@@ -186,13 +186,16 @@ void RealLogger::flush_message(const Message& message)
 
 	std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
 
+	if (m_is_config) return;
+
 	m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " " << message.msg
 		   << "\n";
 }
 
-void RealLogger::handle_fatal_error(int)
+void RealLogger::handle_fatal_error()
 {
 	auto buff = RealLogger::get_instance();
+	if (buff->m_is_config) std::abort();
 
 	try
 	{
@@ -202,11 +205,13 @@ void RealLogger::handle_fatal_error(int)
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->flush_message(Message{str, ERROR, std::source_location::current(),
-												 buff->real_get_level(), std::thread::id{}});
+		buff->save_to_queue(str, ERROR, std::source_location::current(),
+												 buff->real_get_level(), std::thread::id{});
 	}
 
 	Logger::destroy();
+
+	std::abort();
 }
 
 void RealLogger::real_stop_config()

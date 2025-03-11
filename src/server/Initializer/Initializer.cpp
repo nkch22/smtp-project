@@ -3,7 +3,7 @@
 #include <exception>
 #include <filesystem>
 
-#include "Logger/Include/Logger.h"
+#include "../Logger/Include/Logger.h"
 
 void Initializer::Init(const std::filesystem::path& configPath)
 {
@@ -29,7 +29,7 @@ Config Initializer::LoadConfig(const std::filesystem::path& configPath)
 	catch (const std::exception& e)
 	{
 		logger::Logger::stop_config();
-		throw e;
+		throw std::runtime_error{e.what()};
 	}
 }
 

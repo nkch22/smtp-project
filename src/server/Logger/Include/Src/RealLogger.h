@@ -54,7 +54,7 @@ public:
 
 	void flush_message(const Message&);
 
-	static void handle_fatal_error(int);
+	static void handle_fatal_error();
 
 	void real_stop_config();
 
