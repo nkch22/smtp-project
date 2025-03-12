@@ -28,6 +28,13 @@ enum LogLevels
 	LOG_LEVEL_TRACE
 };
 
+enum MessageTypes
+{
+	ERROR,
+	WARNING,
+	INFORMATION
+};
+
 }
 
 #define DEFAULT_LEVEL logger::LOG_LEVEL_PROD
@@ -41,9 +48,4 @@ enum LogLevels
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-enum MessageTypes
-{
-	ERROR,
-	WARNING,
-	INFORMATION
-};
+

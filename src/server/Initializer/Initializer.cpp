@@ -37,8 +37,7 @@ void Initializer::InitLogger(const Config& config)
 {
 	Config::Logging logger_config = config.GetLogging();
 
-	logger::Logger logger;
-	logger.set_global_level(static_cast<logger::LogLevels>(logger_config.log_level));
+	logger::Logger::set_global_level(static_cast<logger::LogLevels>(logger_config.log_level));
 	logger::Logger::set_output_dir(logger_config.logs_directory);
 
 	logger::Logger::stop_config();

@@ -11,7 +11,7 @@ template<typename T>
 class SerializationAdapter
 {
 public:
-	static void Serialize(logger::Buffer& buff, const T& obj)
+	static void Serialize(Buffer& buff, const T& obj)
 	{
 		try
 		{
