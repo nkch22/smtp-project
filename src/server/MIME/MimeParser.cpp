@@ -11,7 +11,7 @@
 #include <stack>
 
 #include "MimeUtils.hpp"
-#include "server/Encoding/EncoderFactory.hpp"
+#include "../Encoding/EncoderFactory.hpp"
 
 namespace ISXMime
 {
