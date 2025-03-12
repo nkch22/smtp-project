@@ -2,10 +2,10 @@
 #include "../../../JSON/Macros.hpp"
 #include "Buffer.h"
 
-#define INNER_LOGGER_ACTION(value) buff << obj.value;
+#define INNER_LOGGER_ACTION(value) buff << #value << ':' << obj.value;
 #define INNER_LOGGER_LOOP(...) FOR_EACH(INNER_LOGGER_ACTION, __VA_ARGS__)
 
-#define GET_PRIVATE(Type) friend struct logger::RealLoggerSerializer<Type>;
+#define LOGGER_GET_PRIVATE(Type) friend struct logger::RealLoggerSerializer<Type>;
 
 #define DEFINE_SER(Type, ...)                                                                                          \
 	namespace logger                                                                                                   \
