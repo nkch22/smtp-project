@@ -18,4 +18,4 @@
 #include <string>
 
 #include "Enums.h"
-#include "../Macros/LoggerMarcos.h"
+#include "../Macros/LoggerMacros.h"
