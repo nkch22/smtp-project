@@ -5,6 +5,7 @@
 
 using namespace logger;
 
+
 RealLogger* RealLogger::m_instance = nullptr;
 
 RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const unsigned int amount,
@@ -99,7 +100,7 @@ RealLogger* RealLogger::get_instance(const LogLevels level, const std::string& p
 		m_instance = new RealLogger{level, path, amount, is_config, do_flush};
 
 		atexit([] { Logger::destroy(); });
-		signal(SIGABRT, handle_fatal_error);
+		std::set_terminate(handle_fatal_error);
 	}
 	return m_instance;
 }
@@ -186,13 +187,16 @@ void RealLogger::flush_message(const Message& message)
 
 	std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
 
+	if (m_is_config) return;
+
 	m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " " << message.msg
 		   << "\n";
 }
 
-void RealLogger::handle_fatal_error(int)
+void RealLogger::handle_fatal_error()
 {
 	auto buff = RealLogger::get_instance();
+	if (buff->m_is_config) std::abort();
 
 	try
 	{
@@ -202,11 +206,13 @@ void RealLogger::handle_fatal_error(int)
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->flush_message(Message{str, ERROR, std::source_location::current(),
-												 buff->real_get_level(), std::thread::id{}});
+		buff->save_to_queue(str, ERROR, std::source_location::current(),
+												 buff->real_get_level(), std::thread::id{});
 	}
 
 	Logger::destroy();
+
+	std::abort();
 }
 
 void RealLogger::real_stop_config()
@@ -280,7 +286,7 @@ void Logger::log_message(const std::string& msg)
 
 void Logger::set_global_level(const LogLevels _level)
 {
-	m_real->real_set_level(_level);
+	RealLogger::get_instance()->real_set_level(_level);
 }
 LogLevels Logger::get_global_level() const
 {
@@ -327,62 +333,4 @@ void Logger::set_output_dir(const std::string& path)
 void Logger::set_flush(const bool value)
 {
 	RealLogger::get_instance()->real_set_flush(value);
-}
-
-// Buffer
-
-Buffer::Buffer() : Buffer{""} {}
-Buffer::Buffer(const std::string& str) : m_real_buff{new std::string{str}} {}
-
-Buffer::~Buffer()
-{
-	delete m_real_buff;
-}
-
-std::string Buffer::get() const
-{
-	return *m_real_buff;
-}
-
-void Buffer::clear()
-{
-	m_real_buff->clear();
-}
-
-Buffer& Buffer::operator<<(const std::string& str)
-{
-	*m_real_buff += str;
-	*m_real_buff += " ";
-	return *this;
-}
-Buffer& Buffer::operator<<(const char* str)
-{
-	*m_real_buff += str;
-	*m_real_buff += " ";
-	return *this;
-}
-
-Buffer& Buffer::operator<<(const int value)
-{
-	*m_real_buff += std::to_string(value);
-	*m_real_buff += " ";
-	return *this;
-}
-Buffer& Buffer::operator<<(const unsigned int value)
-{
-	*m_real_buff += std::to_string(value);
-	*m_real_buff += " ";
-	return *this;
-}
-Buffer& Buffer::operator<<(const double value)
-{
-	*m_real_buff += std::to_string(value);
-	*m_real_buff += " ";
-	return *this;
-}
-Buffer& Buffer::operator<<(const bool value)
-{
-	*m_real_buff += std::to_string((int)value);
-	*m_real_buff += " ";
-	return *this;
 }

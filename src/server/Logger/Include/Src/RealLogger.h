@@ -1,21 +1,20 @@
 #pragma once
 #include "SharedInclude.h"
 
+
 class RealLogger
 {
 private:
-
 	struct Message
 	{
 		std::string msg;
-		MessageTypes type;
+		logger::MessageTypes type;
 		std::source_location location;
 		logger::LogLevels level;
 		std::thread::id thr_id;
 	};
 
 	using queue = std::queue<Message>;
-
 	static RealLogger* m_instance;
 
 	logger::LogLevels m_level;
@@ -39,6 +38,7 @@ private:
 	~RealLogger() = default;
 
 	void file_init(const unsigned int);
+
 public:
 	static RealLogger* get_instance(const logger::LogLevels = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
 									const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
@@ -46,15 +46,15 @@ public:
 
 	static void destroy();
 
-	void save_to_queue(const std::string&, const MessageTypes, const std::source_location&, const logger::LogLevels level,
-				   std::thread::id id = std::this_thread::get_id());
+	void save_to_queue(const std::string&, const logger::MessageTypes, const std::source_location&,
+					   const logger::LogLevels level, std::thread::id id = std::this_thread::get_id());
 
 	void real_set_level(const logger::LogLevels);
 	logger::LogLevels real_get_level();
 
 	void flush_message(const Message&);
 
-	static void handle_fatal_error(int);
+	static void handle_fatal_error();
 
 	void real_stop_config();
 

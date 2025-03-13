@@ -1,9 +1,10 @@
-#include "Include/Logger.h"
 #include <sstream>
+
+#include "Include/Logger.h"
 
 namespace example
 {
-class Test
+class ExampleOperator
 {
 private:
 	int a;
@@ -11,11 +12,11 @@ private:
 	int* ptr;
 
 public:
-	Test() : a{5}, ptr{new int{a}} {}
-	~Test() { delete ptr; }
+	ExampleOperator() : a{5}, ptr{new int{a}} {}
+	~ExampleOperator() { delete ptr; }
 
 	// all you need to have to pass custom class into logger save args and return methods is this operator overload
-	friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
+	friend logger::Buffer& operator<<(logger::Buffer& buff, const ExampleOperator& obj)
 	{
 		buff << obj.a; // Buffer has default operator for int, see Buffer Documentation page for more
 
@@ -30,6 +31,24 @@ public:
 		return buff;
 	}
 };
+
+class ExampleMacros
+{
+private:
+	int a;
+	double b;
+
+	ExampleOperator op;
+
+	LOGGER_GET_PRIVATE(ExampleMacros) // you have to use this macros, when you want to log private members
+											   // to make this class fully loggable you have to use one more macros, but
+											   // you cant use it class declaration
+public:
+	ExampleMacros() : a{5}, b{2.6}, op{} {}
+	~ExampleMacros() {}
+};
+	MAKE_LOGGABLE(ExampleMacros, a, b, op) // this macros generates operator<< overloading for ExampleMarcos class with a and b members
+		//It is recomended to use this macros in cpp files
 
 void NoArgsNoRet()
 {
@@ -91,12 +110,20 @@ int MessageOutput(int a, int b)
 	return c;
 }
 
-void CustomClass(Test& obj)
+void CustomClassOperator(ExampleOperator& obj)
 {
 	logger::Logger log;
 	log.log_arguments(obj); // if you have overloaded operator, just pass it to the method
 	// any type, that is not in default buffer operators, need to have overloaded one
 	//  if dont and you want to log it, method will throw exception
+
+	log.log_return_nothing();
+}
+
+void CustomClassMacros(ExampleMacros& obj)
+{
+	logger::Logger log;
+	log.log_arguments(obj); //works petty much the same as overloaded operator, but you cant make you own overloading
 
 	log.log_return_nothing();
 }
@@ -110,14 +137,15 @@ void ArgsWithoutLogging(int*, int b)
 
 	log.log_return_nothing();
 }
-}
+} // namespace example
 
 using namespace example;
+
 
 int main()
 {
 	logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
-	//every instance of Logger will have trace log level
+	// every instance of Logger will have trace log level
 
 	NoArgsNoRet();
 	ArgsRet(5);
@@ -126,10 +154,12 @@ int main()
 
 	MessageOutput(1, 0);
 
-	Test t;
-	CustomClass(t);
+	ExampleOperator t;
+	CustomClassOperator(t);
+
+	ExampleMacros t2;
+	CustomClassMacros(t2);
 
 	int a = 6;
 	ArgsWithoutLogging(&a, 5);
 }
-
