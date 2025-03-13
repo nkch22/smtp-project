@@ -9,7 +9,7 @@ namespace logger
 class Buffer
 {
 private:
-	std::string* m_real_buff;
+	std::string m_real_buff;
 
 public:
 	Buffer();
