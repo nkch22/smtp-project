@@ -38,14 +38,17 @@ private:
 	int a;
 	double b;
 
+	ExampleOperator op;
+
 	LOGGER_GET_PRIVATE(ExampleMacros) // you have to use this macros, when you want to log private members
 											   // to make this class fully loggable you have to use one more macros, but
-											   // you cant use it inside namespace
+											   // you cant use it class declaration
 public:
-	ExampleMacros() : a{5}, b{2.6} {}
+	ExampleMacros() : a{5}, b{2.6}, op{} {}
 	~ExampleMacros() {}
 };
-	MAKE_LOGGABLE(ExampleMacros, a, b)
+	MAKE_LOGGABLE(ExampleMacros, a, b, op) // this macros generates operator<< overloading for ExampleMarcos class with a and b members
+		//It is recomended to use this macros in cpp files
 
 void NoArgsNoRet()
 {
@@ -136,24 +139,7 @@ void ArgsWithoutLogging(int*, int b)
 }
 } // namespace example
 
-
-class Test
-{
-	LOGGER_GET_PRIVATE(Test)
-
-	const int a = 7;
-};
-MAKE_LOGGABLE(Test, a)
-
-void test(Test h) {
-	logger::Logger log;
-	log.log_arguments(h);
-}
-
 using namespace example;
-
-
-// This macros generates operator<< overloading for ExampleMarcos class with a and b members
 
 
 int main()
@@ -176,6 +162,4 @@ int main()
 
 	int a = 6;
 	ArgsWithoutLogging(&a, 5);
-
-	test(Test{});
 }

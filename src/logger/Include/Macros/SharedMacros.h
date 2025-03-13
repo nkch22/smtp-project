@@ -1,6 +1,8 @@
 #pragma once
 
-//This macros were taken from JSON branch
+/*! @file SharedMacros.h
+*	This file contains macros from JSON branch
+*/
 
 /**
  * @brief Identity macro.
