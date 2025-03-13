@@ -130,3 +130,9 @@ void Config::ParseThreadpool(const ISXJson::JSON& threadpool_json)
 
 	logger.log_return_nothing();
 }
+
+MAKE_LOGGABLE(Config, m_server, m_communication, m_logging, m_threads)
+MAKE_LOGGABLE(Config::Communication, blocking, socket_timeout)
+MAKE_LOGGABLE(Config::Logging, logs_directory, log_level, flush)
+MAKE_LOGGABLE(Config::Threads, period_time, max_working_threads)
+MAKE_LOGGABLE(Config::Server, server_name, server_display_name, port, ip)
