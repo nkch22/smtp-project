@@ -1,8 +1,8 @@
 #pragma once
-#include "Src/SharedInclude.h"
-#include "Src/TemplateWrapper.h"
+#include "Macros/LoggerMacros.h"
 #include "Src/Buffer.h"
-#include "Src/LoggerMarcos.h"
+#include "Src/LoggerWrapper.h"
+#include "Src/SharedInclude.h"
 
 class RealLogger;
 
@@ -11,179 +11,9 @@ class RealLogger;
  *	@brief Interface of Logger shared library
  *
  *	This file contains logger interface
- *
- *	@section usage_example Usage example
- *	@code
- *
- *	#include "Logger.h"
- *	#include <sstream>
- * 
- *	void NoArgsNoRet();
- *	int ArgsRet(int a);
- *
- *	int LocalLevel(int a);
- *
- *	int MessageOutput(int a, int b);
- * 
- *	class Test;
- *	void CustomClass(Test);
- *
- *	void ArgsWithoutLogging(int* a, int b);
- *
- *	int main()
- *	{
- *		logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
- *		//every instance of Logger will have trace log level
- *
- *		NoArgsNoRet();
- *		ArgsRet(5);
- *
- *		LocalLevel(5);
- *		MessageOutput(1, 0);
- *
- *		Test t;
- *		CustomClass(t);
- *
- *		int a = 6;
- *		ArgsWithoutLogging(&a, 5);
- *	}
- *
- *	void NoArgsNoRet()
- *	{
- *		logger::Logger log;	   // creates logger variable
- *		log.log_func_start(); // saves function start without arguments
- *
- *		// some logic, that not need to be logged
- *
- *		log.log_return_nothing(); // saves function end
- *	}
- *	int ArgsRet(int a)
- *	{
- *		logger::Logger log;
- *		log.log_arguments(a); // saves function start with a parameter (might be more parameters)
- *
- *		int b = a++; // some logic, that not need to be logged
- *
- *		log.log_return(b); // saves function return with b output
- *		return b;
- *	}
- *
- *	int LocalLevel(int a)
- *	{
- *		logger::Logger log;
- *		log.set_local_level(
- *			logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
- *		// Global log level won't be affected
- *		log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
- *
- *		int b = a++; // some logic, that not need to be logged
- *
- *		log.log_return(b); // because of debug log level will be replaced with log_return_nothing()
- *		return b;
- *	}
- *
- *	int MessageOutput(int a, int b)
- *	{
- *		logger::Logger log;
- *		log.log_arguments(a, b);
- *
- *		int c = 0;
- *		try
- *		{
- *			if (b == 0) throw std::invalid_argument("b can't be 0");
- *
- *			c = a / b;
- *		}
- *		catch (std::invalid_argument& ex)
- *		{
- *			log.log_error(ex.what());	 // saves exception message with error flag
- *			log.log_warning(ex.what()); // are also valid
- *			log.log_message(ex.what()); // the only difference is message type flag
- *			// you can use any of them based on your logic
- *		}
- *
- *		log.log_return(c);
- *		return c;
- *	}
- *
- *	class Test
- *	{
- *	private:
- *		int a;
- *		int* ptr;
- *
- *		void* none;
- *
- *	public:
- *		Test() : a{5}, ptr{&a}, none{nullptr} {}
- *
- *		// all you need to have to pass custom class into logger save args and return methods is this operator overload
- *		friend logger::Buffer& operator<<(logger::Buffer& buff, const Test& obj)
- *		{
- *			buff << obj.a; //Buffer has default operator for int, see Buffer Documentation page for more
- *
- *			//if there is none you need, than make it yourself
- *			//the main goal of every buffer operator<< is to convert data into std::string
- *			std::stringstream st;
- *			st << obj.ptr;
- *			buff << st.str();
- *
- *			//if you dont want to log value of some variable, than dont do it
- *
- *			//no logging for 'none' void ptr
- *
- *			return buff;
- *		}
- *	};
- *	void CustomClass(Test obj) {
- *		logger::Logger log;
- *		log.log_arguments(obj); //if you have overloakded operator, just pass it to the method
- *		//any type, that is not in default buffer operators, need to have overloaded one
- *		// if dont and you want to log it, method will throw exception
- *
- *		log.log_return_nothing();
- *	}
- *
- *	void ArgsWithoutLogging(int* a, int b) {
- *		logger::Logger log;
- *
- *		log.log_arguments(b); //you choose what to save
- *		//if you dont want to log any parameters, than use log_func_start()
- *
- *		log.log_return_nothing();
- *	}
- *	@endcode
  */
 namespace logger
 {
-/*! @def DEFAULT_LEVEL
- *	@brief Default log level
- */
-/*! @def DEFAULT_AMOUNT
- *	@brief Default logs amount
- */
-/*! @def DEFAULT_PATH
- *	@brief Default output path
- */
-/*! @def DEFAULT_CONFIG
- *	@brief Default config flag value
- */
-/*! @def DEFAULT_FLUSH
- *	@brief Default flush flag value
- */
-
-/*! @def DEFAULT_COLOR
- *	@brief Default console color
- */
-/*! @def ERROR_COLOR
- *	@brief Error console color
- */
-/*! @def WARNING_COLOR
- *	@brief Warning console color
- */
-/*! @def INFORMATION_COLOR
- *	@brief Information console color
- */
 
 /*! @class Logger
  *	@brief Main logger interface
@@ -196,16 +26,40 @@ namespace logger
  *
  *	@warning init() method will delete Logger singleton AFTER program ends or crashes
  *
- *  @warning Don't use init() more than once
- *
  *	@warning Using saving methods without previous init() call in any other place is undefined behavior
  *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
+ *
+ *	@attention When using log_return() or log_arguments(), you need to have overloaded operator<<.
+ *
+ *	@section code_example Example of overloaded operator<< for class Test with int a member
+ *	@code
+ *		friend Buffer& operator<<(Buffer& buff, const Test& obj){
+ *			buff << obj.a;
+ *			return buff;
+ *		}
+ *	@endcode
+ *
+ *	@attention There are such default overloaded operators:	int, char, char*, std::string, unsigned int, double, bool
+ *
+ *	@warning If class doesnt have operator, but it was passed to log_return or log_arguments, then it will log warning
+ *
+ * @attention You can use macros instead of overloading operator<<.
+ * 
+ * @section macros_example Example of macros for class Test with a and b members
+ *	@code
+ *		class Test{
+ *			const int a = 5;
+ *			const double b = 7.8;
+ *			
+ *			LOGGER_GET_PRIVATE(Test) //Defines operator<< for class Test
+ *	    }
+ *		MAKE_LOGGABLE(Test, a, b) //Creates operator<< for given class and members
+ *	@endcode
  */
 class Logger
 {
 private:
-
 	RealLogger* m_real;
 
 	Buffer m_buff;
@@ -239,10 +93,10 @@ public:
 
 	static void destroy();
 	/*! @fn destroy()
-	*	@brief Destroy method
-	* 
-	*	Destroys global values
-	*/
+	 *	@brief Destroy method
+	 *
+	 *	Destroys global values
+	 */
 
 	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = false,
@@ -258,14 +112,11 @@ public:
 	 *
 	 *	It will save message of successful initialization
 	 *
-	 *	@warning It will throw std::invalid_argument if
-	 *	@warning 1. Level is out of scope OR
-	 *	@warning 2. Save_path is incorrect OR
-	 *	@warning 3. Amount is less than 1
+	 *	@warning It will log warning if
+	 *	@warning 1. Save_path is incorrect OR
+	 *	@warning 2. Amount is less than 1
 	 *
-	 *  @attention this method can be called only once
-	 *
-	 *	@throw std::invalid_argument
+	 *  @attention this method need to be called only once
 	 *
 	 *	@return initialization state (true or false)
 	 */
@@ -315,7 +166,7 @@ public:
 		if (m_local_level == LOG_LEVEL_TRACE)
 		{
 			m_buff << value;
-			temp_wrap::log_return(m_buff.get(), m_location, m_local_level);
+			temp_wrap::wrap_return(m_buff.get(), m_location, m_local_level);
 			m_buff.clear();
 		}
 		else
@@ -324,7 +175,8 @@ public:
 	/*! @fn log_return(const T&)
 	 *	@brief It saves return value of funtion
 	 *
-	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of overloaded
+	 *operator<<() (see them in class description)
 	 */
 
 	void log_return_nothing();
@@ -350,7 +202,8 @@ public:
 	/*! @fn log_arguments(const T& first, Args&... args)
 	 *	@brief It saves input arguments
 	 *
-	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of Buffer::operator<<()
+	 *	@warning If custom class is given as parameter, then it needs to meet the requirements of overloaded
+	 *operator<<() (see them in class description)
 	 *
 	 *	This method should be called at the beginning of parameterized function
 	 */
