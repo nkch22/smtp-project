@@ -17,18 +17,7 @@
 #include <source_location>
 #include <string>
 
-
-namespace logger
-{
-enum LogLevels
-{
-	LOG_LEVEL_NO,
-	LOG_LEVEL_PROD,
-	LOG_LEVEL_DEBUG,
-	LOG_LEVEL_TRACE
-};
-
-}
+#include "Enums.h"
 
 #define DEFAULT_LEVEL logger::LOG_LEVEL_PROD
 #define DEFAULT_AMOUNT 30
@@ -41,9 +30,4 @@ enum LogLevels
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-enum MessageTypes
-{
-	ERROR,
-	WARNING,
-	INFORMATION
-};
+
