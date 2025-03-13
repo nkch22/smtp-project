@@ -35,18 +35,17 @@ public:
 class ExampleMacros
 {
 private:
-	LOGGER_GET_PRIVATE(example::ExampleMacros) // you have to use this macros, when you want to log private members
-									  // to make this class fully loggable you have to use one more macros, but you cant
-									  // use it inside namespace
-
 	int a;
 	double b;
 
+	LOGGER_GET_PRIVATE(ExampleMacros) // you have to use this macros, when you want to log private members
+											   // to make this class fully loggable you have to use one more macros, but
+											   // you cant use it inside namespace
 public:
 	ExampleMacros() : a{5}, b{2.6} {}
 	~ExampleMacros() {}
 };
-
+	MAKE_LOGGABLE(ExampleMacros, a, b)
 
 void NoArgsNoRet()
 {
@@ -153,7 +152,7 @@ void test(Test h) {
 
 using namespace example;
 
-MAKE_LOGGABLE(ExampleMacros, a, b)
+
 // This macros generates operator<< overloading for ExampleMarcos class with a and b members
 
 
