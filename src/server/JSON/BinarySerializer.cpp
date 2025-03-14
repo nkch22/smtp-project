@@ -10,6 +10,7 @@
 
 #include "BinarySerializer.hpp"
 
+#include <cmath>
 #include <cstring>
 #include <limits>
 

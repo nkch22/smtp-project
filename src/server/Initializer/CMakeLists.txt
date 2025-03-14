@@ -1,2 +1,2 @@
-add_library(initializer "r.cpp")
+add_library(initializer "Initializer.cpp")
 target_link_libraries(initializer PUBLIC logger_shared config)
