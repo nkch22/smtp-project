@@ -32,12 +32,14 @@ std::vector<std::optional<Message>> MessageRepository::GetMessages() const
 	std::vector<std::optional<Message>> messages;
 	for (auto msg : tx.exec("select * from messages"))
 	{
-		auto usrfrom = tx.exec1("select * from users where id = " + msg["sender"].as<std::string>());
-		auto usrto = tx.exec1("select * from users where id = " + msg["recepient"].as<std::string>());
-		messages.emplace_back(Message{.from = User{usrfrom["id"].as<int>(), usrfrom["name"].as<std::string>(),
-												   usrfrom["password"].as<std::string>()},
-									  .to = User{usrto["id"].as<int>(), usrto["name"].as<std::string>(),
-												 usrto["password"].as<std::string>()},
+		auto usrfrom = tx.exec("select * from users where id = " + msg["sender"].as<std::string>()).one_row();
+		auto usrto = tx.exec("select * from users where id = " + msg["recepient"].as<std::string>()).one_row();
+		messages.emplace_back(Message{.from = User{.id = usrfrom["id"].as<int>(),
+												   .name = usrfrom["name"].as<std::string>(),
+												   .password = usrfrom["password"].as<std::string>()},
+									  .to = User{.id = usrto["id"].as<int>(),
+												 .name = usrto["name"].as<std::string>(),
+												 .password = usrto["password"].as<std::string>()},
 									  .content = msg["content"].as<std::string>()});
 	}
 	tx.commit();
@@ -54,7 +56,7 @@ std::vector<std::optional<Message>> MessageRepository::GetMessagesFrom(const Use
 		std::cout << "inside if\n";
 		for (auto msg : tx.exec("select * from messages where sender = " + std::to_string(user.id)))
 		{
-			auto usrto = tx.exec1("select * from users where id = " + msg["recepient"].as<std::string>());
+			auto usrto = tx.exec("select * from users where id = " + msg["recepient"].as<std::string>()).one_row();
 			messages.emplace_back(Message{.from = user,
 										  .to = User{.id = usrto["id"].as<int>(),
 													 .name = usrto["name"].as<std::string>(),
@@ -78,7 +80,7 @@ std::vector<std::optional<Message>> MessageRepository::GetMessagesTo(const User&
 	{
 		for (auto msg : tx.exec("select * from messages where recepient = " + std::to_string(user.id)))
 		{
-			auto usrfrom = tx.exec1("select * from users where id = " + msg["sender"].as<std::string>());
+			auto usrfrom = tx.exec("select * from users where id = " + msg["sender"].as<std::string>()).one_row();
 			messages.emplace_back(Message{.from = User{.id = usrfrom["id"].as<int>(),
 													   .name = usrfrom["name"].as<std::string>(),
 													   .password = usrfrom["password"].as<std::string>()},

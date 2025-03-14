@@ -1,7 +1,6 @@
-#ifndef DBCONNECTOR_HPP
-#define DBCONNECTOR_HPP
+#pragma once
 
-#include <pqxx/pqxx>
+#include "pqxx/pqxx"
 
 class DBConnector
 {
@@ -14,5 +13,3 @@ public:
 
 	pqxx::connection& GetConnection() const;
 };
-
-#endif

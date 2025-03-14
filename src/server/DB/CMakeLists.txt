@@ -1,5 +1,15 @@
-add_library(db STATIC DBConnector.cpp Entity/UserRepository.cpp Entity/MessageRepository.cpp)
+add_library(db STATIC
+        DBConnector.cpp
+        Repository/UserRepository.cpp
+        Repository/MessageRepository.cpp
+
+        # make IDE happy
+        Entity/Message.hpp
+        Entity/User.hpp
+        Repository/UserRepository.hpp
+        Repository/MessageRepository.hpp
+        DBConnector.hpp
+)
 
 target_include_directories(db PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 target_link_libraries(db PRIVATE ${PQXX_LIBRARIES})
