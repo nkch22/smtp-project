@@ -48,5 +48,8 @@ FetchContent_Declare(
 )
 set(PQXX_LIBRARIES pqxx_static)
 
+set(PQXX_BUILD_TEST OFF)
+set(PQXX_BUILD_SHARED OFF)  # Ensure static build is consistent
 FetchContent_MakeAvailable(libpqxx)
-include_directories(${libpqxx_SOURCE_DIR}/include)
+include_directories(SYSTEM ${libpqxx_SOURCE_DIR}/include ${libpqxx_BINARY_DIR}/include)
+
