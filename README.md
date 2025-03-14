@@ -62,3 +62,41 @@ cmake --build build/<PresetName>
 ### Info about sanitizers:
 -  [Address Sanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
 -  [Thread Sanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html)
+
+## Docker Compose
+
+### Start
+
+```shell
+docker-compose --project-name="smtp-project" up -d
+```
+
+### Stop
+
+```shell
+docker-compose --project-name="smtp-project" down
+```
+
+## Access to PgAdmin
+
+Open in browser [http://localhost:5050](http://localhost:5050)
+
+## Add a new server in PgAdmin
+
+* Host name/address `postgres_container` (as Docker-service name)
+* Port `5432` (inside Docker)
+* Maintenance database `smtp-db` (as `POSTGRES_DB`)
+* Username `postgres` (as `POSTGRES_USER`)
+* Password `smtp!!!` (as `POSTGRES_PASSWORD`)
+
+![pgadmin_add_server.png](docs/img/pgadmin_add_server.png)
+
+## Add a new server in CLion
+
+* Host `localhost`
+* Port `5432`
+* Maintenance database `smtp-db` (as `POSTGRES_DB`)
+* Username `postgres` (as `POSTGRES_USER`)
+* Password `smtp!!!` (as `POSTGRES_PASSWORD`)
+
+![clion_add_db.png](docs/img/clion_add_db.png)
