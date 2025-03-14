@@ -3,20 +3,16 @@
 
 #include <pqxx/pqxx>
 
-class DBConnector {
-    private:
-        const std::string connection_str; 
-        
-        
-    public:
-        pqxx::connection conn;
+class DBConnector
+{
+private:
+	pqxx::connection m_connection;
 
-        DBConnector(std::string connection_str);
-        ~DBConnector() = default;
+public:
+	DBConnector(const std::string& connection_str);
+	~DBConnector() = default;
 
+	pqxx::connection& GetConnection() const;
 };
-
-
-
 
 #endif

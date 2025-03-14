@@ -1,24 +1,27 @@
 #pragma once
 
-#include "UserRepository.hpp"
 #include "../DBConnector.hpp"
+#include "UserRepository.hpp"
 
-struct Message {
-  User from;
-  User to;
-  std::string content;
+struct Message
+{
+	User from;
+	User to;
+	std::string content;
 };
 
-class MessageRepository {
+class MessageRepository
+{
 private:
-  DBConnector* dbc;
+	DBConnector* m_dbc;
+
 public:
-  MessageRepository(DBConnector* dbc);
-  ~MessageRepository();
+	MessageRepository(DBConnector* dbc);
+	~MessageRepository();
 
-  bool create_message(Message msg);
+	bool CreateMessage(const Message& msg) const;
 
-  std::vector<std::optional<Message>> get_messages();
-  std::vector<std::optional<Message>> get_messages_from(User user);
-  std::vector<std::optional<Message>> get_messages_to(User user);
+	std::vector<std::optional<Message>> GetMessages() const;
+	std::vector<std::optional<Message>> GetMessagesFrom(const User& user) const;
+	std::vector<std::optional<Message>> GetMessagesTo(const User& user) const;
 };

@@ -1,28 +1,31 @@
 #pragma once
 
+#include <optional>
 #include <pqxx/pqxx>
 #include <string>
 #include <vector>
-#include <optional>
+
 #include "../DBConnector.hpp"
 
-struct User {
-  int id;
-  std::string name;
-  std::string password;
+struct User
+{
+	int id;
+	std::string name;
+	std::string password;
 };
 
-class UserRepository {
+class UserRepository
+{
 private:
-  DBConnector* dbc;
+	DBConnector* m_dbc;
+
 public:
-  // UserRepository();
-  UserRepository(DBConnector* dbc);
-  ~UserRepository();
+	UserRepository(DBConnector* dbc);
+	~UserRepository();
 
-  bool create_user(User user);
+	bool CreateUser(const User& user) const;
 
-  std::vector<std::optional<User>> get_users();
-  std::optional<User> get_by_id(int id);
-  std::optional<User> get_by_name(std::string name);
+	std::vector<std::optional<User>> GetUsers() const;
+	std::optional<User> GetById(int id) const;
+	std::optional<User> GetByName(const std::string& name) const;
 };
