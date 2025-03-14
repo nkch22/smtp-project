@@ -12,10 +12,6 @@ include(FetchContent)
 # Libraries
 
 # --------------------------------------------------------------------
-
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
-
 project_log("FetchContent: asio")
 
 FetchContent_Declare(
@@ -39,5 +35,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(base64)
 
 add_library(base64 STATIC ${base64_SOURCE_DIR}/base64.cpp)
-
 target_include_directories(base64 INTERFACE ${base64_SOURCE_DIR})
+
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+project_log("FetchContent: libpqxx")
+FetchContent_Declare(
+        libpqxx
+        GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+        GIT_TAG 7.10.0
+)
+set(PQXX_LIBRARIES pqxx_static)
+set(PQXX_BUILD_TEST OFF)
+set(PQXX_BUILD_SHARED OFF)  # Ensure static build is consistent
+FetchContent_MakeAvailable(libpqxx)
+include_directories(SYSTEM ${libpqxx_SOURCE_DIR}/include ${libpqxx_BINARY_DIR}/include)
