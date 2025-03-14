@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DBConnector.hpp"
+#include "Connection/DBConnector.hpp"
 #include "Entity/Message.hpp"
 
 class MessageRepository

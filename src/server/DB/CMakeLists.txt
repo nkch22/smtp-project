@@ -1,5 +1,5 @@
 add_library(db STATIC
-        DBConnector.cpp
+        Connection/DBConnector.cpp
         Repository/UserRepository.cpp
         Repository/MessageRepository.cpp
 
@@ -8,7 +8,7 @@ add_library(db STATIC
         Entity/User.hpp
         Repository/UserRepository.hpp
         Repository/MessageRepository.hpp
-        DBConnector.hpp
+        Connection/DBConnector.hpp
 )
 
 target_include_directories(db PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

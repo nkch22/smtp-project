@@ -3,7 +3,7 @@
 #include <optional>
 #include <vector>
 
-#include "DBConnector.hpp"
+#include "Connection/DBConnector.hpp"
 #include "Entity/User.hpp"
 
 class UserRepository
