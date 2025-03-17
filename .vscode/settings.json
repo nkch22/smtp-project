@@ -5,6 +5,9 @@
         "*.ipp": "cpp",
         "cstdlib": "cpp",
         "unordered_set": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "memory": "cpp",
+        "list": "cpp",
+        "xutility": "cpp"
     }
 }

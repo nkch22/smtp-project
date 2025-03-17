@@ -69,6 +69,7 @@ protected:
 private:    
     void HandleReplyCode(const Protocol::ReplyCode reply_code);
 
+    bool m_receiving_mail;
     Protocol::Parser m_smtp_parser;
     std::shared_ptr<Context> m_context;
 };

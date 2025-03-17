@@ -23,13 +23,13 @@ namespace Protocol
  * @brief 
  * 
  */
-class RcptToCommand final : public ICommand
+class RcptCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"RCPT"sv};
 
-    RcptToCommand(const Mailbox& mailbox);
-    ~RcptToCommand() = default;
+    RcptCommand(const Mailbox& mailbox);
+    ~RcptCommand() = default;
 
     /**
      * @brief Create a Response object

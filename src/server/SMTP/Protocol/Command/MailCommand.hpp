@@ -23,13 +23,14 @@ namespace Protocol
  * @brief Class that implements MAIL command
  * 
  */
-class MailFromCommand final : public ICommand
+class MailCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"MAIL"sv};
+    constexpr static std::string_view END_OF_MAIL{"\r\n.\r\n"sv};
 
-    MailFromCommand(const Mailbox& mailbox);
-    ~MailFromCommand() = default;
+    MailCommand(const Mailbox& mailbox);
+    ~MailCommand() = default;
 
     /**
      * @brief Create a Response object

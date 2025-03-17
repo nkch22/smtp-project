@@ -1,4 +1,4 @@
-#include "RcptToCommand.hpp"
+#include "RcptCommand.hpp"
 
 namespace SMTP
 {
@@ -6,12 +6,12 @@ namespace SMTP
 namespace Protocol
 {
 
-RcptToCommand::RcptToCommand(const Mailbox& mailbox)
+RcptCommand::RcptCommand(const Mailbox& mailbox)
     : m_mailbox{mailbox}
 {
 }
 
-Response RcptToCommand::CreateResponse(Context& options)
+Response RcptCommand::CreateResponse(Context& options)
 {
     if(options.transaction.CheckAvailability(m_mailbox))
     {
@@ -24,12 +24,12 @@ Response RcptToCommand::CreateResponse(Context& options)
     return response;
 }
 
-OptionalCommand RcptToCommand::TryParseCommand(const std::string& request, const Context& options)
+OptionalCommand RcptCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     const auto command{std::data(COMMAND) + std::string{" TO:"}};
     if(request.contains(command))
     {
-        return std::make_unique<RcptToCommand>(Mailbox::ParseAddressFromRequest(request));
+        return std::make_unique<RcptCommand>(Mailbox::ParseAddressFromRequest(request));
     }
     return std::nullopt;
 }

@@ -13,6 +13,8 @@ class Transaction
 {
 public:
     Transaction() = default;
+    ~Transaction() = default;
+
     bool CheckAvailability(const Mailbox& mailbox) const;
     
     void Reset() noexcept;

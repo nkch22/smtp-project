@@ -1,4 +1,4 @@
-#include "MailFromCommand.hpp"
+#include "MailCommand.hpp"
 
 #include <print>
 
@@ -8,12 +8,12 @@ namespace SMTP
 namespace Protocol
 {
 
-MailFromCommand::MailFromCommand(const Mailbox& mailbox)
+MailCommand::MailCommand(const Mailbox& mailbox)
     : m_mailbox{mailbox}
 {
 }
 
-Response MailFromCommand::CreateResponse(Context& options)
+Response MailCommand::CreateResponse(Context& options)
 {
     if(options.transaction.CheckAvailability(m_mailbox))
     {
@@ -26,12 +26,12 @@ Response MailFromCommand::CreateResponse(Context& options)
     return response;
 }
 
-OptionalCommand MailFromCommand::TryParseCommand(const std::string& request, const Context& options)
+OptionalCommand MailCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     const auto command{std::data(COMMAND) + std::string{" FROM:"}};
     if(request.contains(command))
     {
-        return std::make_unique<MailFromCommand>(Mailbox::ParseAddressFromRequest(request));
+        return std::make_unique<MailCommand>(Mailbox::ParseAddressFromRequest(request));
     }
     return std::nullopt;
 }

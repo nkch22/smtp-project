@@ -9,9 +9,9 @@
 #include "QuitCommand.hpp"
 #include "DataCommand.hpp"
 #include "AuthCommand.hpp"
-#include "MailFromCommand.hpp"
+#include "MailCommand.hpp"
 #include "NoopCommand.hpp"
-#include "RcptToCommand.hpp"
+#include "RcptCommand.hpp"
 #include "RsetCommand.hpp"
 #include "VrfyCommand.hpp"
 #include "HelpCommand.hpp"
@@ -28,8 +28,8 @@ OptionalCommand Parser::TryParseRequest(const std::string& request, const Contex
     return ParserHelper<HeloCommand, EhloCommand, 
                         HelpCommand, QuitCommand, 
                         DataCommand, AuthCommand,
-                        MailFromCommand, NoopCommand,
-                        QuitCommand, RcptToCommand,
+                        MailCommand, NoopCommand,
+                        QuitCommand, RcptCommand,
                         RsetCommand, VrfyCommand>::TryParse(request, custom_options);
 }
 

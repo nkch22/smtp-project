@@ -6,10 +6,10 @@
 #include "DataCommand.hpp"
 #include "HeloCommand.hpp"
 #include "EhloCommand.hpp"
-#include "MailFromCommand.hpp"
+#include "MailCommand.hpp"
 #include "NoopCommand.hpp"
 #include "QuitCommand.hpp"
-#include "RcptToCommand.hpp"
+#include "RcptCommand.hpp"
 #include "RsetCommand.hpp"
 #include "VrfyCommand.hpp"
 
@@ -24,8 +24,8 @@ Response HelpCommand::CreateResponse(Context& options)
     std::string combine_commands{};
     combine_commands += HeloCommand::COMMAND;
     combine_commands += FormatData(EhloCommand::COMMAND);
-    combine_commands += FormatData(MailFromCommand::COMMAND);
-    combine_commands += FormatData(RcptToCommand::COMMAND);
+    combine_commands += FormatData(MailCommand::COMMAND);
+    combine_commands += FormatData(RcptCommand::COMMAND);
     combine_commands += FormatData(DataCommand::COMMAND);
     combine_commands += FormatData(RsetCommand::COMMAND);
     combine_commands += FormatData(VrfyCommand::COMMAND);
