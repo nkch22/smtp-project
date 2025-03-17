@@ -11,15 +11,17 @@
  */
 
 #include <string>
+#include <memory>
 
 #include "Transaction.hpp"
+#include "Database/IDatabase.hpp"
 
 namespace SMTP
 {
 
-class Context
+struct Context
 {
-public:
+    std::shared_ptr<Database::IDatabase> database;
     Transaction transaction;
     std::string domain_name;
     std::size_t max_message_size;

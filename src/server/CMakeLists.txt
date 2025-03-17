@@ -3,7 +3,7 @@ add_subdirectory(SMTP)
 target_link_libraries(smtp PUBLIC asio )
 target_link_libraries(smtp PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
-add_executable(smtp_server main.cpp)
+add_executable(smtp_server main.cpp Database.cpp Server.cpp Session.cpp)
 add_custom_target(copy_certificates ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/tools/certificates

@@ -60,7 +60,8 @@ OptionalCommand EhloCommand::TryParseCommand(const std::string& request, const C
 std::string EhloCommand::RemoveWhitespaces(const std::string& string)
 {
     auto copy{string};
-    copy.erase(std::remove_if(std::begin(copy), std::end(copy), ::isspace), std::end(copy));
+    auto removed_elements{std::remove_if(std::begin(copy), std::end(copy), ::isspace)};
+    copy.erase(removed_elements, std::end(copy));
     return copy;
 }
 

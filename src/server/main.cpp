@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include <print>
 
-#include "SMTP/Server.hpp"
+#include "Server.hpp"
+#include "Database.hpp"
+#include "Session.hpp"
 
 int main() 
 {
@@ -18,9 +20,10 @@ int main()
         ssl_context->use_private_key_file("tools/certificates/key.pem", asio::ssl::context::file_format::pem);
         ssl_context->use_tmp_dh_file("tools/certificates/dhparam.pem");
 
-        auto context_generator{[]() -> std::shared_ptr<SMTP::Context>
+        auto context_generator{[]() -> std::shared_ptr<Server::Context>
         {
-            auto options{std::make_shared<SMTP::Context>()};
+            auto options{std::make_shared<Server::Context>()};
+            options->database = std::make_shared<Database>();
             options->domain_name = asio::ip::host_name();
             options->max_message_size = 1024 * 10;
             options->plain_login_allowed = false;
@@ -28,7 +31,7 @@ int main()
             return options;
         }};
 
-        auto server{std::make_shared<SMTP::Server>(io_context, ssl_context, context_generator, 465)};
+        auto server{std::make_shared<Server>(io_context, ssl_context, context_generator, 465)};
         server->Start();
         io_context->run();
         server->Stop();
