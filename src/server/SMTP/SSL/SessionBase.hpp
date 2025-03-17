@@ -13,12 +13,13 @@
 #include <memory>
 #include <optional>
 #include <atomic>
+#include <vector>
 
 #include <asio.hpp>
 #include <asio/ssl.hpp>
 
 #include "../ISession.hpp"
-#include "SessionRegister.hpp"
+#include "SessionRegisterBase.hpp"
 
 namespace SMTP
 {
@@ -43,7 +44,8 @@ public:
      */
     SessionBase(std::shared_ptr<asio::io_context> io_context, 
                 std::shared_ptr<asio::ssl::context> ssl_context,
-                std::shared_ptr<SessionRegister> session_register);
+                std::shared_ptr<SessionRegisterBase> session_register,
+                const std::size_t max_bytes_receive_size);
     ~SessionBase() = default;
 
     /**
@@ -142,7 +144,7 @@ protected:
      */
     void OnSent(const std::size_t sent) override;
 
-    std::shared_ptr<SessionRegister> m_session_register;
+    std::shared_ptr<SessionRegisterBase> m_session_register;
     std::shared_ptr<asio::io_context> m_io_context;
     std::shared_ptr<asio::ssl::context> m_ssl_context;
 
@@ -172,7 +174,7 @@ private:
     std::atomic<bool> m_handshaked;
     bool m_receiving;
     bool m_sending;
-    asio::streambuf m_receive_buffer;
+    std::vector<char> m_receive_buffer;
     asio::streambuf m_send_buffer;
 };
 

@@ -15,7 +15,7 @@ EhloCommand::EhloCommand(const std::string client_domain)
 {
 }
 
-Response EhloCommand::CreateResponse(const Options& options)
+Response EhloCommand::CreateResponse(Context& options)
 {
     constexpr std::string_view extension_format{"250-{}\r\n"sv};
     const auto extensions{FillExtensions(options)};
@@ -29,16 +29,11 @@ Response EhloCommand::CreateResponse(const Options& options)
     return response;
 }
 
-std::vector<std::string> EhloCommand::FillExtensions(const Options& options) const
+std::vector<std::string> EhloCommand::FillExtensions(const Context& options) const
 {
     std::vector<std::string> extensions{};
-    extensions.emplace_back("PIPELING");
     extensions.emplace_back("8BITMIME");
     extensions.emplace_back("SMTPUTF8");
-    if(!options.is_secure)
-    {
-        extensions.emplace_back("STARTTLS");
-    }
     if(options.max_message_size > 0)
     {
         extensions.emplace_back(std::format("SIZE {}", options.max_message_size));
@@ -50,7 +45,7 @@ std::vector<std::string> EhloCommand::FillExtensions(const Options& options) con
     return extensions;
 }
 
-OptionalCommand EhloCommand::TryParseCommand(const std::string& request, const Options options)
+OptionalCommand EhloCommand::TryParseCommand(const std::string& request, const Context options)
 {
     if(const auto position{request.find(COMMAND)};
        position != std::string::npos)

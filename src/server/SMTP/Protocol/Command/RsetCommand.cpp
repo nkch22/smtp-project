@@ -6,13 +6,13 @@ namespace SMTP
 namespace Protocol
 {
 
-Response RsetCommand::CreateResponse(const Options& options)
+Response RsetCommand::CreateResponse(Context& options)
 {
     const Response response{ReplyCode::Ok};
     return response;
 }
 
-OptionalCommand RsetCommand::TryParseCommand(const std::string& request, const Options& options)
+OptionalCommand RsetCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     if(request.contains(COMMAND))
     {

@@ -12,20 +12,19 @@
 
 #include <string>
 
+#include "Transaction.hpp"
+
 namespace SMTP
 {
 
-namespace Protocol
+class Context
 {
-
-struct Options
-{
+public:
+    Transaction transaction;
     std::string domain_name;
     std::size_t max_message_size;
     bool plain_login_allowed;
     bool is_secure;
 };
-
-}
 
 }

@@ -16,13 +16,13 @@ ServerBase::ServerBase(std::shared_ptr<asio::io_context> io_context,
     , m_started{false}
     , m_acceptor{*m_io_context}
     , m_endpoint{asio::ip::tcp::v4(), port}
-    , m_session_register{std::make_shared<SessionRegister>()}
+    , m_session_register{std::make_shared<SessionRegisterBase>()}
 {
 }
 
 std::shared_ptr<SSL::SessionBase> ServerBase::CreateSession()
 {
-    return std::make_shared<SessionBase>(m_io_context, m_ssl_context, m_session_register);
+    return std::make_shared<SessionBase>(m_io_context, m_ssl_context, m_session_register, 1024);
 }
 
 void ServerBase::Start()

@@ -13,14 +13,14 @@ HeloCommand::HeloCommand(const std::string client_domain)
 {
 }
 
-Response HeloCommand::CreateResponse(const Options& options)
+Response HeloCommand::CreateResponse(Context& options)
 {
     const Response response{ReplyCode::Ok, 
         std::format("{} greets {}", options.domain_name, m_client_domain)};
     return response;
 }
 
-OptionalCommand HeloCommand::TryParseCommand(const std::string& request, const Options& options)
+OptionalCommand HeloCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     if(const auto position{request.find(HeloCommand::COMMAND)};
        position != std::string::npos)

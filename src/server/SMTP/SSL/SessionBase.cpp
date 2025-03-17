@@ -10,7 +10,8 @@ namespace SSL
 
 SessionBase::SessionBase(std::shared_ptr<asio::io_context> io_context, 
                          std::shared_ptr<asio::ssl::context> ssl_context, 
-                         std::shared_ptr<SessionRegister> session_register)
+                         std::shared_ptr<SessionRegisterBase> session_register,
+                         const std::size_t max_bytes_receive_size)
     : m_io_context{io_context}
     , m_ssl_context{ssl_context}
     , m_connected{false}
@@ -18,7 +19,7 @@ SessionBase::SessionBase(std::shared_ptr<asio::io_context> io_context,
     , m_receiving{false}
     , m_sending{false}
     , m_stream{*m_io_context, *m_ssl_context}
-    , m_receive_buffer{}
+    , m_receive_buffer(max_bytes_receive_size)
     , m_send_buffer{}
     , m_send_mutex{}
     , m_session_register{session_register}
@@ -138,6 +139,8 @@ bool SessionBase::IsHandshaked() const noexcept
 void SessionBase::ClearBuffers()
 {
     std::scoped_lock lock{m_send_mutex};
+    m_receive_buffer.clear();
+    m_send_buffer.consume(std::size(m_send_buffer));
 }
 
 asio::ssl::stream<asio::ip::tcp::socket>& SessionBase::get_stream() noexcept
@@ -175,8 +178,7 @@ void SessionBase::TryReceive()
 
         if(size > 0)
         {
-            std::string data{std::istreambuf_iterator<char>{&m_receive_buffer},
-            std::istreambuf_iterator<char>{}};
+            std::string_view data{std::data(m_receive_buffer), size};
             OnReceived(data);
         }
         
@@ -190,7 +192,7 @@ void SessionBase::TryReceive()
             Disconnect();
         }
     }};
-    asio::async_read_until(m_stream, m_receive_buffer, "\r\n", async_receive_handler);
+    m_stream.async_read_some(asio::buffer(std::data(m_receive_buffer), std::size(m_receive_buffer)), async_receive_handler);
 }
 
 void SessionBase::TrySend()

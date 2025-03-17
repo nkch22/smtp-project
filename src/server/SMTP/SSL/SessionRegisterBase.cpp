@@ -1,4 +1,4 @@
-#include "SessionRegister.hpp"
+#include "SessionRegisterBase.hpp"
 
 namespace SMTP
 {
@@ -6,33 +6,38 @@ namespace SMTP
 namespace SSL
 {
 
-SessionRegister::~SessionRegister()
+SessionRegisterBase::~SessionRegisterBase()
 {
     Clear();
 }
 
-void SessionRegister::RegisterSession(std::shared_ptr<ISession> session)
+void SessionRegisterBase::RegisterSession(std::shared_ptr<ISession> session)
 {
     std::unique_lock<std::shared_mutex> m_sessions_lock{get_sessions_mutex()};
     m_sessions.insert(session);
 }
 
-void SessionRegister::UnregisterSession(std::shared_ptr<ISession> session)
+void SessionRegisterBase::UnregisterSession(std::shared_ptr<ISession> session)
 {
     std::unique_lock<std::shared_mutex> m_sessions_lock{get_sessions_mutex()};
     m_sessions.erase(session);
 }
 
-bool SessionRegister::Multicast(std::string_view data)
+bool SessionRegisterBase::Multicast(const std::string_view data)
 {
+    if(std::size(data) == 0)
+    {
+        return false;
+    }
     std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
     for(auto& session : m_sessions)
     {
         session->Send(data);
     }
+    return true;
 }
 
-void SessionRegister::DisconnectAll()
+void SessionRegisterBase::DisconnectAll()
 {
     std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
     for(auto& session : m_sessions)
@@ -41,7 +46,7 @@ void SessionRegister::DisconnectAll()
     }
 }
 
-void SessionRegister::Clear()
+void SessionRegisterBase::Clear()
 {
     std::shared_lock<std::shared_mutex> lock{m_sessions_mutex};
     for(auto& session : m_sessions)
@@ -51,7 +56,7 @@ void SessionRegister::Clear()
     m_sessions.clear();
 }
 
-std::shared_mutex& SessionRegister::get_sessions_mutex()
+std::shared_mutex& SessionRegisterBase::get_sessions_mutex()
 {
     return m_sessions_mutex;
 }

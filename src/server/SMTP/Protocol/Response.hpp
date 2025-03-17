@@ -37,7 +37,8 @@ public:
      * @param message 
      * @param add_crlf 
      */
-    Response(const ReplyCode reply_code, const OptionalMessage message = std::nullopt, const bool add_crlf = true);
+    Response(const ReplyCode reply_code, const OptionalMessage message = std::nullopt, 
+             const bool has_error = false, const bool add_crlf = true);
 
     /**
      * @brief Get the reply code object
@@ -53,6 +54,8 @@ public:
      */
     OptionalMessage get_message() const noexcept;
 
+    bool HasError() const noexcept;
+
     /**
      * @brief Create a String Response object
      * 
@@ -62,6 +65,7 @@ public:
 private:
     ReplyCode m_reply_code;
     bool m_add_crlf;
+    bool m_has_error;
     std::optional<std::string> m_message;
 };
 

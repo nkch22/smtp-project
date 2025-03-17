@@ -6,13 +6,13 @@ namespace SMTP
 namespace Protocol
 {
 
-Response VrfyCommand::CreateResponse(const Options& options)
+Response VrfyCommand::CreateResponse(Context& options)
 {
     const Response response{ReplyCode::Ok};
     return response;
 }
 
-OptionalCommand VrfyCommand::TryParseCommand(const std::string& request, const Options& options)
+OptionalCommand VrfyCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     if(request.contains(COMMAND))
     {

@@ -19,7 +19,7 @@ namespace SMTP
 namespace Protocol
 {
 
-Response HelpCommand::CreateResponse(const Options& options)
+Response HelpCommand::CreateResponse(Context& options)
 {
     std::string combine_commands{};
     combine_commands += HeloCommand::COMMAND;
@@ -38,7 +38,7 @@ Response HelpCommand::CreateResponse(const Options& options)
     return response;
 }
 
-OptionalCommand HelpCommand::TryParseCommand(const std::string& request, const Options& options)
+OptionalCommand HelpCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     if(request.contains(COMMAND))
     {

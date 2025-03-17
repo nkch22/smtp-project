@@ -10,6 +10,8 @@
  * 
  */
 
+#include <functional>
+
 #include "Session.hpp"
 #include "SSL/ServerBase.hpp"
 #include "Protocol/Parser.hpp"
@@ -36,7 +38,7 @@ public:
      */
     Server(std::shared_ptr<asio::io_context> io_context, 
            std::shared_ptr<asio::ssl::context> ssl_context, 
-           const Protocol::Options smtp_options,
+           std::function<std::shared_ptr<Context>()> context_generator,
            const Port port);
     ~Server() = default;
 protected:
@@ -60,7 +62,7 @@ protected:
      */
     void OnStarted() override;
 
-    std::shared_ptr<Protocol::Parser> m_smtp_parser;
+    std::function<std::shared_ptr<Context>()> m_context_generator;
 };
 
 }

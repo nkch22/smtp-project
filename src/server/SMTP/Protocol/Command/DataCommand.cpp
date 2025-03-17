@@ -6,13 +6,23 @@ namespace SMTP
 namespace Protocol
 {
 
-Response DataCommand::CreateResponse(const Options& options)
+DataCommand::DataCommand()
 {
-    const Response response{ReplyCode::Ok};
+}
+
+Response DataCommand::CreateResponse(Context& options)
+{
+    if(std::size(options.transaction.get_recepients()) == 0)
+    {
+        const Response response{ReplyCode::TransactionFailed, "No valid recepients given"};
+        return response;
+    }
+
+    const Response response{ReplyCode::StartMailInput, "End data with <CR><LF>.<CR><LF>"};
     return response;
 }
 
-OptionalCommand DataCommand::TryParseCommand(const std::string& request, const Options& options)
+OptionalCommand DataCommand::TryParseCommand(const std::string& request, const Context& options)
 {
     if(request.contains(COMMAND))
     {

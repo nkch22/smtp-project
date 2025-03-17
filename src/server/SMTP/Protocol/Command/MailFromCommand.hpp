@@ -11,6 +11,7 @@
  */
 
 #include "ICommand.hpp"
+#include "../../Mailbox.hpp"
 
 namespace SMTP
 {
@@ -22,12 +23,12 @@ namespace Protocol
  * @brief Class that implements MAIL command
  * 
  */
-class MailFromCommand : public ICommand
+class MailFromCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"MAIL"sv};
 
-    MailFromCommand() = default;
+    MailFromCommand(const Mailbox& mailbox);
     ~MailFromCommand() = default;
 
     /**
@@ -36,7 +37,7 @@ public:
      * @param options 
      * @return Response 
      */
-    Response CreateResponse(const Options& options) override;
+    Response CreateResponse(Context& options) override;
 
     /**
      * @brief Function that parses smtp-request string
@@ -45,7 +46,10 @@ public:
      * @param options 
      * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
-    static OptionalCommand TryParseCommand(const std::string& request, const Options& options);
+    static OptionalCommand TryParseCommand(const std::string& request, const Context& options);
+
+private:
+    Mailbox m_mailbox;
 };
 
 }

@@ -7,10 +7,12 @@ namespace SMTP
 
 Session::Session(std::shared_ptr<asio::io_context> io_context,
                  std::shared_ptr<asio::ssl::context> ssl_context,
-                 std::shared_ptr<SSL::SessionRegister> session_register,
-                 std::shared_ptr<Protocol::Parser> smtp_parser)
-    : SSL::SessionBase{io_context, ssl_context, session_register}
-    , m_smtp_parser{smtp_parser}
+                 std::shared_ptr<SSL::SessionRegisterBase> session_register,
+                 std::shared_ptr<Context> context)
+    : SSL::SessionBase{io_context, ssl_context, 
+        session_register, context->max_message_size}
+    , m_smtp_parser{}
+    , m_context{context}
 {
 }
 
@@ -29,17 +31,11 @@ void Session::OnDisconnected()
 void Session::OnReceived(const std::string_view data)
 {
     std::print("Received: {}", data);
-    const auto command{m_smtp_parser->TryParseRequest(std::data(data))};
+    const auto command{m_smtp_parser.TryParseRequest(std::data(data), *m_context)};
     if(command.has_value())
     {
-        const auto response{command.value()->CreateResponse(m_smtp_parser->get_global_options())};
-        const auto string_response{response.CreateStringResponse()};
-        Send(string_response);
-        if(response.get_reply_code() == 
-           Protocol::ReplyCode::ServiceClosingTransmissionChannel)
-        {
-            Disconnect();
-        }
+        const auto response{command.value()->CreateResponse(*m_context)};
+        HandleResponse(response);   
     }
 }
 
@@ -53,8 +49,33 @@ void Session::OnHandshaked()
         SessionBase::get_socket().remote_endpoint().address().to_string(),
         SessionBase::get_socket().remote_endpoint().port());
     const Protocol::Response response{Protocol::ReplyCode::ServiceReady, 
-                                      std::format("{} SMTP is ready", m_smtp_parser->get_global_options().domain_name)};
+                                      std::format("{} SMTP is ready", m_context->domain_name)};
     Send(response.CreateStringResponse());
+}
+
+void Session::HandleResponse(const Protocol::Response& response)
+{
+    const auto string_response{response.CreateStringResponse()};
+    Send(string_response);
+    HandleReplyCode(response.get_reply_code());
+}
+
+
+void Session::HandleReplyCode(const Protocol::ReplyCode reply_code)
+{
+    using enum Protocol::ReplyCode;
+
+    switch(reply_code)
+    {
+    case ServiceClosingTransmissionChannel:
+        Disconnect();
+        break;
+    case StartMailInput:
+        break;
+    default:
+        std::println("Unknown reply_code: {}", Protocol::to_underlying(reply_code));
+        break;
+    }
 }
 
 }

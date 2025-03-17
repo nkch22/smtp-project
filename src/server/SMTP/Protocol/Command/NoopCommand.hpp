@@ -22,7 +22,7 @@ namespace Protocol
  * @brief Class that implements Noop command
  * 
  */
-class NoopCommand : public ICommand
+class NoopCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"NOOP"sv};
@@ -36,7 +36,7 @@ public:
      * @param options 
      * @return Response 
      */
-    Response CreateResponse(const Options& options) override;
+    Response CreateResponse(Context& options) override;
 
     /**
      * @brief Function that parses smtp-request string
@@ -45,7 +45,7 @@ public:
      * @param options 
      * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
-    static OptionalCommand TryParseCommand(const std::string& request, const Options& options);
+    static OptionalCommand TryParseCommand(const std::string& request, const Context& options);
 };
 
 }
