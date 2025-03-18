@@ -1,14 +1,16 @@
 add_library(db STATIC
-        Connection/DBConnector.cpp
-        Repository/UserRepository.cpp
-        Repository/MessageRepository.cpp
+        Repository/RepoPq/UserRepoPq.cpp
+        Repository/RepoPq/MessageRepoPq.cpp
 
         # make IDE happy
         Entity/Message.hpp
         Entity/User.hpp
-        Repository/UserRepository.hpp
-        Repository/MessageRepository.hpp
-        Connection/DBConnector.hpp
+        Repository/Queries/UserQueries.hpp
+        Repository/Queries/MessageQueries.hpp
+        Repository/Interface/UserRepo.hpp
+        Repository/Interface/MessageRepo.hpp
+        Repository/RepoPq/UserRepoPq.hpp
+        Repository/RepoPq/MessageRepoPq.hpp
 )
 
 target_include_directories(db PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
