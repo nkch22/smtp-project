@@ -76,12 +76,12 @@ bool ContentTransferEncoding::RequiresEncoding() const
 
 bool ContentTransferEncoding::IsValid7Bit(const std::vector<uint8_t>& data)
 {
-	return std::ranges::all_of(data, [](uint8_t c) { return c >= 1 && c <= 127; });
+	return std::all_of(data.begin(), data.end(), [](uint8_t c) { return c >= 1 && c <= 127; });
 }
 
 bool ContentTransferEncoding::IsValid8Bit(const std::vector<uint8_t>& data)
 {
-	return std::ranges::all_of(data, [](uint8_t c) { return c != 0; });
+	return std::all_of(data.begin(), data.end(), [](uint8_t c) { return c != 0; });
 }
 
 const char* ContentTransferEncoding::TypeToString(Type type)
