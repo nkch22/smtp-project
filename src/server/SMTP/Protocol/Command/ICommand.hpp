@@ -14,7 +14,7 @@
 #include <string_view>
 
 #include "../Response.hpp"
-#include "../Options.hpp"
+#include "../../Context.hpp"
 
 
 namespace SMTP
@@ -34,7 +34,7 @@ public:
      * @param options 
      * @return Response 
      */
-    virtual Response CreateResponse(const Options& options) = 0;
+    virtual Response CreateResponse(Context& options) = 0;
 };
 
 using OptionalCommand = std::optional<std::unique_ptr<ICommand>>;

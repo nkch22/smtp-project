@@ -17,9 +17,10 @@ namespace SMTP
 namespace Protocol
 {
 
-Response::Response(const ReplyCode reply_code, const OptionalMessage message, const bool add_crlf)
+Response::Response(const ReplyCode reply_code, const OptionalMessage message, const bool has_error, const bool add_crlf)
     : m_reply_code{reply_code}
     , m_message{message}
+    , m_has_error{has_error}
     , m_add_crlf{add_crlf}
 {
 }
@@ -50,6 +51,11 @@ std::string Response::CreateStringResponse() const noexcept
         return std::format("{}\r\n", string_response);
     }
     return std::format("{}", string_response);
+}
+
+bool Response::HasError() const noexcept
+{
+    return m_has_error;
 }
 
 }

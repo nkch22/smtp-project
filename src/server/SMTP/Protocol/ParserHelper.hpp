@@ -15,7 +15,7 @@
 
 #include "ICommand.hpp"
 #include "ParseCommandType.hpp"
-#include "../Options.hpp"
+#include "../Context.hpp"
 
 namespace SMTP
 {
@@ -49,7 +49,7 @@ public:
      * @param options 
      * @return OptionalCommand 
      */
-    static OptionalCommand TryParse(const std::string& request, const Options& options){return std::nullopt;}
+    static OptionalCommand TryParse(const std::string& request, const Context& options){return std::nullopt;}
 };
 
 /**
@@ -71,11 +71,11 @@ public:
  * @param options 
  * @return OptionalCommand 
  */
-    static OptionalCommand TryParse(const std::string& request, const Options& options);
+    static OptionalCommand TryParse(const std::string& request, const Context& options);
 };
 
 template<ParseCommandType T, ParseCommandType... Types>
-ParserHelper<T, Types...>::OptionalCommand ParserHelper<T, Types...>::TryParse(const std::string& request, const Options& options)
+ParserHelper<T, Types...>::OptionalCommand ParserHelper<T, Types...>::TryParse(const std::string& request, const Context& options)
 {
     if(auto command{T::TryParseCommand(request, options)};
        command.has_value())

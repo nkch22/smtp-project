@@ -23,7 +23,7 @@ namespace Protocol
  * @brief Class that implements HELO command
  * 
  */
-class HeloCommand : public ICommand
+class HeloCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"HELO"sv};
@@ -42,16 +42,16 @@ public:
      * @param options 
      * @return Response 
      */
-    Response CreateResponse(const Options& options) override;
+    Response CreateResponse(Context& options) override;
 
     /**
-     * @brief 
+     * @brief Function that parses smtp-request string
      * 
      * @param request 
      * @param options 
      * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
-    static OptionalCommand TryParseCommand(const std::string& request, const Options& options);
+    static OptionalCommand TryParseCommand(const std::string& request, const Context& options);
 private:
     static std::string RemoveWhitespaces(const std::string& string);
 

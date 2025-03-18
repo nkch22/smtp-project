@@ -1,6 +1,6 @@
 #pragma once
 /**
- * @file VrfyCommand.hpp
+ * @file RcptToCommand.hpp
  * @author Oleksandr
  * @brief 
  * @version 0.1
@@ -11,6 +11,7 @@
  */
 
 #include "ICommand.hpp"
+#include "../../Mailbox.hpp"
 
 namespace SMTP
 {
@@ -19,16 +20,16 @@ namespace Protocol
 {
 
 /**
- * @brief Class that implements VRFY
+ * @brief 
  * 
  */
-class VrfyCommand final : public ICommand
+class RcptCommand final : public ICommand
 {
 public:
-    constexpr static std::string_view COMMAND{"VRFY"sv};
+    constexpr static std::string_view COMMAND{"RCPT"sv};
 
-    VrfyCommand() = default;
-    ~VrfyCommand() = default;
+    RcptCommand(const Mailbox& mailbox);
+    ~RcptCommand() = default;
 
     /**
      * @brief Create a Response object
@@ -46,6 +47,8 @@ public:
      * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
     static OptionalCommand TryParseCommand(const std::string& request, const Context& options);
+private:
+    Mailbox m_mailbox;
 };
 
 }

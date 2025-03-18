@@ -15,7 +15,7 @@
 #include <mutex>
 #include <vector>
 
-#include "Options.hpp"
+#include "../Context.hpp"
 #include "ICommand.hpp"
 
 namespace SMTP
@@ -31,16 +31,8 @@ namespace Protocol
 class Parser
 {
 public:
-    Parser(const Options global_options);
-
-    /**
-     * @brief 
-     * 
-     * @param request 
-     * @return OptionalCommand 
-     */
-    OptionalCommand TryParseRequest(const std::string& request) const;
-
+    Parser() = default;
+    ~Parser() = default;
     /**
      * @brief 
      * 
@@ -48,21 +40,7 @@ public:
      * @param custom_options 
      * @return OptionalCommand 
      */
-    OptionalCommand TryParseRequest(const std::string& request, const Options& custom_options) const;
-
-    /**
-     * @brief Get the global options object
-     * 
-     * @return const Options& 
-     */
-    const Options& get_global_options() const noexcept;
-
-    /**
-     * @brief Set the global options object
-     * 
-     * @param options 
-     */
-    void set_global_options(const Options& options);
+    OptionalCommand TryParseRequest(const std::string& request, const Context& custom_options) const;
 private:
 
     /**
@@ -72,9 +50,6 @@ private:
      * @return std::string 
      */
     static std::string ToUpper(const std::string& string);
-
-    std::mutex m_global_options_mutex;
-    Options m_global_options;
 };
 
 }
