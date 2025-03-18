@@ -9,8 +9,6 @@ Mailbox::Mailbox(const std::string address)
     : m_user{TryParseUser(address)}
     , m_host{TryParseHost(address)}
 {
-    std::println("{}", address);
-    std::println("{}", m_host.value());
 }
 
 std::optional<std::string> Mailbox::get_user() const noexcept

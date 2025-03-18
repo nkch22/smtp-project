@@ -12,5 +12,4 @@ public:
             std::shared_ptr<SMTP::SSL::SessionRegisterBase> session_register,
             std::shared_ptr<Context> context);
     ~Session() = default;
-private:
 };

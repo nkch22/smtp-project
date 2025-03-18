@@ -16,5 +16,4 @@ public:
     ~Server() = default;
 protected: 
     std::shared_ptr<SMTP::SSL::SessionBase> CreateSession() override;
-private:
 };

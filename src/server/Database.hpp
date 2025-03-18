@@ -1,20 +1,22 @@
 #pragma once
 
 #include "SMTP/Database/IDatabase.hpp"
+#include "SMTP/Mailbox.hpp"
 
-class Database final : public SMTP::Database::IDatabase
+using SMTP::Database::IDatabase;
+using SMTP::Database::IUser;
+using SMTP::Mailbox;
+
+class Database final : public IDatabase
 {
 public:
-    void ReadUser() override;
-    void ReadEmail() override;
+    using OptionalUser = IDatabase::OptionalUser;
+    using OptionalMessage = IDatabase::OptionalMail;
 
-    void CreateUser() override;
-    void CreateEmail() override;
+    ~Database() = default;
 
-    void UpdateUser() override;
-    void UpdateEmail() override;
-
-    void RemoveUser() override;
-    void RemoveEmail() override;
-private:
+    OptionalUser ReadUser(const Mailbox& mailbox) const override;
+    bool CreateUser(const IUser& user) override;
+    bool UpdateUser(const IUser& user) override;
+    bool RemoveUser(const IUser& user) override;
 };

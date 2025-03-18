@@ -1,41 +1,21 @@
 #include "Database.hpp"
 
-void Database::ReadUser() 
+Database::OptionalUser Database::ReadUser(const Mailbox& mailbox) const
 {
-
+    return std::nullopt;
 }
 
-void Database::ReadEmail() 
+bool Database::CreateUser(const IUser& user)
 {
-
+    return true;
 }
 
-void Database::CreateUser() 
+bool Database::UpdateUser(const IUser& user)
 {
-
+    return true;
 }
 
-void Database::CreateEmail() 
+bool Database::RemoveUser(const IUser& user)
 {
-
-}
-
-void Database::UpdateUser() 
-{
-
-}
-
-void Database::UpdateEmail() 
-{
-
-}
-
-void Database::RemoveUser() 
-{
-
-}
-
-void Database::RemoveEmail() 
-{
-
+    return true;
 }
