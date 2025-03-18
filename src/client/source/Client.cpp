@@ -123,4 +123,8 @@ std::string Client::get_password() const
 	return m_password;
 }
 
+void Client::set_context(asio::ssl::context&& context)
+{
+	m_socket->SetContext(std::move(context));
+}
 } // namespace SMTP

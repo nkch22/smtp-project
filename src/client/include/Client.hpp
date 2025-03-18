@@ -120,6 +120,16 @@ public:
 	 *
 	 * @param authenticator The authenticator object to use.
 	 */
+	void set_context(asio::ssl::context&& context);
+
+	/**
+	 * @brief Sets the authenticator for authentication.
+	 *
+	 * This method allows setting a custom authenticator for handling the SMTP
+	 * authentication process.
+	 *
+	 * @param authenticator The authenticator object to use.
+	 */
 	void set_authenticator(std::unique_ptr<IAuthenticator> authenticator);
 
 	/**

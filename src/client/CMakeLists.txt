@@ -13,5 +13,6 @@ qt_standard_project_setup()
 
 add_subdirectory(ui)
 
+add_dependencies(client copy_certificates)
 qt_add_executable(smtp_client main.cpp)
 target_link_libraries(smtp_client PUBLIC client ui_lib Qt6::Core Qt6::Widgets)
