@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "ICommand.hpp"
-#include "../Options.hpp"
 
 namespace SMTP
 {
@@ -25,7 +24,7 @@ namespace Protocol
  * @brief Class that implements EHLO Command
  * 
  */
-class EhloCommand : public ICommand
+class EhloCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"EHLO"sv};
@@ -44,16 +43,16 @@ public:
      * @param options 
      * @return Response 
      */
-    Response CreateResponse(const Options& options) override;
+    Response CreateResponse(Context& options) override;
 
     /**
-     * @brief 
+     * @brief Function that parses smtp-request string
      * 
      * @param request 
      * @param options 
      * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
-    static OptionalCommand TryParseCommand(const std::string& request, const Options options);
+    static OptionalCommand TryParseCommand(const std::string& request, const Context options);
 private:
 
     /**
@@ -62,7 +61,7 @@ private:
      * @param options 
      * @return std::vector<std::string> 
      */
-    std::vector<std::string> FillExtensions(const Options& options) const;
+    std::vector<std::string> FillExtensions(const Context& options) const;
 
     /**
      * @brief 

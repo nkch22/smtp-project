@@ -12,7 +12,7 @@
 
 #include "Protocol/Parser.hpp"
 #include "SSL/SessionBase.hpp"
-#include "Protocol/Parser.hpp"
+#include "Context.hpp"
 
 namespace SMTP
 {
@@ -29,8 +29,8 @@ public:
      */
     Session(std::shared_ptr<asio::io_context> io_context, 
             std::shared_ptr<asio::ssl::context> ssl_context, 
-            std::shared_ptr<SSL::SessionRegister> session_register,
-            std::shared_ptr<Protocol::Parser> smtp_parser);
+            std::shared_ptr<SSL::SessionRegisterBase> session_register,
+            std::shared_ptr<Context> context);
     ~Session() = default;
 protected:
     /**
@@ -64,8 +64,14 @@ protected:
      * 
      */
     void OnHandshaked() override;
-private:
-    std::shared_ptr<Protocol::Parser> m_smtp_parser;
+    
+    virtual void HandleResponse(const Protocol::Response& response);
+private:    
+    void HandleReplyCode(const Protocol::ReplyCode reply_code);
+
+    bool m_receiving_mail;
+    Protocol::Parser m_smtp_parser;
+    std::shared_ptr<Context> m_context;
 };
 
 }

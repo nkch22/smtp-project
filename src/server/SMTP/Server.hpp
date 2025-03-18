@@ -10,6 +10,8 @@
  * 
  */
 
+#include <functional>
+
 #include "Session.hpp"
 #include "SSL/ServerBase.hpp"
 #include "Protocol/Parser.hpp"
@@ -25,6 +27,7 @@ class Server : public SSL::ServerBase
 {
 public:
     using Port = asio::ip::port_type;
+    using ContextGenerator = std::function<std::shared_ptr<Context>()>;
 
     /**
      * @brief Construct a new Server object
@@ -36,7 +39,7 @@ public:
      */
     Server(std::shared_ptr<asio::io_context> io_context, 
            std::shared_ptr<asio::ssl::context> ssl_context, 
-           const Protocol::Options smtp_options,
+           ContextGenerator context_generator,
            const Port port);
     ~Server() = default;
 protected:
@@ -60,7 +63,7 @@ protected:
      */
     void OnStarted() override;
 
-    std::shared_ptr<Protocol::Parser> m_smtp_parser;
+    ContextGenerator m_context_generator;
 };
 
 }

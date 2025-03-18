@@ -150,7 +150,7 @@ enum class ReplyCode
     MailboxNameNotAllowed = 553,
 
     // The transaction failed.
-    TransactionFailed = 554
+    TransactionFailed = 554,
 };
 
 constexpr std::underlying_type_t<ReplyCode> to_underlying(const ReplyCode reply_code) noexcept 

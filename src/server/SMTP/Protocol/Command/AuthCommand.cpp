@@ -6,21 +6,45 @@ namespace SMTP
 namespace Protocol
 {
 
-Response AuthCommand::CreateResponse(const Options& options)
+AuthCommand::AuthCommand(const AuthentificationMethod auth_method, const std::string_view parameter)
+    : m_auth_method{auth_method}, m_parameter{parameter}
 {
-	const Response response{ReplyCode::Ok};
-	return response;
 }
 
-OptionalCommand AuthCommand::TryParseCommand(const std::string& request, const Options& options)
+Response AuthCommand::CreateResponse(Context& options)
 {
-	if (request.find(COMMAND) != std::string::npos)
-	{
-		return std::make_unique<AuthCommand>();
-	}
-	return std::nullopt;
+    using enum AuthentificationMethod;
+
+    const Response response{ReplyCode::Ok};
+    switch(m_auth_method)
+    {
+    case Plain:
+        break;
+    case Login:
+        break;
+    }
+    return response;
 }
 
-} // namespace Protocol
+OptionalCommand AuthCommand::TryParseCommand(const std::string& request, const Context& options)
+{
+    if(request.contains(COMMAND))
+    {
+        //return std::make_unique<AuthCommand>();
+    }
+    return std::nullopt;
+}
 
-} // namespace SMTP
+std::optional<Response> AuthCommand::TryPlain(const Context& options)
+{
+    return std::nullopt;
+}
+
+std::optional<Response> AuthCommand::TryLogin(const Context& options)
+{
+    return std::nullopt;
+}
+
+}
+
+}

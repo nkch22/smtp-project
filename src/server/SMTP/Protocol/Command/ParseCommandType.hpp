@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <memory>
 
-#include "../Options.hpp"
+#include "../../Context.hpp"
 
 namespace SMTP
 {
@@ -32,7 +32,7 @@ concept ParseCommandType = requires(T type)
      * @brief 
      * 
      */
-    {T::TryParseCommand(std::declval<std::string>(), std::declval<Options>())} -> std::same_as<OptionalCommand>;
+    {T::TryParseCommand(std::declval<std::string>(), std::declval<Context>())} -> std::same_as<OptionalCommand>;
 };
 
 }

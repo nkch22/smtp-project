@@ -22,7 +22,7 @@ namespace Protocol
  * @brief Class that implements QUIT command
  * 
  */
-class QuitCommand : public ICommand
+class QuitCommand final : public ICommand
 {
 public:
     constexpr static std::string_view COMMAND{"QUIT"sv};
@@ -36,16 +36,16 @@ public:
      * @param options 
      * @return Response 
      */
-    Response CreateResponse(const Options& options) override;
+    Response CreateResponse(Context& options) override;
 
     /**
-     * @brief 
+     * @brief Function that parses smtp-request string
      * 
      * @param request 
      * @param options 
-     * @return OptionalCommand 
+     * @return OptionalCommand if command found constructs It else std::nullopt object 
      */
-    static OptionalCommand TryParseCommand(const std::string& request, const Options& options);
+    static OptionalCommand TryParseCommand(const std::string& request, const Context& options);
 };
 
 }
