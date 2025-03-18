@@ -18,12 +18,12 @@ std::shared_ptr<SSL::SessionBase> Server::CreateSession()
 
 void Server::OnAccepted()
 {
-	std::printf("Accepting Connection");
+	std::printf("Accepting Connection\n");
 }
 
 void Server::OnStarted()
 {
-	std::printf("Server is started");
+	std::printf("Server is started\n");
 }
 
 } // namespace SMTP

@@ -222,7 +222,7 @@ void SessionBase::TrySend()
 
 void SessionBase::HandleError(const asio::error_code& error)
 {
-	std::printf("Error: %s", error.message().data());
+	std::printf("Error: %s\n", error.message().data());
 }
 
 void SessionBase::OnConnected() {}

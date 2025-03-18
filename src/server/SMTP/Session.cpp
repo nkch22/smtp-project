@@ -14,20 +14,20 @@ Session::Session(std::shared_ptr<asio::io_context> io_context, std::shared_ptr<a
 
 void Session::OnConnected()
 {
-	std::printf("Connected: %s:%d", SessionBase::get_socket().remote_endpoint().address().to_string().data(),
+	std::printf("Connected: %s:%d\n", SessionBase::get_socket().remote_endpoint().address().to_string().data(),
 				SessionBase::get_socket().remote_endpoint().port());
 }
 
 void Session::OnDisconnected()
 {
-	std::printf("Disconnected");
+	std::printf("Disconnected\n");
 }
 
 void Session::OnSent(const std::size_t sent) {}
 
 void Session::OnHandshaked()
 {
-	std::printf("Handshaked is successfull %s:%d",
+	std::printf("Handshaked is successfull %s:%d\n",
 				SessionBase::get_socket().remote_endpoint().address().to_string().data(),
 				SessionBase::get_socket().remote_endpoint().port());
 	const Protocol::Response response{Protocol::ReplyCode::ServiceReady,
@@ -37,7 +37,9 @@ void Session::OnHandshaked()
 
 void Session::OnReceived(const std::string_view data)
 {
-	std::printf("Received: %s", data.data());
+	int end = data.size();
+	const_cast<char*>(data.data())[end] = '\0';
+	std::printf("Received: %s\n", data.data());
 	if (m_receiving_mail)
 	{
 		if (data == Protocol::MailCommand::END_OF_MAIL)
@@ -79,7 +81,6 @@ void Session::HandleReplyCode(const Protocol::ReplyCode reply_code)
 		m_receiving_mail = true;
 		break;
 	default:
-		std::printf("Unknown reply_code: %d", Protocol::to_underlying(reply_code));
 		break;
 	}
 }

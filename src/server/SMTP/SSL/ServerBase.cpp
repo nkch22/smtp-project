@@ -121,7 +121,7 @@ bool ServerBase::IsStarted() const noexcept
 
 void ServerBase::HandleError(const asio::error_code& error)
 {
-	std::printf("Error: %s", error.message().data());
+	std::printf("Error: %s\n", error.message().data());
 }
 
 void ServerBase::DisconnectAll()

@@ -29,17 +29,19 @@ int main()
 							   }};
 
 		auto server{std::make_shared<Server>(io_context, ssl_context, context_generator, 465)};
+		printf("Server started on port 465\n");
 		server->Start();
 		io_context->run();
+		printf("Server after run started on port 465\n");
 		server->Stop();
 	}
 	catch (const std::exception& error)
 	{
-		std::printf("Error: %s", error.what());
+		std::printf("Error: %s\n", error.what());
 	}
 	catch (...)
 	{
-		std::printf("Unknown error thrown");
+		std::printf("Unknown error thrown\n");
 	}
 	return EXIT_SUCCESS;
 }
