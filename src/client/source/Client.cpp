@@ -50,7 +50,7 @@ void Client::Connect(const std::string& server, uint16_t port)
 	m_socket->Send(Command::EHLO(server));
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 
-	m_authenticator->Authenticate(*m_socket, m_username, m_password);
+	// m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
 void Client::SendMail(const Mail& mail)
