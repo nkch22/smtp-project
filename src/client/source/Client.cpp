@@ -20,7 +20,7 @@ bool Client::Init()
 
 	if (!s_Instance)
 	{
-		s_Instance = new Client(std::make_unique<Socket>(), std::make_unique<AuthLogin>());
+		s_Instance = new Client(std::make_unique<SSLSocket>(), std::make_unique<AuthLogin>());
 	}
 
 	return s_Instance != nullptr;

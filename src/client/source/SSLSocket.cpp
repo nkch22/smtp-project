@@ -3,7 +3,18 @@
 #include "Command.hpp"
 using namespace SMTP;
 
-SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::sslv23_client), m_socket(m_context, m_sslContext) {}
+SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::tlsv13_client), m_socket(m_context, m_sslContext)
+{
+	asio::ssl::context ssl_context = asio::ssl::context{asio::ssl::context::tlsv13_client};
+	ssl_context.set_password_callback(
+		[](const std::size_t max_length, const asio::ssl::context::password_purpose& purpose) -> std::string
+		{ return "hello"; });
+	ssl_context.use_certificate_chain_file("../tools/certificates/cert.pem");
+	ssl_context.use_private_key_file("../tools/certificates/key.pem", asio::ssl::context::file_format::pem);
+	ssl_context.use_tmp_dh_file("../tools/certificates/dhparam.pem");
+
+	m_socket = ssl_socket(m_context, m_sslContext);
+}
 
 void SSLSocket::Connect(const std::string& server, uint16_t port)
 {
@@ -23,7 +34,14 @@ void SSLSocket::Connect(const std::string& server, uint16_t port)
 
 	if (error) throw asio::system_error(error);
 
-	HandShake();
+	m_socket.handshake(ssl_socket::client, error);
+	if (error)
+	{
+		m_isConnected = false;
+		throw asio::system_error(error);
+	}
+
+	// HandShake();
 
 	m_isConnected = true;
 }

@@ -30,7 +30,6 @@ int main(int argc, char* argv[])
 	ssl_context.use_private_key_file("../tools/certificates/key.pem", asio::ssl::context::file_format::pem);
 	ssl_context.use_tmp_dh_file("../tools/certificates/dhparam.pem");
 
-	client->set_context(std::move(ssl_context));
 	client->set_username("username");
 	client->set_password("password");
 	client->Connect("127.0.0.1", 465);
