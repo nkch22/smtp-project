@@ -9,7 +9,7 @@
 #include "../../Entity/Message.hpp"
 #include "../Interface/MessageRepo.hpp"
 
-class MessageRepoPq: MessageRepo {
+class MessageRepoPq: public MessageRepo {
 private:
   pqxx::connection conn;
 

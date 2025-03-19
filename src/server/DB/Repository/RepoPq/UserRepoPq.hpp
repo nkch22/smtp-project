@@ -8,12 +8,11 @@
 #include "../../Entity/User.hpp"
 #include "../Interface/UserRepo.hpp"
 
-class UserRepoPq: UserRepo {
+class UserRepoPq: public UserRepo {
 private:
   pqxx::connection conn;
 
 public:
-  // UserRepository();
   UserRepoPq(std::string connection_str);
   ~UserRepoPq() = default;
 
