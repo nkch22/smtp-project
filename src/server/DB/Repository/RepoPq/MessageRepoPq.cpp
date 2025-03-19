@@ -11,7 +11,7 @@
 
 MessageRepoPq::MessageRepoPq(std::string connection_str): conn(connection_str) {}
 
-bool MessageRepoPq::create_message(Message msg) {
+bool MessageRepoPq::CreateMessage(Message msg) {
     pqxx::work tx{conn};
     std::string query_str = MessageQueries[MessageQueriesEnum::INSERT_MESSAGE];
     try {
@@ -22,7 +22,7 @@ bool MessageRepoPq::create_message(Message msg) {
     return true;
 }
 
-std::vector<std::optional<Message>> MessageRepoPq::get_messages() {
+std::vector<std::optional<Message>> MessageRepoPq::GetMessages() {
     pqxx::work tx{conn};
     std::string query_str = MessageQueries[MessageQueriesEnum::GET_MESSAGES]+" "+MessageQueries[MessageQueriesEnum::LIMIT_MESS_50];
     std::vector<std::optional<Message>> messages;
@@ -36,7 +36,7 @@ std::vector<std::optional<Message>> MessageRepoPq::get_messages() {
     return messages;
 }
 
-std::vector<std::optional<Message>> MessageRepoPq::get_messages_from(User user) {
+std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(User user) {
     pqxx::work tx{conn};
     auto check = tx.exec(UserQueries[UserQueriesEnum::GET_BY_ID]+std::to_string(user.id));
     auto messages = std::vector<std::optional<Message>>();
@@ -53,7 +53,7 @@ std::vector<std::optional<Message>> MessageRepoPq::get_messages_from(User user) 
     return messages;
 }
 
-std::vector<std::optional<Message>> MessageRepoPq::get_messages_to(User user) {
+std::vector<std::optional<Message>> MessageRepoPq::GetMessagesTo(User user) {
     pqxx::work tx{conn};
     auto check = tx.exec(UserQueries[UserQueriesEnum::GET_BY_ID]+std::to_string(user.id));
     auto messages = std::vector<std::optional<Message>>();

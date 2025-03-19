@@ -8,10 +8,10 @@
 
 class UserRepo {
     public:
-        virtual bool create_user(User user) = 0;
-        virtual std::vector<std::optional<User>> get_users() = 0;
-        virtual std::optional<User> get_by_id(int id) = 0;
-        virtual std::optional<User> get_by_name(std::string name) = 0;
+        virtual bool CreateUser(User user) = 0;
+        virtual std::vector<std::optional<User>> GetUsers() = 0;
+        virtual std::optional<User> GetById(int id) = 0;
+        virtual std::optional<User> GetByName(std::string name) = 0;
 };
 
 

@@ -17,11 +17,11 @@ public:
   MessageRepoPq(std::string connection_str);
   ~MessageRepoPq() = default;
 
-  bool create_message(Message msg);
+  bool CreateMessage(Message msg);
 
-  std::vector<std::optional<Message>> get_messages();
-  std::vector<std::optional<Message>> get_messages_from(User user);
-  std::vector<std::optional<Message>> get_messages_to(User user);
+  std::vector<std::optional<Message>> GetMessages();
+  std::vector<std::optional<Message>> GetMessagesFrom(User user);
+  std::vector<std::optional<Message>> GetMessagesTo(User user);
 };
 
 #endif
