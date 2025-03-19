@@ -72,6 +72,7 @@ void Client::SendMail(const Mail& mail)
 	AssertCode(m_socket->Receive(), ResultCode::DATA);
 
 	m_socket->Send(Command::MAIL(mail));
+	m_socket->Send(Command::DATA_END());
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 }
 
