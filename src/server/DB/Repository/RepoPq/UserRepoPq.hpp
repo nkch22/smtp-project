@@ -16,11 +16,11 @@ public:
   UserRepoPq(std::string connection_str);
   ~UserRepoPq() = default;
 
-  bool create_user(User user);
+  bool CreateUser(User user);
 
-  std::vector<std::optional<User>> get_users();
-  std::optional<User> get_by_id(int id);
-  std::optional<User> get_by_name(std::string name);
+  std::vector<std::optional<User>> GetUsers();
+  std::optional<User> GetById(int id);
+  std::optional<User> GetByName(std::string name);
 };
 
 #endif

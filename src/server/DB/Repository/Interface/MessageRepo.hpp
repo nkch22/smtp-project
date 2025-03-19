@@ -7,10 +7,10 @@
 
 class MessageRepo {
     public:
-        virtual bool create_message(Message msg) = 0;
-        virtual std::vector<std::optional<Message>> get_messages() = 0;
-        virtual std::vector<std::optional<Message>> get_messages_from(User user) = 0;
-        virtual std::vector<std::optional<Message>> get_messages_to(User user) = 0;
+        virtual bool CreateMessage(Message msg) = 0;
+        virtual std::vector<std::optional<Message>> GetMessages() = 0;
+        virtual std::vector<std::optional<Message>> GetMessagesFrom(User user) = 0;
+        virtual std::vector<std::optional<Message>> GetMessagesTo(User user) = 0;
 };
 
 

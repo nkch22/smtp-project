@@ -8,7 +8,7 @@
 
 UserRepoPq::UserRepoPq(std::string connection_str): conn(connection_str) {}
 
-bool UserRepoPq::create_user(User user) {
+bool UserRepoPq::CreateUser(User user) {
     pqxx::work tx{conn};
     try {
         std::string query_str = UserQueries[UserQueriesEnum::INSERT_USER];
@@ -20,7 +20,7 @@ bool UserRepoPq::create_user(User user) {
     return true;
 }
 
-std::vector<std::optional<User>> UserRepoPq::get_users() {
+std::vector<std::optional<User>> UserRepoPq::GetUsers() {
     pqxx::work tx{conn};
     std::string query_str = UserQueries[UserQueriesEnum::GET_USERS]+" "+UserQueries[UserQueriesEnum::LIMIT_USER_50];
     std::vector<std::optional<User>> users;
@@ -31,7 +31,7 @@ std::vector<std::optional<User>> UserRepoPq::get_users() {
     return users;
 }
 
-std::optional<User> UserRepoPq::get_by_id(int id) {
+std::optional<User> UserRepoPq::GetById(int id) {
     pqxx::work tx{conn};
     std::string query_str = UserQueries[UserQueriesEnum::GET_BY_ID];
     auto user = tx.exec(query_str+std::to_string(id));
@@ -40,7 +40,7 @@ std::optional<User> UserRepoPq::get_by_id(int id) {
     return std::nullopt;
 }
 
-std::optional<User> UserRepoPq::get_by_name(std::string name) {
+std::optional<User> UserRepoPq::GetByName(std::string name) {
     pqxx::work tx{conn};
     std::string query_str = UserQueries[UserQueriesEnum::GET_BY_NAME];
     auto user = tx.exec(query_str+"'"+name+"'");
