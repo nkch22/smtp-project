@@ -2,6 +2,8 @@
 
 #include "SMTP/Session.hpp"
 
+#include "Logger/Include/Logger.h"
+
 class Session final : public SMTP::Session
 {
 public:
@@ -12,4 +14,11 @@ public:
             std::shared_ptr<SMTP::SSL::SessionRegisterBase> session_register,
             std::shared_ptr<Context> context);
     ~Session() = default;
+    void OnConnected() override;
+    void OnDisconnected() override;
+    void OnSent(const std::size_t sent) override;
+    void OnHandshaked() override;
+    void OnReceived(const std::string_view data) override;
+private:
+    logger::Logger log;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SMTP/Server.hpp"
+#include "Logger/Include/Logger.h"
 
 class Server final : public SMTP::Server
 {
@@ -14,6 +15,12 @@ public:
            ContextGenerator context_generator,
            const Port port);
     ~Server() = default;
-protected: 
+
+    void OnStarted() override;
+    void OnStopped() override;
+    void OnRestarted() override;
+    void OnAccepted() override;
+private:
     std::shared_ptr<SMTP::SSL::SessionBase> CreateSession() override;
+    logger::Logger log;
 };
