@@ -88,6 +88,8 @@ private:
 	 */
 	void HandShake();
 
+	void SetContext(asio::ssl::context&& context) override;
+
 private:
 	asio::io_context m_context;		 ///< ASIO IO context for managing asynchronous operations.
 	asio::ssl::context m_sslContext; ///< SSL context used to configure SSL/TLS operations.

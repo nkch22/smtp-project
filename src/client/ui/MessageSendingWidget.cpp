@@ -101,6 +101,15 @@ void MessageSendingWidget::OnSendButtonClicked()
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
+	asio::ssl::context ssl_context = asio::ssl::context{asio::ssl::context::tlsv13_client};
+	ssl_context.set_verify_mode(asio::ssl::verify_peer);
+	ssl_context.load_verify_file("../tools/certificates/cert.pem");
+	ssl_context.set_password_callback(
+		[](const std::size_t max_length, const asio::ssl::context::password_purpose& purpose) -> std::string
+		{ return "hello"; });
+
+	client->set_context(std::move(ssl_context));
+
 	const std::string from{m_from_line_edit->text().toUtf8().constData()};
 	const std::string to{m_to_line_edit->text().toUtf8().constData()};
 	const std::string subject{m_subject_line_edit->text().toUtf8().constData()};
@@ -108,5 +117,9 @@ void MessageSendingWidget::OnSendButtonClicked()
 
 	const std::vector recipients_array{GetRecipientsEmails()};
 	SMTP::Mail mail{subject, from, recipients_array, body};
+
+	std::string server_address{recipients_array[0].substr(recipients_array[0].find('@') + 1)};
+	client->Connect(server_address, 465);
 	client->SendMail(mail);
+	client->Quit();
 }

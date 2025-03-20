@@ -3,7 +3,7 @@
 #include "Command.hpp"
 using namespace SMTP;
 
-SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::sslv23_client), m_socket(m_context, m_sslContext) {}
+SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::tlsv13_client), m_socket(m_context, m_sslContext) {}
 
 void SSLSocket::Connect(const std::string& server, uint16_t port)
 {
@@ -23,7 +23,14 @@ void SSLSocket::Connect(const std::string& server, uint16_t port)
 
 	if (error) throw asio::system_error(error);
 
-	HandShake();
+	m_socket.handshake(ssl_socket::client, error);
+	if (error)
+	{
+		m_isConnected = false;
+		throw asio::system_error(error);
+	}
+
+	// HandShake();
 
 	m_isConnected = true;
 }
@@ -137,4 +144,10 @@ void SSLSocket::HandShake()
 	default:
 		throw std::runtime_error("SMTP Error: Unexpected response code: " + std::to_string(response.code));
 	}
+}
+
+void SSLSocket::SetContext(asio::ssl::context&& context)
+{
+	m_sslContext = std::move(context);
+	m_socket = ssl_socket(m_context, m_sslContext);
 }

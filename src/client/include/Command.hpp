@@ -106,9 +106,11 @@ public:
 		ss << "From: <" << mail.from << ">\r\n";
 		ss << "Subject: " << mail.subject << "\r\n";
 		for (const auto& recipient : mail.to) ss << "To: <" << recipient << ">\r\n";
-		ss << "\r\n" << mail.body << "\r\n.\r\n";
+		ss << "\r\n" << mail.body;
 		return ss.str();
 	}
+
+	static std::string DATA_END() { return "\r\n.\r\n"; }
 
 	/**
 	 * @brief Generates the QUIT command.

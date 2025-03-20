@@ -20,7 +20,7 @@ bool Client::Init()
 
 	if (!s_Instance)
 	{
-		s_Instance = new Client(std::make_unique<Socket>(), std::make_unique<AuthLogin>());
+		s_Instance = new Client(std::make_unique<SSLSocket>(), std::make_unique<AuthLogin>());
 	}
 
 	return s_Instance != nullptr;
@@ -42,6 +42,8 @@ void Client::Connect(const std::string& server, uint16_t port)
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 	if (!m_authenticator) throw std::runtime_error("Authenticator not set");
 
+	if (m_socket->IsConnected()) return;
+
 	m_socket->Connect(server, port);
 
 	SMTPResponse response = m_socket->Receive();
@@ -50,7 +52,7 @@ void Client::Connect(const std::string& server, uint16_t port)
 	m_socket->Send(Command::EHLO(server));
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 
-	m_authenticator->Authenticate(*m_socket, m_username, m_password);
+	// m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
 void Client::SendMail(const Mail& mail)
@@ -72,6 +74,7 @@ void Client::SendMail(const Mail& mail)
 	AssertCode(m_socket->Receive(), ResultCode::DATA);
 
 	m_socket->Send(Command::MAIL(mail));
+	m_socket->Send(Command::DATA_END());
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
 }
 
@@ -82,7 +85,7 @@ void Client::Quit()
 	if (!m_socket->IsConnected()) return;
 
 	m_socket->Send(Command::QUIT());
-	AssertCode(m_socket->Receive(), ResultCode::GOODBYE);
+	// AssertCode(m_socket->Receive(), ResultCode::GOODBYE);
 	m_socket->Disconnect();
 }
 
@@ -123,4 +126,8 @@ std::string Client::get_password() const
 	return m_password;
 }
 
+void Client::set_context(asio::ssl::context&& context)
+{
+	m_socket->SetContext(std::move(context));
+}
 } // namespace SMTP

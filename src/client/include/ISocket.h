@@ -12,7 +12,10 @@
  */
 
 #pragma once
+
+#include <asio/ssl/context.hpp>
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "SMTPResponse.h"
@@ -85,6 +88,8 @@ public:
 	 * @return true if connected, false otherwise.
 	 */
 	bool IsConnected() { return m_isConnected; }
+
+	virtual void SetContext(asio::ssl::context&& context) = 0;
 
 protected:
 	/**
