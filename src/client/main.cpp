@@ -5,13 +5,6 @@
 
 int main(int argc, char* argv[])
 {
-	// std::thread ui_thread{(
-	// 	[&]
-	// 	{
-
-	// 	})};
-	// ui_thread.detach();
-
 	SMTP::Client::Init();
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
@@ -26,7 +19,6 @@ int main(int argc, char* argv[])
 	client->set_context(std::move(ssl_context));
 	client->set_username("username");
 	client->set_password("password");
-	client->Connect("127.0.0.1", 465);
 
 	QApplication app{argc, argv};
 	UserInterface::MainWindow window{};

@@ -42,6 +42,8 @@ void Client::Connect(const std::string& server, uint16_t port)
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 	if (!m_authenticator) throw std::runtime_error("Authenticator not set");
 
+	if (m_socket->IsConnected()) return;
+
 	m_socket->Connect(server, port);
 
 	SMTPResponse response = m_socket->Receive();
@@ -83,7 +85,7 @@ void Client::Quit()
 	if (!m_socket->IsConnected()) return;
 
 	m_socket->Send(Command::QUIT());
-	AssertCode(m_socket->Receive(), ResultCode::GOODBYE);
+	// AssertCode(m_socket->Receive(), ResultCode::GOODBYE);
 	m_socket->Disconnect();
 }
 
