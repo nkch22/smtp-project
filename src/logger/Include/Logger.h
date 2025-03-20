@@ -77,6 +77,10 @@ private:
 	void log_arguments();
 
 public:
+	Logger(const Logger&) = delete;
+	Logger(Logger&&) = delete;
+	void operator=(const Logger&) = delete;
+
 	Logger(const std::source_location location = std::source_location::current());
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
 	 *	@brief Default constructor
@@ -99,8 +103,8 @@ public:
 	 */
 
 	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = false,
-					 const bool do_flush = true);
+					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
+					 const bool do_flush = DEFAULT_FLUSH);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -248,11 +252,23 @@ public:
 	 *	@attention Can be used only in configuration mode (if @a is_config was set to true in init())
 	 */
 
+	static std::string get_output_path();
+	/*! @fn get_output_path()
+	*	@brief Output path getter
+	*/
+
 	static void set_flush(const bool);
 	/*! @fn set_flush(const bool&)
 	 *	@brief Flush setter
 	 *
 	 *	@attention If flush was set to false, logger won't store any log messages
 	 */
+
+	bool is_valid() const;
+	/*! @fn is_valid()
+	*	@brief Validation checker
+	* 
+	*	@return true, if logger is safe to use
+	*/
 };
 } // namespace logger

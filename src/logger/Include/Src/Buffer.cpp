@@ -4,6 +4,8 @@
 
 using namespace logger;
 
+Buffer::Buffer(const Buffer& obj) : m_real_buff{obj.m_real_buff} {};
+
 Buffer::Buffer() : Buffer{""} {}
 Buffer::Buffer(const std::string& str) : m_real_buff{str} {}
 
@@ -54,4 +56,8 @@ Buffer& Buffer::operator<<(const bool value)
 {
 	m_real_buff += std::to_string((int)value);
 	return *this;
+}
+
+void Buffer::operator=(const Buffer& obj) {
+	this->m_real_buff = obj.m_real_buff;
 }

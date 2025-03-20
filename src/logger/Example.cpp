@@ -2,8 +2,6 @@
 
 #include "Include/Logger.h"
 
-namespace example
-{
 class ExampleOperator
 {
 private:
@@ -18,7 +16,7 @@ public:
 	// all you need to have to pass custom class into logger save args and return methods is this operator overload
 	friend logger::Buffer& operator<<(logger::Buffer& buff, const ExampleOperator& obj)
 	{
-		buff << obj.a; // Buffer has default operator for int, see Buffer Documentation page for more
+		buff << obj.a; // Buffer has default operator for int
 
 		// if there is none you need, than make it yourself
 		// the main goal of every buffer operator<< is to convert data into std::string
@@ -41,14 +39,15 @@ private:
 	ExampleOperator op;
 
 	LOGGER_GET_PRIVATE(ExampleMacros) // you have to use this macros, when you want to log private members
-											   // to make this class fully loggable you have to use one more macros, but
-											   // you cant use it class declaration
+									  // to make this class fully loggable you have to use one more macros, but
+									  // you cant use it class declaration
 public:
 	ExampleMacros() : a{5}, b{2.6}, op{} {}
 	~ExampleMacros() {}
 };
-	MAKE_LOGGABLE(ExampleMacros, a, b, op) // this macros generates operator<< overloading for ExampleMarcos class with a and b members
-		//It is recomended to use this macros in cpp files
+MAKE_LOGGABLE(ExampleMacros, a, b,
+			  op) // this macros generates operator<< overloading for ExampleMarcos class with a and b members
+				  // It is recomended to use this macros in cpp files
 
 void NoArgsNoRet()
 {
@@ -123,7 +122,7 @@ void CustomClassOperator(ExampleOperator& obj)
 void CustomClassMacros(ExampleMacros& obj)
 {
 	logger::Logger log;
-	log.log_arguments(obj); //works petty much the same as overloaded operator, but you cant make you own overloading
+	log.log_arguments(obj); // works petty much the same as overloaded operator, but you cant make you own overloading
 
 	log.log_return_nothing();
 }
@@ -137,10 +136,6 @@ void ArgsWithoutLogging(int*, int b)
 
 	log.log_return_nothing();
 }
-} // namespace example
-
-using namespace example;
-
 
 int main()
 {
