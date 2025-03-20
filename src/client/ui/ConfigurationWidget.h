@@ -13,10 +13,7 @@
 
 #pragma once
 
-#include <QPointer>
 #include <QWidget>
-
-class QLineEdit;
 
 namespace UserInterface
 {
@@ -32,12 +29,8 @@ public:
 
 private slots:
 	/**
-	 * @brief Executed when authentication check box changes state
+	 * @brief Executed when authentication combo box changes its value
 	 */
-	void OnAuthCheckBoxStateChanged(Qt::CheckState NewCheckState);
-
-private:
-	QPointer<QLineEdit> m_user_line_edit;
-	QPointer<QLineEdit> m_password_line_edit;
+	void OnAuthMethodComboBoxTextChanged(const QString& text);
 };
 } // namespace UserInterface
