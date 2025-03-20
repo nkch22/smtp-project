@@ -40,6 +40,10 @@ private:
 	void file_init(const unsigned int);
 
 public:
+	void operator=(const RealLogger&) = delete;
+	RealLogger(const RealLogger&) = delete;
+	RealLogger(RealLogger&&) = delete;
+
 	static RealLogger* get_instance(const logger::LogLevels = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
 									const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
 									const bool do_flush = DEFAULT_FLUSH);
@@ -59,6 +63,8 @@ public:
 	void real_stop_config();
 
 	void set_output(const std::string&);
+
+	std::string get_path() const;
 
 	void real_set_flush(const bool);
 };

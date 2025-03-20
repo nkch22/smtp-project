@@ -12,6 +12,8 @@ private:
 	std::string m_real_buff;
 
 public:
+	Buffer(const Buffer&);
+
 	Buffer();
 	Buffer(const std::string&);
 
@@ -21,7 +23,6 @@ public:
 	
 	void clear();
 	
-
 	Buffer& operator<<(const std::string&);
 	Buffer& operator<<(const char*);
 	Buffer& operator<<(const char);
@@ -37,6 +38,8 @@ public:
 		temp_wrap::wrap_warning("Can't find overloaded operator", std::source_location::current());
 		return *this;
 	}
+
+	void operator=(const Buffer&);
 };
 
 } // namespace logger
