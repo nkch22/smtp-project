@@ -14,22 +14,16 @@ Session::Session(std::shared_ptr<asio::io_context> io_context, std::shared_ptr<a
 
 void Session::OnConnected()
 {
-	std::printf("Connected: %s:%d\n", SessionBase::get_socket().remote_endpoint().address().to_string().data(),
-				SessionBase::get_socket().remote_endpoint().port());
 }
 
 void Session::OnDisconnected()
 {
-	std::printf("Disconnected\n");
 }
 
 void Session::OnSent(const std::size_t sent) {}
 
 void Session::OnHandshaked()
 {
-	std::printf("Handshaked is successfull %s:%d\n",
-				SessionBase::get_socket().remote_endpoint().address().to_string().data(),
-				SessionBase::get_socket().remote_endpoint().port());
 	const Protocol::Response response{Protocol::ReplyCode::ServiceReady,
 									  std::format("{} SMTP is ready", m_context->domain_name)};
 	Send(response.CreateStringResponse());
@@ -37,9 +31,6 @@ void Session::OnHandshaked()
 
 void Session::OnReceived(const std::string_view data)
 {
-	int end = data.size();
-	const_cast<char*>(data.data())[end] = '\0';
-	std::printf("Received: %s\n", data.data());
 	if (m_receiving_mail)
 	{
 		if (data == Protocol::MailCommand::END_OF_MAIL)
