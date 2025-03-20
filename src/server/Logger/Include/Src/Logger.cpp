@@ -345,7 +345,3 @@ void Logger::set_flush(const bool value)
 {
 	RealLogger::get_instance()->real_set_flush(value);
 }
-
-bool Logger::is_valid() const {
-	return m_real != nullptr;
-}

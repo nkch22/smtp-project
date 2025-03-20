@@ -264,11 +264,5 @@ public:
 	 *	@attention If flush was set to false, logger won't store any log messages
 	 */
 
-	bool is_valid() const;
-	/*! @fn is_valid()
-	*	@brief Validation checker
-	* 
-	*	@return true, if logger is safe to use
-	*/
 };
 } // namespace logger
