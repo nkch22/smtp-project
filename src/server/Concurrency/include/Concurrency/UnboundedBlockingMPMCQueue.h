@@ -3,7 +3,7 @@
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
-#include <deque>
+#include <queue>
 #include <mutex>
 #include <optional>
 
@@ -35,7 +35,7 @@ public:
 	{
 		assert(!m_is_closed);
 		std::lock_guard guard(m_mutex);
-		m_buffer.push_back(std::move(value));
+		m_buffer.push(std::move(value));
 		m_not_empty.notify_one();
 	}
 
@@ -69,6 +69,14 @@ public:
 		m_not_empty.notify_all();
 	}
 
+	std::queue<T> Extract()
+	{
+		std::lock_guard guard(m_mutex);
+		std::queue<T> extracted = std::move(m_buffer);
+		m_buffer = {};
+		return std::move(extracted);
+	}
+
 private:
 	/**
 	 * @brief Pops an element when the mutex is already locked.
@@ -79,12 +87,12 @@ private:
 	{
 		assert(!m_buffer.empty());
 		T value{std::move(m_buffer.front())};
-		m_buffer.pop_front();
+		m_buffer.pop();
 		return value;
 	}
 
 private:
-	std::deque<T> m_buffer;
+	std::queue<T> m_buffer;
 	std::mutex m_mutex;
 	std::condition_variable m_not_empty;
 	std::atomic<bool> m_is_closed{false};
