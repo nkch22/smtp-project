@@ -1,5 +1,6 @@
 ﻿#include "ConfigurationWidget.h"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -7,6 +8,7 @@
 #include <QPushButton>
 
 #include "Client.hpp"
+#include "UiGlobalVariables.inl"
 
 using namespace UserInterface;
 
@@ -66,18 +68,31 @@ void ConfigurationWidget::OnLoginButtonClicked()
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
 	const std::string username{m_user_line_edit->text().toUtf8().constData()};
 	const std::string password{m_password_line_edit->text().toUtf8().constData()};
 	if (client->Login(username, password))
 	{
+		m_user_line_edit->setStyleSheet(LineEditStyles::G_VALID_LINE_EDIT_STYLE);
+		m_password_line_edit->setStyleSheet(LineEditStyles::G_VALID_LINE_EDIT_STYLE);
 		Q_EMIT OnSuccessfulLogin();
 	}
+	else
+	{
+		m_user_line_edit->setStyleSheet(LineEditStyles::G_INVALID_LINE_EDIT_STYLE);
+		m_password_line_edit->setStyleSheet(LineEditStyles::G_INVALID_LINE_EDIT_STYLE);
+	}
+
+	QApplication::restoreOverrideCursor();
 }
 
 void ConfigurationWidget::OnRegisterButtonClicked()
 {
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	const std::string username{m_user_line_edit->text().toUtf8().constData()};
 	const std::string password{m_password_line_edit->text().toUtf8().constData()};
@@ -88,4 +103,6 @@ void ConfigurationWidget::OnRegisterButtonClicked()
 			Q_EMIT OnSuccessfulLogin();
 		}
 	}
+
+	QApplication::restoreOverrideCursor();
 }

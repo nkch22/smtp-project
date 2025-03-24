@@ -1,5 +1,6 @@
 ﻿#include "MessageSendingWidget.h"
 
+#include <QApplication>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLineEdit>
@@ -49,12 +50,12 @@ void MessageSendingWidget::OnEmailAddressEditingFinished()
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
-		email_line_edit->setStyleSheet(LineEditStyles::G_VALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(LineEditStyles::G_VALID_LINE_EDIT_STYLE);
 		m_send_button->setEnabled(true);
 	}
 	else
 	{
-		email_line_edit->setStyleSheet(LineEditStyles::G_INVALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(LineEditStyles::G_INVALID_LINE_EDIT_STYLE);
 		m_send_button->setEnabled(false);
 	}
 }
@@ -67,7 +68,7 @@ void MessageSendingWidget::OnEmailAddressEdited()
 	QValidator::State state{GetEmailLineEditState(email_line_edit, m_email_validator)};
 	if (state == QValidator::Acceptable)
 	{
-		email_line_edit->setStyleSheet(LineEditStyles::G_VALID_EMAIL_STYLE_SHEET);
+		email_line_edit->setStyleSheet(LineEditStyles::G_VALID_LINE_EDIT_STYLE);
 	}
 }
 
@@ -106,5 +107,7 @@ void MessageSendingWidget::OnSendButtonClicked()
 	const std::vector recipients_array{GetRecipientsEmails()};
 	SMTP::Mail mail{subject, client->get_username(), recipients_array, body};
 
+	QApplication::setOverrideCursor(Qt::WaitCursor);
 	client->SendMail(mail);
+	QApplication::restoreOverrideCursor();
 }

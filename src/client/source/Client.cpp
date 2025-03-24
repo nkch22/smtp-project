@@ -39,15 +39,25 @@ void Client::Shutdown()
 
 bool Client::Login(const std::string& username, const std::string& password)
 {
+	if (!m_socket) throw std::runtime_error("Client not initialized");
+
 	set_username(username);
 	set_password(password);
 
-	return true;
+	return m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
 bool Client::Register(const std::string& username, const std::string& password)
 {
-	return true;
+	if (!m_socket) throw std::runtime_error("Client not initialized");
+
+	if (!m_authenticator->Authenticate(*m_socket, m_username, m_password))
+	{
+		// TODO: register user here!
+		return true;
+	}
+
+	return false;
 }
 
 void Client::Connect(const std::string& server, uint16_t port)
@@ -65,8 +75,6 @@ void Client::Connect(const std::string& server, uint16_t port)
 
 	m_socket->Send(Command::EHLO(server));
 	AssertCode(m_socket->Receive(), ResultCode::OKAY);
-
-	// m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
 void Client::SendMail(const Mail& mail)
