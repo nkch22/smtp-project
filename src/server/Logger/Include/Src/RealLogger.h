@@ -1,6 +1,7 @@
 #pragma once
-#include "SharedInclude.h"
 
+#include "SharedInclude.h"
+#include "Concurrency/UnboundedBlockingMPMCQueue.h"
 
 class RealLogger
 {
@@ -14,7 +15,8 @@ private:
 		std::thread::id thr_id;
 	};
 
-	using queue = std::queue<Message>;
+	using Queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
+
 	static RealLogger* m_instance;
 
 	logger::LogLevels m_level;
@@ -22,7 +24,6 @@ private:
 	std::ofstream m_file;
 
 	std::mutex m_mutex;
-	std::condition_variable m_con_var;
 
 	bool m_end;
 	bool m_do_flush;
@@ -30,7 +31,7 @@ private:
 
 	unsigned int m_amount;
 
-	queue m_queue;
+	Queue m_queue;
 	std::thread m_thr;
 
 	RealLogger(const logger::LogLevels, const std::string&, const unsigned int, const bool, const bool);

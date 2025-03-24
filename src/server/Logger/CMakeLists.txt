@@ -1,5 +1,5 @@
-
 add_library(logger_shared SHARED "Include/Src/Logger.cpp" "Include/Src/TemplateWrapper.cpp" "Include/Src/Buffer.cpp" )
+target_link_libraries(logger_shared PRIVATE concurrency)
 
 add_executable(example "Example.cpp")
 target_link_libraries(example logger_shared)
