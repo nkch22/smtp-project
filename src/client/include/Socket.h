@@ -62,8 +62,6 @@ public:
 	 */
 	void AsyncReceive(ReceiveDelegate receiveDelegate) override;
 
-	void SetContext(asio::ssl::context&& context) override {}
-
 private:
 	/**
 	 * @brief Internal function to send a message asynchronously.

@@ -42,7 +42,8 @@ void Client::Connect(const std::string& server, uint16_t port)
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 	if (!m_authenticator) throw std::runtime_error("Authenticator not set");
 
-	if (m_socket->IsConnected()) return;
+	set_socket(std::make_unique<SSLSocket>());
+	assert(m_socket);
 
 	m_socket->Connect(server, port);
 
@@ -126,8 +127,4 @@ std::string Client::get_password() const
 	return m_password;
 }
 
-void Client::set_context(asio::ssl::context&& context)
-{
-	m_socket->SetContext(std::move(context));
-}
 } // namespace SMTP

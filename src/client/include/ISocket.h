@@ -89,8 +89,6 @@ public:
 	 */
 	bool IsConnected() { return m_isConnected; }
 
-	virtual void SetContext(asio::ssl::context&& context) = 0;
-
 protected:
 	/**
 	 * @brief Internal function to send a message asynchronously.

@@ -1,9 +1,14 @@
 #include "SSLSocket.h"
 
 #include "Command.hpp"
+
 using namespace SMTP;
 
-SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::tlsv13_client), m_socket(m_context, m_sslContext) {}
+SSLSocket::SSLSocket() : m_sslContext(asio::ssl::context::tlsv13_client), m_socket(m_context, m_sslContext)
+{
+	m_sslContext.set_verify_mode(asio::ssl::verify_peer);
+	m_sslContext.load_verify_file("../tools/certificates/cert.pem");
+}
 
 void SSLSocket::Connect(const std::string& server, uint16_t port)
 {
@@ -144,10 +149,4 @@ void SSLSocket::HandShake()
 	default:
 		throw std::runtime_error("SMTP Error: Unexpected response code: " + std::to_string(response.code));
 	}
-}
-
-void SSLSocket::SetContext(asio::ssl::context&& context)
-{
-	m_sslContext = std::move(context);
-	m_socket = ssl_socket(m_context, m_sslContext);
 }
