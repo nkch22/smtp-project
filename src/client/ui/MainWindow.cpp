@@ -17,9 +17,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow{parent}
 	const QPointer layout{new QVBoxLayout{central_widget}};
 	central_widget->setLayout(layout);
 
-	const QPointer configuration_widget{new ConfigurationWidget{central_widget}};
-	const QPointer message_sending_widget{new MessageSendingWidget{central_widget}};
+	m_configuration_widget = new ConfigurationWidget{central_widget};
+	m_message_sending_widget = new MessageSendingWidget{central_widget};
+	m_message_sending_widget->setEnabled(false);
 
-	layout->addWidget(configuration_widget);
-	layout->addWidget(message_sending_widget);
+	connect(m_configuration_widget, &ConfigurationWidget::OnSuccessfulLogin, this, &MainWindow::OnSuccessfulLogin);
+
+	layout->addWidget(m_configuration_widget);
+	layout->addWidget(m_message_sending_widget);
+}
+
+void MainWindow::OnSuccessfulLogin()
+{
+	m_configuration_widget->setEnabled(false);
+	m_message_sending_widget->setEnabled(true);
 }

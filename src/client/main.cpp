@@ -9,8 +9,8 @@ int main(int argc, char* argv[])
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
-	client->set_username("username");
-	client->set_password("password");
+	const std::string server_address{"localhost"};
+	client->Connect(server_address, 465);
 
 	QApplication app{argc, argv};
 	UserInterface::MainWindow window{};

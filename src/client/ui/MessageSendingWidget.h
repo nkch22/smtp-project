@@ -19,6 +19,7 @@
 
 class QLineEdit;
 class QTextEdit;
+class QPushButton;
 
 namespace UserInterface
 {
@@ -54,9 +55,10 @@ private:
 
 	QPointer<QRegularExpressionValidator> m_email_validator;
 
-	QPointer<QLineEdit> m_from_line_edit;
+	// QPointer<QLineEdit> m_from_line_edit;
 	QPointer<QLineEdit> m_to_line_edit;
 	QPointer<QLineEdit> m_subject_line_edit;
 	QPointer<QTextEdit> m_body_text_edit;
+	QPointer<QPushButton> m_send_button;
 };
 } // namespace UserInterface

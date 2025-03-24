@@ -24,10 +24,6 @@ MessageSendingWidget::MessageSendingWidget(QWidget* parent) : QWidget{parent}
 	email_group_box->setLayout(form_layout);
 	main_layout->addWidget(email_group_box);
 
-	m_from_line_edit = new QLineEdit{email_group_box};
-	connect(m_from_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
-	connect(m_from_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
-
 	m_to_line_edit = new QLineEdit{email_group_box};
 	connect(m_to_line_edit, &QLineEdit::editingFinished, this, &MessageSendingWidget::OnEmailAddressEditingFinished);
 	connect(m_to_line_edit, &QLineEdit::textEdited, this, &MessageSendingWidget::OnEmailAddressEdited);
@@ -35,14 +31,14 @@ MessageSendingWidget::MessageSendingWidget(QWidget* parent) : QWidget{parent}
 	m_subject_line_edit = new QLineEdit{email_group_box};
 	m_body_text_edit = new QTextEdit{email_group_box};
 
-	const QPointer send_button{new QPushButton{"Send mail", email_group_box}};
-	connect(send_button, &QPushButton::clicked, this, &MessageSendingWidget::OnSendButtonClicked);
+	m_send_button = new QPushButton{"Send mail", email_group_box};
+	m_send_button->setEnabled(false);
+	connect(m_send_button, &QPushButton::clicked, this, &MessageSendingWidget::OnSendButtonClicked);
 
-	form_layout->addRow("From", m_from_line_edit);
 	form_layout->addRow("To", m_to_line_edit);
 	form_layout->addRow("Subject", m_subject_line_edit);
 	form_layout->addRow("Body", m_body_text_edit);
-	form_layout->addRow(send_button);
+	form_layout->addRow(m_send_button);
 }
 
 void MessageSendingWidget::OnEmailAddressEditingFinished()
@@ -54,10 +50,12 @@ void MessageSendingWidget::OnEmailAddressEditingFinished()
 	if (state == QValidator::Acceptable)
 	{
 		email_line_edit->setStyleSheet(LineEditStyles::G_VALID_EMAIL_STYLE_SHEET);
+		m_send_button->setEnabled(true);
 	}
 	else
 	{
 		email_line_edit->setStyleSheet(LineEditStyles::G_INVALID_EMAIL_STYLE_SHEET);
+		m_send_button->setEnabled(false);
 	}
 }
 
@@ -101,16 +99,12 @@ void MessageSendingWidget::OnSendButtonClicked()
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
-	const std::string from{m_from_line_edit->text().toUtf8().constData()};
 	const std::string to{m_to_line_edit->text().toUtf8().constData()};
 	const std::string subject{m_subject_line_edit->text().toUtf8().constData()};
 	const std::string body{m_body_text_edit->toPlainText().toUtf8().constData()};
 
 	const std::vector recipients_array{GetRecipientsEmails()};
-	SMTP::Mail mail{subject, from, recipients_array, body};
+	SMTP::Mail mail{subject, "from@localhost", recipients_array, body};
 
-	std::string server_address{recipients_array[0].substr(recipients_array[0].find('@') + 1)};
-	client->Connect(server_address, 465);
 	client->SendMail(mail);
-	client->Quit();
 }

@@ -14,9 +14,14 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPointer>
 
 namespace UserInterface
 {
+
+class ConfigurationWidget;
+class MessageSendingWidget;
+
 /**
  * @brief Main UI window which contains other widgets
  *
@@ -29,5 +34,12 @@ class MainWindow final : public QMainWindow
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
+
+private slots:
+	void OnSuccessfulLogin();
+
+private:
+	QPointer<ConfigurationWidget> m_configuration_widget;
+	QPointer<MessageSendingWidget> m_message_sending_widget;
 };
 } // namespace UserInterface

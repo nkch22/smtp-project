@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <QLineEdit>
+#include <QPointer>
 #include <QWidget>
 
 namespace UserInterface
@@ -27,10 +29,21 @@ class ConfigurationWidget final : public QWidget
 public:
 	explicit ConfigurationWidget(QWidget* parent = nullptr);
 
+signals:
+	void OnSuccessfulLogin();
+
 private slots:
 	/**
 	 * @brief Executed when authentication combo box changes its value
 	 */
 	void OnAuthMethodComboBoxTextChanged(const QString& text);
+
+	void OnLoginButtonClicked();
+
+	void OnRegisterButtonClicked();
+
+private:
+	QPointer<QLineEdit> m_user_line_edit;
+	QPointer<QLineEdit> m_password_line_edit;
 };
 } // namespace UserInterface
