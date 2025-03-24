@@ -3,9 +3,9 @@
 #include "Command.hpp"
 #include "SSLSocket.h"
 #include "Socket.h"
+
 namespace SMTP
 {
-
 std::mutex Client::s_Mutex;
 Client* Client::s_Instance;
 
@@ -35,6 +35,19 @@ void Client::Shutdown()
 		delete s_Instance;
 		s_Instance = nullptr;
 	}
+}
+
+bool Client::Login(const std::string& username, const std::string& password)
+{
+	set_username(username);
+	set_password(password);
+
+	return true;
+}
+
+bool Client::Register(const std::string& username, const std::string& password)
+{
+	return true;
 }
 
 void Client::Connect(const std::string& server, uint16_t port)
@@ -126,5 +139,4 @@ std::string Client::get_password() const
 {
 	return m_password;
 }
-
 } // namespace SMTP

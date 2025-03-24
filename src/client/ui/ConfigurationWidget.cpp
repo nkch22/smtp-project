@@ -66,10 +66,12 @@ void ConfigurationWidget::OnLoginButtonClicked()
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
-	client->set_username(m_user_line_edit->text().toUtf8().constData());
-	client->set_password(m_password_line_edit->text().toUtf8().constData());
-
-	Q_EMIT OnSuccessfulLogin();
+	const std::string username{m_user_line_edit->text().toUtf8().constData()};
+	const std::string password{m_password_line_edit->text().toUtf8().constData()};
+	if (client->Login(username, password))
+	{
+		Q_EMIT OnSuccessfulLogin();
+	}
 }
 
 void ConfigurationWidget::OnRegisterButtonClicked()
@@ -77,8 +79,13 @@ void ConfigurationWidget::OnRegisterButtonClicked()
 	SMTP::Client* client{SMTP::Client::get_instance()};
 	assert(client);
 
-	client->set_username(m_user_line_edit->text().toUtf8().constData());
-	client->set_password(m_password_line_edit->text().toUtf8().constData());
-
-	Q_EMIT OnSuccessfulLogin();
+	const std::string username{m_user_line_edit->text().toUtf8().constData()};
+	const std::string password{m_password_line_edit->text().toUtf8().constData()};
+	if (client->Register(username, password))
+	{
+		[[likely]] if (client->Login(username, password))
+		{
+			Q_EMIT OnSuccessfulLogin();
+		}
+	}
 }

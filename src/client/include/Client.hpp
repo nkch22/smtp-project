@@ -65,6 +65,26 @@ public:
 	static void Shutdown();
 
 	/**
+	 * @brief Logins the user to SMTP session.
+	 *
+	 * @param username The username of the user.
+	 * @param password The password of the user.
+	 *
+	 * @return True if operation successful, false otherwise
+	 */
+	bool Login(const std::string& username, const std::string& password);
+
+	/**
+	 * @brief Registers the user to SMTP session
+	 *
+	 * @param username The username of the user.
+	 * @param password The password of the user.
+	 *
+	 * @return True if operation successful, false otherwise
+	 */
+	bool Register(const std::string& username, const std::string& password);
+
+	/**
 	 * @brief Connects to the SMTP server.
 	 *
 	 * This method establishes a connection to the SMTP server at the specified address

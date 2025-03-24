@@ -104,7 +104,7 @@ void MessageSendingWidget::OnSendButtonClicked()
 	const std::string body{m_body_text_edit->toPlainText().toUtf8().constData()};
 
 	const std::vector recipients_array{GetRecipientsEmails()};
-	SMTP::Mail mail{subject, "from@localhost", recipients_array, body};
+	SMTP::Mail mail{subject, client->get_username(), recipients_array, body};
 
 	client->SendMail(mail);
 }
