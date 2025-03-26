@@ -10,8 +10,7 @@ RealLogger* RealLogger::m_instance = nullptr;
 
 RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const unsigned int amount,
 					   const bool is_config, const bool do_flush) :
-	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount},
-	m_thr{}
+	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount}
 {
 	if (amount < 1)
 		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING,
@@ -21,34 +20,21 @@ RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const u
 
 	m_thr = std::thread{[this]
 						{
-							std::unique_lock<std::mutex> lock{m_mutex};
-							while (true)
+							while (!m_end)
 							{
-								if (!m_end)
-								{
-									m_con_var.wait(lock, [this]() { return (!m_queue.empty() && !m_is_config); });
-								}
-								else
-								{
-									while (!m_queue.empty())
-									{
-										flush_message(m_queue.front());
-										m_queue.pop();
-									}
-									break;
-								}
-
-								queue localQueue;
-								localQueue.swap(m_queue);
-								lock.unlock();
-
+								std::queue<Message> localQueue = m_queue.Extract();
 								while (!localQueue.empty())
 								{
 									flush_message(localQueue.front());
 									localQueue.pop();
 								}
-
-								lock.lock();
+							}
+							// process messages that left in the queue
+							auto message = m_queue.Pop();
+							while (message)
+							{
+								flush_message(*message);
+								message = m_queue.Pop();
 							}
 						}};
 };
@@ -114,11 +100,11 @@ void RealLogger::destroy()
 	if (m_instance == nullptr) return;
 
 	{
-		std::unique_lock<std::mutex> lock{m_instance->m_mutex};
+		std::lock_guard guard{m_instance->m_mutex};
 		m_instance->m_end = 1;
 	}
-	m_instance->m_con_var.notify_all();
 
+	m_instance->m_queue.Close();
 	m_instance->m_thr.join();
 
 	delete m_instance;
@@ -130,21 +116,17 @@ void RealLogger::save_to_queue(const std::string& str, const MessageTypes type, 
 {
 	if (!m_do_flush || level == LOG_LEVEL_NO) return;
 
-	{
-		std::unique_lock<std::mutex> lock{m_mutex};
-		m_queue.emplace(Message{str, type, location, level, id});
-	}
-	m_con_var.notify_all();
+	m_queue.Push(Message{str, type, location, level, id});
 }
 
 void RealLogger::real_set_level(const LogLevels _level)
 {
-	std::unique_lock<std::mutex> lock{m_mutex};
+	std::lock_guard guard{m_mutex};
 	m_level = _level;
 }
 LogLevels RealLogger::real_get_level()
 {
-	std::unique_lock<std::mutex> lock{m_mutex};
+	std::lock_guard guard{m_mutex};
 	return m_level;
 }
 
@@ -223,16 +205,14 @@ void RealLogger::real_stop_config()
 	file_init(m_amount);
 
 	{
-		std::lock_guard<std::mutex> lock{m_mutex};
+		std::lock_guard lock{m_mutex};
 		m_is_config = 0;
 	}
-
-	m_con_var.notify_all();
 }
 
 void RealLogger::set_output(const std::string& path)
 {
-	std::unique_lock<std::mutex> lock{m_mutex};
+	std::lock_guard guard{m_mutex};
 	m_output_path = path;
 }
 
