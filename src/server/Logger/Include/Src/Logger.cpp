@@ -12,11 +12,14 @@ RealLogger::RealLogger(const LogLevels _level, const std::string& _save, const u
 					   const bool is_config, const bool do_flush) :
 	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount}
 {
-	if (amount < 1)
+	if (m_amount < 1)
+	{
 		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING,
 					  std::source_location::current(), m_level, std::this_thread::get_id());
+		m_amount = DEFAULT_AMOUNT;
+	}
 
-	if (!is_config) file_init(amount);
+	if (!is_config) file_init(m_amount);
 
 	m_thr = std::thread{[this]
 						{

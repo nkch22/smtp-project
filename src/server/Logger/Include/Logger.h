@@ -3,6 +3,7 @@
 #include "Src/Buffer.h"
 #include "Src/LoggerWrapper.h"
 #include "Src/SharedInclude.h"
+#include "Src/ThreadMap.h"
 
 class RealLogger;
 
