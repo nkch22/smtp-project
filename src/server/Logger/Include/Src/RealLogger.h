@@ -2,6 +2,7 @@
 
 #include "SharedInclude.h"
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
+#include "ThreadMap.h"
 
 class RealLogger
 {
@@ -33,6 +34,8 @@ private:
 
 	Queue m_queue;
 	std::thread m_thr;
+
+	logger::ThreadMap map;
 
 	RealLogger(const logger::LogLevels, const std::string&, const unsigned int, const bool, const bool);
 

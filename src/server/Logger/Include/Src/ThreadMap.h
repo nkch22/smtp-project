@@ -2,6 +2,7 @@
 #include <thread>
 #include <unordered_map>
 #include <string>
+#include <mutex>
 
 namespace logger
 {
@@ -10,6 +11,7 @@ class ThreadMap
 {
 private:
 	std::unordered_map<std::thread::id, std::string> map;
+	std::mutex mutex;
 
 public:
 	ThreadMap();
