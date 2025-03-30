@@ -16,11 +16,13 @@ public:
   UserRepoPq(std::string connection_str);
   ~UserRepoPq() = default;
 
-  bool CreateUser(User user);
+  bool CreateUser(const User& user) override;
+  bool UpdateUser(const User& user) override;
+  bool RemoveUser(const User& user) override;
 
-  std::vector<std::optional<User>> GetUsers();
-  std::optional<User> GetById(int id);
-  std::optional<User> GetByName(std::string name);
+  std::vector<std::optional<User>> GetUsers() override;
+  std::optional<User> GetById(int id) override;
+  std::optional<User> GetByName(std::string name) override;
 };
 
 #endif

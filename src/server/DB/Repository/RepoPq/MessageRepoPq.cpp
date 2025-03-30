@@ -13,22 +13,23 @@ MessageRepoPq::MessageRepoPq(std::string connection_str): conn(connection_str) {
 
 bool MessageRepoPq::CreateMessage(Message msg) {
     pqxx::work tx{conn};
-    std::string query_str = MessageQueries[MessageQueriesEnum::INSERT_MESSAGE];
+    std::string query_str = MessageQueryString::insert_message(msg);
     try {
-        tx.exec(query_str.substr(0, query_str.length()-1)+std::to_string(msg.from.id)+", "+std::to_string(msg.to.id)+", '"+msg.content+"'"+query_str[query_str.length()-1]);
+        tx.exec(query_str);
+        tx.commit();
+        return true;
     }
     catch(...) {return false;}
-    tx.commit();
-    return true;
+    
 }
 
 std::vector<std::optional<Message>> MessageRepoPq::GetMessages() {
     pqxx::work tx{conn};
-    std::string query_str = MessageQueries[MessageQueriesEnum::GET_MESSAGES]+" "+MessageQueries[MessageQueriesEnum::LIMIT_MESS_50];
+    std::string query_str = MessageQueryString::select_messages()+" "+MessageQueryString::limit_50();
     std::vector<std::optional<Message>> messages;
     for (auto msg: tx.exec(query_str)) {
-        auto usrfrom = tx.exec1(UserQueries[UserQueriesEnum::GET_BY_ID]+msg["sender"].as<std::string>());
-        auto usrto = tx.exec1(UserQueries[UserQueriesEnum::GET_BY_ID]+msg["recepient"].as<std::string>());
+        auto usrfrom = tx.exec1(UserQueryString::select_by_id(msg["sender"].as<int>()));
+        auto usrto = tx.exec1(UserQueryString::select_by_id(msg["recipient"].as<int>()));
         messages.push_back(Message{User{usrfrom["id"].as<int>(), usrfrom["name"].as<std::string>(), usrfrom["password"].as<std::string>()},
             User{usrto["id"].as<int>(), usrto["name"].as<std::string>(), usrto["password"].as<std::string>()},
             msg["content"].as<std::string>()});
@@ -37,13 +38,14 @@ std::vector<std::optional<Message>> MessageRepoPq::GetMessages() {
 }
 
 std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(User user) {
+    //this function only checks if id is valid
     pqxx::work tx{conn};
-    auto check = tx.exec(UserQueries[UserQueriesEnum::GET_BY_ID]+std::to_string(user.id));
+    auto check = tx.exec(UserQueryString::select_by_id(user.id));
     auto messages = std::vector<std::optional<Message>>();
     if (!check.empty()) {
-        for (auto msg: tx.exec(MessageQueries[MessageQueriesEnum::GET_FROM]+std::to_string(user.id)+" "
-                                            +MessageQueries[MessageQueriesEnum::LIMIT_MESS_50])) {
-            auto usrto = tx.exec1(UserQueries[UserQueriesEnum::GET_BY_ID]+msg["recepient"].as<std::string>());
+        for (auto msg: tx.exec(MessageQueryString::select_from(user.id)+" "
+                                            +MessageQueryString::limit_50())) {
+            auto usrto = tx.exec1(UserQueryString::select_by_id(msg["recipient"].as<int>()));
             messages.push_back(Message{user,
                 User{usrto["id"].as<int>(), usrto["name"].as<std::string>(), usrto["password"].as<std::string>()},
                 msg["content"].as<std::string>()});
@@ -54,14 +56,15 @@ std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(User user) {
 }
 
 std::vector<std::optional<Message>> MessageRepoPq::GetMessagesTo(User user) {
+    //this function only checks if id is valid
     pqxx::work tx{conn};
-    auto check = tx.exec(UserQueries[UserQueriesEnum::GET_BY_ID]+std::to_string(user.id));
+    auto check = tx.exec(UserQueryString::select_by_id(user.id));
     auto messages = std::vector<std::optional<Message>>();
 
     if (!check.empty()) {
-        for (auto msg: tx.exec(MessageQueries[MessageQueriesEnum::GET_TO]+std::to_string(user.id)+" "
-                        +MessageQueries[MessageQueriesEnum::LIMIT_MESS_50])) {
-            auto usrfrom = tx.exec1(UserQueries[UserQueriesEnum::GET_BY_ID]+msg["sender"].as<std::string>());
+        for (auto msg: tx.exec(MessageQueryString::select_to(user.id)+" "
+                        +MessageQueryString::limit_50())) {
+            auto usrfrom = tx.exec1(UserQueryString::select_by_id(msg["sender"].as<int>()));
             messages.push_back(Message{User{usrfrom["id"].as<int>(), usrfrom["name"].as<std::string>(), usrfrom["password"].as<std::string>()},
                 user,
                 msg["content"].as<std::string>()});
