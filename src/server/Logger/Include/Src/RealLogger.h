@@ -1,6 +1,7 @@
 #pragma once
-#include "SharedInclude.h"
 
+#include "SharedInclude.h"
+#include "Concurrency/UnboundedBlockingMPMCQueue.h"
 
 class RealLogger
 {
@@ -14,7 +15,8 @@ private:
 		std::thread::id thr_id;
 	};
 
-	using queue = std::queue<Message>;
+	using Queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
+
 	static RealLogger* m_instance;
 
 	logger::LogLevels m_level;
@@ -22,7 +24,6 @@ private:
 	std::ofstream m_file;
 
 	std::mutex m_mutex;
-	std::condition_variable m_con_var;
 
 	bool m_end;
 	bool m_do_flush;
@@ -30,7 +31,7 @@ private:
 
 	unsigned int m_amount;
 
-	queue m_queue;
+	Queue m_queue;
 	std::thread m_thr;
 
 	RealLogger(const logger::LogLevels, const std::string&, const unsigned int, const bool, const bool);
@@ -40,6 +41,10 @@ private:
 	void file_init(const unsigned int);
 
 public:
+	void operator=(const RealLogger&) = delete;
+	RealLogger(const RealLogger&) = delete;
+	RealLogger(RealLogger&&) = delete;
+
 	static RealLogger* get_instance(const logger::LogLevels = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
 									const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
 									const bool do_flush = DEFAULT_FLUSH);
@@ -59,6 +64,8 @@ public:
 	void real_stop_config();
 
 	void set_output(const std::string&);
+
+	std::string get_path() const;
 
 	void real_set_flush(const bool);
 };

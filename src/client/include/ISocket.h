@@ -12,7 +12,10 @@
  */
 
 #pragma once
+
+#include <asio/ssl/context.hpp>
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "SMTPResponse.h"

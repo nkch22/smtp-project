@@ -108,5 +108,9 @@ void MessageSendingWidget::OnSendButtonClicked()
 
 	const std::vector recipients_array{GetRecipientsEmails()};
 	SMTP::Mail mail{subject, from, recipients_array, body};
+
+	std::string server_address{recipients_array[0].substr(recipients_array[0].find('@') + 1)};
+	client->Connect(server_address, 465);
 	client->SendMail(mail);
+	client->Quit();
 }

@@ -1,11 +1,17 @@
 ﻿#include "ConfigurationWidget.h"
 
-#include <QCheckBox>
+#include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QPointer>
+
+#include "Client.hpp"
 
 using namespace UserInterface;
+
+static const QString AuthLoginString{"LOGIN"};
+static const QString AuthPlainString{"PLAIN"};
 
 ConfigurationWidget::ConfigurationWidget(QWidget* parent) : QWidget{parent}
 {
@@ -15,29 +21,35 @@ ConfigurationWidget::ConfigurationWidget(QWidget* parent) : QWidget{parent}
 	configuration_group_box->setLayout(form_layout);
 	main_layout->addWidget(configuration_group_box);
 
-	const QPointer server_line_edit{new QLineEdit{configuration_group_box}};
-	const QPointer port_line_edit{new QLineEdit{configuration_group_box}};
+	const QPointer auth_method_edit{new QComboBox{configuration_group_box}};
+	auth_method_edit->addItems(QStringList{AuthLoginString, AuthPlainString});
+	connect(auth_method_edit, &QComboBox::currentTextChanged, this,
+			&ConfigurationWidget::OnAuthMethodComboBoxTextChanged);
 
-	const QPointer auth_check_box{new QCheckBox{"Use authentication", configuration_group_box}};
-	connect(auth_check_box, &QCheckBox::checkStateChanged, this, &ConfigurationWidget::OnAuthCheckBoxStateChanged);
+	const QPointer user_line_edit{new QLineEdit{configuration_group_box}};
+	const QPointer password_line_edit{new QLineEdit{configuration_group_box}};
+	password_line_edit->setEchoMode(QLineEdit::Password);
 
-	m_user_line_edit = new QLineEdit{configuration_group_box};
-	m_user_line_edit->setEnabled(false);
-
-	m_password_line_edit = new QLineEdit{configuration_group_box};
-	m_password_line_edit->setEnabled(false);
-	m_password_line_edit->setEchoMode(QLineEdit::Password);
-
-	form_layout->addRow("SMTP Server", server_line_edit);
-	form_layout->addRow("Port", port_line_edit);
-	form_layout->addRow(auth_check_box);
-	form_layout->addRow("SMTP User", m_user_line_edit);
-	form_layout->addRow("Password", m_password_line_edit);
+	form_layout->addRow("Authentication method", auth_method_edit);
+	form_layout->addRow("SMTP User", user_line_edit);
+	form_layout->addRow("Password", password_line_edit);
 }
 
-void ConfigurationWidget::OnAuthCheckBoxStateChanged(Qt::CheckState NewCheckState)
+void ConfigurationWidget::OnAuthMethodComboBoxTextChanged(const QString& text)
 {
-	const bool CHECKED{NewCheckState == Qt::CheckState::Checked};
-	m_user_line_edit->setEnabled(CHECKED);
-	m_password_line_edit->setEnabled(CHECKED);
+	SMTP::Client* client{SMTP::Client::get_instance()};
+	assert(client);
+
+	std::unique_ptr<SMTP::IAuthenticator> authenticator;
+	if (comparesEqual(text, AuthLoginString))
+	{
+		authenticator = std::make_unique<SMTP::AuthLogin>();
+	}
+	else if (comparesEqual(text, AuthPlainString))
+	{
+		authenticator = std::make_unique<SMTP::AuthPlain>();
+	}
+	else
+		return;
+	client->set_authenticator(std::move(authenticator));
 }
