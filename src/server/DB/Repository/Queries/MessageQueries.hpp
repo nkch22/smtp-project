@@ -4,14 +4,19 @@
 #include <string>
 #include <vector>
 
-enum MessageQueriesEnum {INSERT_MESSAGE, GET_MESSAGES, GET_FROM, GET_TO, LIMIT_MESS_50};
+#include "../../Entity/Message.hpp"
 
-const std::vector<std::string> MessageQueries = {
-    "insert into messages(sender, recepient, content) values ()",
-    "select * from messages",
-    "select * from messages where sender = ",
-    "select * from messages where recepient = ",
-    "limit 50"
-};
+namespace MessageQueryString {
+    std::string insert_message(Message message);
+
+    std::string select_messages();
+
+    std::string select_from(int id);
+
+    std::string select_to(int id);
+
+    std::string limit_50();
+
+}
 
 #endif

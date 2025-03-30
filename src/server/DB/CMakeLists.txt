@@ -1,6 +1,8 @@
 add_library(db STATIC
         Repository/RepoPq/UserRepoPq.cpp
         Repository/RepoPq/MessageRepoPq.cpp
+        Repository/Queries/UserQueries.cpp
+        Repository/Queries/MessageQueries.cpp
 
         # make IDE happy
         Entity/Message.hpp
