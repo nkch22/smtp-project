@@ -10,8 +10,8 @@ create table users
 create table messages
 (
     id        serial primary key,
-    sender    integer references users (id),
-    recipient integer references users (id),
+    sender    integer not null references users (id) on delete cascade on update cascade,
+    recipient integer not null references users (id) on delete cascade on update cascade,
     subject   varchar(50),
     content   varchar(500),
     date_time timestamp

@@ -3,6 +3,7 @@ add_subdirectory(Config)
 add_subdirectory(DB)
 add_subdirectory(Initializer)
 add_subdirectory(Logger)
+add_subdirectory(Concurrency)
 
 add_library(smtp STATIC)
 add_subdirectory(SMTP)

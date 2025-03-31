@@ -1,5 +1,7 @@
 #include "Mailbox.hpp"
 
+#include <print>
+
 namespace SMTP
 {
 

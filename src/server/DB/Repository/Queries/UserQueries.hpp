@@ -3,13 +3,22 @@
 #include <vector>
 #include <string>
 
-enum UserQueriesEnum {INSERT_USER, GET_USERS, GET_BY_ID, GET_BY_NAME, LIMIT_USER_50};
-const std::vector<std::string> UserQueries = {
-    "insert into users(id, name, password) values ()",
-    "select * from users",
-    "select * from users where id = ",
-    "select * from users where name = ",
-    "limit 50"
-};
+#include "../../Entity/User.hpp"
+
+namespace UserQueryString {
+    std::string insert_user(User user);
+
+    std::string select_users();
+
+    std::string select_by_id(int id);
+
+    std::string select_by_name(std::string name);
+
+    std::string limit_50();
+
+    std::string update_user(User user);
+
+    std::string remove_user(User user);
+}
 
 #endif
