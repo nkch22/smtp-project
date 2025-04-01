@@ -1,4 +1,4 @@
-add_library(logger_shared SHARED "Include/Src/Logger.cpp" "Include/Src/TemplateWrapper.cpp" "Include/Src/Buffer.cpp"  "Include/Src/ThreadMap.cpp")
+add_library(logger_shared SHARED "Include/Src/Logger.cpp" "Include/Src/TemplateWrapper.cpp" "Include/Src/Buffer.cpp"  "Include/Src/ThreadMap.cpp"  "Include/Src/LogLevels.cpp" "Include/Src/RealLogger.cpp")
 target_link_libraries(logger_shared PRIVATE concurrency)
 
 add_executable(example "Example.cpp")

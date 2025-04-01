@@ -4,6 +4,9 @@
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
 #include "ThreadMap.h"
 
+namespace logger
+{
+
 class RealLogger
 {
 private:
@@ -72,3 +75,5 @@ public:
 
 	void real_set_flush(const bool);
 };
+
+} // namespace logger
