@@ -1,0 +1,4 @@
+*.log
+Dockerfile
+build
+docker-compose.yml
