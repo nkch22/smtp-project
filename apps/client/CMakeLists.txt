@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.30)
 project(smtp_client LANGUAGES CXX)
 
+include(cmake/Ccache.cmake)
+include(cmake/CheckCompiler.cmake)
+include(cmake/Sanitize.cmake)
+include(cmake/Development.cmake)
+include(cmake/Logging.cmake)
+include(cmake/InstallThirdParty.cmake)
+
 add_library(client STATIC)
 target_include_directories(client PUBLIC include)
 target_link_libraries(client PUBLIC asio base64 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
