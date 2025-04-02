@@ -197,7 +197,7 @@ void RealLogger::handle_fatal_error()
 		buff->save_to_queue(str, ERROR, std::source_location::current(), buff->real_get_level(), std::thread::id{});
 	}
 
-	Logger::destroy();
+	destroy();
 
 	std::abort();
 }

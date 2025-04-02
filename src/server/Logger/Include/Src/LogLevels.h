@@ -6,6 +6,7 @@
 #define DEFAULT_FORMAT "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
 
 #define INNER_DEFAULT_LEVEL -1
+#define INNER_DEFAULT_NAME ""
 
 namespace logger
 {
@@ -15,13 +16,13 @@ class LogLevel
 {
 private:
 	int m_level;
-	std::string name;
+	std::string m_name;
 	Format m_format;
 public:
 	LogLevel(const LogLevel&);
 	LogLevel(LogLevel&&);
 
-	LogLevel(const std::string& name, const Format& ft = DEFAULT_FORMAT, const int level = INNER_DEFAULT_LEVEL);
+	LogLevel(const std::string& name = INNER_DEFAULT_NAME, const Format& ft = DEFAULT_FORMAT, const int level = INNER_DEFAULT_LEVEL);
 	~LogLevel() = default;
 
 	void set_int(const int);
@@ -53,6 +54,8 @@ public:
 	static void add(LogLevel&);
 
 	static void edit(const std::string&, const LogLevel&);
+
+	static void erase(const std::string&);
 
 	static int get_size();
 

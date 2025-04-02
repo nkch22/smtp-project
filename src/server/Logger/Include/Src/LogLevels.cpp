@@ -40,35 +40,40 @@ void LogLevel::operator=(const LogLevel& obj)
 {
 	m_format = obj.m_format;
 	m_level = obj.m_level;
+	m_name = obj.m_name;
 }
 
 const bool LogLevel::operator==(const LogLevel& obj) const
 {
-	return m_format == obj.m_format && m_level == obj.m_level;
+	return m_name == obj.m_name;
 }
 
 // Global log levels
 using namespace logger_inner;
 
-GlobalLogLevel::inner_map GlobalLogLevel::m_levels_map{{"NO", LogLevel{0}},
-													   {"PROD", LogLevel{1}},
-													   {"DEBUG", LogLevel{2}},
-													   {"TRACE", LogLevel{3}}};
+GlobalLogLevel::inner_map GlobalLogLevel::m_levels_map{{"NO", LogLevel{"NO", DEFAULT_FORMAT, 0}},
+													   {"PROD", LogLevel{"PROD", DEFAULT_FORMAT, 1}},
+													   {"DEBUG", LogLevel{"DEBUG", DEFAULT_FORMAT, 2}},
+													   {"TRACE", LogLevel{"TRACE", DEFAULT_FORMAT, 3}}};
 
-void GlobalLogLevel::add(const std::string& key, LogLevel& lv)
+void GlobalLogLevel::add(LogLevel& lv)
 {
-	if (m_levels_map.contains(key)) return;
+	if (m_levels_map.contains(lv.get_name()) || lv.get_name().empty()) return;
 
 	if (lv.get_int() == -1) lv.set_int(m_levels_map.size());
 
-	m_levels_map.emplace(key, std::move(lv));
+	m_levels_map.emplace(lv.get_name(), std::move(lv));
 }
 
 void GlobalLogLevel::edit(const std::string& key, const LogLevel& obj)
 {
-	if (!m_levels_map.contains(key)) return;
+	if (!m_levels_map.contains(key) || obj.get_name().empty()) return;
 
 	m_levels_map[key] = obj;
+}
+
+void GlobalLogLevel::erase(const std::string& key) {
+	m_levels_map.erase(key);
 }
 
 int GlobalLogLevel::get_size()
