@@ -4,7 +4,7 @@
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
 #include "ThreadMap.h"
 
-namespace logger
+namespace logger_inner
 {
 
 class RealLogger
@@ -38,7 +38,7 @@ private:
 	Queue m_queue;
 	std::thread m_thr;
 
-	logger::ThreadMap map;
+	ThreadMap map;
 
 	RealLogger(const logger::LogLevels, const std::string&, const unsigned int, const bool, const bool);
 

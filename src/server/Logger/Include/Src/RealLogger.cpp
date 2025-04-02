@@ -1,6 +1,7 @@
 #include "RealLogger.h"
 
 using namespace logger_inner;
+using namespace logger;
 
 RealLogger* RealLogger::m_instance = nullptr;
 
@@ -88,7 +89,7 @@ RealLogger* RealLogger::get_instance(const LogLevels level, const std::string& p
 	{
 		m_instance = new RealLogger{level, path, amount, is_config, do_flush};
 
-		atexit([] { Logger::destroy(); });
+		atexit([] { destroy(); });
 		std::set_terminate(handle_fatal_error);
 	}
 	return m_instance;
@@ -97,6 +98,9 @@ RealLogger* RealLogger::get_instance(const LogLevels level, const std::string& p
 void RealLogger::destroy()
 {
 	if (m_instance == nullptr) return;
+
+	m_instance->save_to_queue("logger is destroyed", INFORMATION, std::source_location::current(),
+							  m_instance->real_get_level(), std::thread::id{});
 
 	{
 		std::lock_guard guard{m_instance->m_mutex};

@@ -3,7 +3,7 @@
 #include "RealLogger.h"
 
 using namespace logger;
-// Logger
+using namespace logger_inner;
 
 Logger::Logger(const std::source_location location) :
 	m_real{RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()} {};
@@ -21,15 +21,6 @@ bool Logger::init(const LogLevels level, const std::string& save_path, const uns
 	}
 
 	return result;
-}
-
-void Logger::destroy()
-{
-	auto buff = RealLogger::get_instance();
-	buff->save_to_queue("logger is destroyed", INFORMATION, std::source_location::current(), buff->real_get_level(),
-						std::thread::id{});
-
-	RealLogger::destroy();
 }
 
 void Logger::log_error(const std::string& msg)

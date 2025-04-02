@@ -2,6 +2,7 @@
 #include "BufferWrapper.h"
 #include "RealLogger.h"
 
+using namespace logger_inner;
 
 void temp_wrap::wrap_return(const std::string& str, const std::source_location& m_location,
 								const logger::LogLevels local)

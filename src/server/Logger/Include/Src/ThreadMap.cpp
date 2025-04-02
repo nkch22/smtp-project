@@ -1,6 +1,6 @@
 #include "ThreadMap.h"
 
-using namespace logger;
+using namespace logger_inner;
 
 ThreadMap::ThreadMap()
 {

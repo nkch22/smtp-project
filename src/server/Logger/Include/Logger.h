@@ -5,7 +5,11 @@
 #include "Src/SharedInclude.h"
 #include "Src/ThreadMap.h"
 
+namespace logger_inner
+{
 class RealLogger;
+}
+
 
 /*!
  *	@file Logger.h
@@ -61,7 +65,8 @@ namespace logger
 class Logger
 {
 private:
-	RealLogger* m_real;
+	
+	logger_inner::RealLogger* m_real;
 
 	Buffer m_buff;
 

@@ -4,7 +4,7 @@
 #include <string>
 #include <mutex>
 
-namespace logger
+namespace logger_inner
 {
 
 class ThreadMap
