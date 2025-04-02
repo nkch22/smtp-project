@@ -3,7 +3,6 @@
 
 #include "SharedInclude.h"
 
-#define DEFAULT_FORMAT "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
 #define DEFAULT_LOG_LEVEL logger::LogLevel{"PROD"}
 
 #define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get("NO")

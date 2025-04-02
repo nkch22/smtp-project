@@ -1,17 +1,17 @@
 #pragma once
 
-#include "SharedInclude.h"
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
-#include "ThreadMap.h"
 #include "MessageFormatter.h"
+#include "SharedInclude.h"
+#include "ThreadMap.h"
 
 namespace logger_inner
 {
+using logger::Format;
 
 class RealLogger
 {
 private:
-
 	using Queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
 
 	static RealLogger* m_instance;
@@ -33,8 +33,9 @@ private:
 
 	ThreadMap m_thr_map;
 	GlobalLogLevel m_level_map;
+	Format m_global_format;
 
-	RealLogger(const logger::LogLevel, const std::string&, const unsigned int, const bool, const bool);
+	RealLogger(const logger::LogLevel, const std::string&, const Format& ,const unsigned int, const bool, const bool);
 
 	~RealLogger() = default;
 
@@ -46,16 +47,16 @@ public:
 	RealLogger(RealLogger&&) = delete;
 
 	static RealLogger* get_instance(const logger::LogLevel = DEFAULT_LOG_LEVEL, const std::string& = DEFAULT_PATH,
-									const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
-									const bool do_flush = DEFAULT_FLUSH);
+									const Format& = DEFAULT_FORMAT, const unsigned int amount = DEFAULT_AMOUNT,
+									const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 
 	static void destroy();
 
 	void save_to_queue(const std::string&, const logger::MessageTypes, const std::source_location&,
-					   const logger::LogLevel level, std::thread::id id = std::this_thread::get_id());
+					   const logger::LogLevel, const Format&,std::thread::id id = std::this_thread::get_id());
 
 	void real_set_level(const logger::LogLevel);
-	logger::LogLevel real_get_level();
+	const logger::LogLevel& real_get_level();
 
 	void flush_message(const Message&);
 
@@ -65,11 +66,15 @@ public:
 
 	void set_output(const std::string&);
 
-	std::string get_path() const;
+	const std::string& get_path() const;
 
 	void real_set_flush(const bool);
 
 	void add_custom_level(LogLevel&);
+
+	void set_global_format(const Format&);
+	
+	const Format& get_global_format() const;
 };
 
-} // namespace logger
+} // namespace logger_inner

@@ -5,22 +5,35 @@
 
 namespace logger_inner
 {
+using logger::Format;
 
-struct Message
+class Message
 {
+public:
 	std::string msg;
 	logger::MessageTypes type;
 	std::source_location location;
 	logger::LogLevel level;
 	std::string thr_id;
+	Format ft;
+
+	Message(const Message&);
+	Message(Message&&);
+
+	Message(const std::string& = "", logger::MessageTypes = logger::INFORMATION,
+			const std::source_location& = std::source_location::current(), const logger::LogLevel& = {},
+			const std::string& = "", const Format& = "");
+
+	void operator=(const Message&);
 };
 
 } // namespace logger_inner
 
 template<>
-struct std::formatter<logger_inner::Message>
+class std::formatter<logger_inner::Message>
 {
-	bool thr_id{false}, time{false}, type{false}, level{false}, location{false}, text{false};
+public:
+	bool thr_id = false, time = false, type = false, level = false, location = false, text = false;
 
 	constexpr auto parse(std::format_parse_context& cxt)
 	{
@@ -64,16 +77,26 @@ struct std::formatter<logger_inner::Message>
 	{
 		std::string formatted{};
 
-		if (thr_id)
-			formatted = obj.thr_id;
-		else if (time)
-			formatted = std::format("[{:%H.%M.%S-%d.%m.%y}]", std::chrono::system_clock::now());
-		else if (type)
-			formatted = obj.type;
-		else if (location)
-			formatted = obj.location.function_name();
-		else if (text)
-			formatted = obj.msg;
+		if (thr_id) formatted += obj.thr_id;
+		if (time) formatted += std::format("[{:%H.%M.%S-%d.%m.%y}]", std::chrono::system_clock::now());
+		if (type)
+		{
+			switch (obj.type)
+			{
+			case logger::ERROR:
+				formatted += "E";
+				break;
+			case logger::WARNING:
+				formatted += "W";
+				break;
+			case logger::INFORMATION:
+				formatted += "I";
+				break;
+			}
+		}
+		if (level) formatted += std::to_string(obj.level.get_int());
+		if (location) formatted += obj.location.function_name();
+		if (text) formatted += obj.msg;
 
 		return std::ranges::copy(std::move(formatted), context.out()).out;
 	}

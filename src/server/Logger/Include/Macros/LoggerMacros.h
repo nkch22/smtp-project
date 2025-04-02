@@ -28,6 +28,9 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
+#define DEFAULT_FORMAT "{:l}" 
+// "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+
 /*! @def INNER_LOGGER_ACTION(value)
 *	@brief Inner serialization for other macros
 */

@@ -139,7 +139,7 @@ void ArgsWithoutLogging(int*, int b)
 
 int main()
 {
-	logger::Logger::init(TRACE_LOG_LEVEL); // init logger with global trace log level
+	logger::Logger::init(TRACE_LOG_LEVEL ); // init logger with global trace log level
 	// every instance of Logger will have trace log level
 
 	NoArgsNoRet();

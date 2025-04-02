@@ -5,14 +5,15 @@ using namespace logger;
 
 RealLogger* RealLogger::m_instance = nullptr;
 
-RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const unsigned int amount,
+RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const Format& ft, const unsigned int amount,
 					   const bool is_config, const bool do_flush) :
-	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount}
+	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount},
+	m_global_format{ft}
 {
 	if (m_amount < 1)
 	{
 		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING,
-					  std::source_location::current(), m_level, std::this_thread::get_id());
+					  std::source_location::current(), m_level, m_global_format,std::this_thread::get_id());
 		m_amount = DEFAULT_AMOUNT;
 	}
 
@@ -79,15 +80,15 @@ void RealLogger::file_init(const unsigned int amount)
 
 	if (error)
 		save_to_queue("invalid output path, default will be used", WARNING, std::source_location::current(), m_level,
-					  std::this_thread::get_id());
+					  m_global_format, std::this_thread::get_id());
 }
 
-RealLogger* RealLogger::get_instance(const LogLevel level, const std::string& path, const unsigned int amount,
-									 const bool is_config, const bool do_flush)
+RealLogger* RealLogger::get_instance(const LogLevel level, const std::string& path, const Format& ft,
+									 const unsigned int amount, const bool is_config, const bool do_flush)
 {
 	if (m_instance == nullptr)
 	{
-		m_instance = new RealLogger{level, path, amount, is_config, do_flush};
+		m_instance = new RealLogger{level, path, ft, amount, is_config, do_flush};
 
 		atexit([] { destroy(); });
 		std::set_terminate(handle_fatal_error);
@@ -100,7 +101,7 @@ void RealLogger::destroy()
 	if (m_instance == nullptr) return;
 
 	m_instance->save_to_queue("logger is destroyed", INFORMATION, std::source_location::current(),
-							  m_instance->real_get_level(), std::thread::id{});
+							  m_instance->real_get_level(), m_instance->m_global_format, std::thread::id{});
 
 	{
 		std::lock_guard guard{m_instance->m_mutex};
@@ -115,12 +116,12 @@ void RealLogger::destroy()
 }
 
 void RealLogger::save_to_queue(const std::string& str, const MessageTypes type, const std::source_location& location,
-							   const LogLevel level, std::thread::id id)
+							   const LogLevel level, const Format& ft, std::thread::id id)
 {
 	if (!m_do_flush || level.get_name() == "NO") return;
 
 	m_thr_map.add(id);
-	m_queue.Push(Message{str, type, location, level, m_thr_map.get(id)});
+	m_queue.Push(Message{str, type, location, level, m_thr_map.get(id), ft});
 }
 
 void RealLogger::real_set_level(const LogLevel _level)
@@ -128,7 +129,7 @@ void RealLogger::real_set_level(const LogLevel _level)
 	std::lock_guard guard{m_mutex};
 	m_level = _level;
 }
-LogLevel RealLogger::real_get_level()
+const LogLevel& RealLogger::real_get_level()
 {
 	std::lock_guard guard{m_mutex};
 	return m_level;
@@ -136,7 +137,7 @@ LogLevel RealLogger::real_get_level()
 
 void RealLogger::flush_message(const Message& message)
 {
-	std::string time = std::format("[{:%H.%M.%S-%d.%m.%y}]", std::chrono::system_clock::now());
+	/*std::string time = std::format("[{:%H.%M.%S-%d.%m.%y}]", std::chrono::system_clock::now());
 
 	std::string message_type;
 	switch (message.type)
@@ -178,7 +179,12 @@ void RealLogger::flush_message(const Message& message)
 	if (m_is_config) return;
 
 	m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
-		   << message.msg << "\n";
+		   << message.msg << "\n";*/
+
+	std::string formatted = std::vformat(message.ft.c_str(), std::make_format_args(message));
+
+	std::cout << formatted << std::endl;
+	if (m_is_config) return;
 }
 
 void RealLogger::handle_fatal_error()
@@ -194,7 +200,8 @@ void RealLogger::handle_fatal_error()
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->save_to_queue(str, ERROR, std::source_location::current(), buff->real_get_level(), std::thread::id{});
+		buff->save_to_queue(str, ERROR, std::source_location::current(), buff->real_get_level(),
+							buff->get_global_format(), std::thread::id{});
 	}
 
 	destroy();
@@ -220,7 +227,7 @@ void RealLogger::set_output(const std::string& path)
 	m_output_path = path;
 }
 
-std::string RealLogger::get_path() const
+const std::string& RealLogger::get_path() const
 {
 	return m_output_path;
 }
@@ -230,6 +237,17 @@ void RealLogger::real_set_flush(const bool value)
 	m_do_flush = value;
 }
 
-void RealLogger::add_custom_level(LogLevel& obj) {
+void RealLogger::add_custom_level(LogLevel& obj)
+{
 	m_level_map.add(obj);
+}
+
+void RealLogger::set_global_format(const Format& obj)
+{
+	m_global_format = obj;
+}
+
+const Format& RealLogger::get_global_format() const
+{
+	return m_global_format;
 }
