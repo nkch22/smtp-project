@@ -120,7 +120,7 @@ void RealLogger::save_to_queue(const std::string& str, const MessageTypes type, 
 	if (!m_do_flush || level.get_name() == "NO") return;
 
 	m_thr_map.add(id);
-	m_queue.Push(Message{str, type, location, level, id});
+	m_queue.Push(Message{str, type, location, level, m_thr_map.get(id)});
 }
 
 void RealLogger::real_set_level(const LogLevel _level)
@@ -158,7 +158,7 @@ void RealLogger::flush_message(const Message& message)
 	func_name += message.location.function_name();
 	func_name += "]";
 
-	std::cout << DEFAULT_COLOR "[" << m_thr_map.get(message.thr_id) << "]" << time;
+	std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
 
 	switch (message.type)
 	{
@@ -177,7 +177,7 @@ void RealLogger::flush_message(const Message& message)
 
 	if (m_is_config) return;
 
-	m_file << "[" << m_thr_map.get(message.thr_id) << "]" << time << message_type << level_str << func_name << " "
+	m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
 		   << message.msg << "\n";
 }
 

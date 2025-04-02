@@ -3,7 +3,7 @@
 #include "SharedInclude.h"
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
 #include "ThreadMap.h"
-
+#include "MessageFormatter.h"
 
 namespace logger_inner
 {
@@ -11,14 +11,6 @@ namespace logger_inner
 class RealLogger
 {
 private:
-	struct Message
-	{
-		std::string msg;
-		logger::MessageTypes type;
-		std::source_location location;
-		logger::LogLevel level;
-		std::thread::id thr_id;
-	};
 
 	using Queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
 
