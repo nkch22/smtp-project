@@ -4,6 +4,7 @@ project(smtp_server)
 
 include(cmake/Ccache.cmake)
 include(cmake/CheckCompiler.cmake)
+include(cmake/CompileOptions.cmake)
 include(cmake/Sanitize.cmake)
 include(cmake/Development.cmake)
 include(cmake/Logging.cmake)
