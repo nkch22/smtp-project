@@ -72,7 +72,7 @@ private:
 
 	const std::source_location m_location;
 
-	LogLevels m_local_level;
+	LogLevel m_local_level;
 
 	template<typename T>
 	void log_argument(const T& value)
@@ -108,7 +108,7 @@ public:
 	 *	Destroys global values
 	 */
 
-	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
+	static bool init(const LogLevel level = DEFAULT_LOG_LEVEL, const std::string& save_path = DEFAULT_PATH,
 					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
 					 const bool do_flush = DEFAULT_FLUSH);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
@@ -154,7 +154,7 @@ public:
 	 *   Saves message with information flag
 	 */
 
-	static void set_global_level(const LogLevels);
+	static void set_global_level(const LogLevel);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
@@ -163,7 +163,7 @@ public:
 	 *  @warning local log level has more priority than global one
 	 */
 
-	LogLevels get_global_level() const;
+	LogLevel get_global_level() const;
 	/*! @fn get_global_level()
 	 *	@brief Global log level getter
 	 *
@@ -173,7 +173,7 @@ public:
 	template<typename T>
 	void log_return(const T& value)
 	{
-		if (m_local_level == LOG_LEVEL_TRACE)
+		if (m_local_level.get_int() == 3)
 		{
 			m_buff << value;
 			temp_wrap::wrap_return(m_buff.get(), m_location, m_local_level);
@@ -201,7 +201,7 @@ public:
 	template<typename T, typename... Args>
 	void log_arguments(const T& first, Args&... args)
 	{
-		if (m_local_level == LOG_LEVEL_TRACE)
+		if (m_local_level.get_int() == 3)
 		{
 			log_argument(first);
 			log_arguments(std::forward<Args>(args)...);
@@ -225,7 +225,7 @@ public:
 		It saves message that function has successfully started
 	*/
 
-	void set_local_level(const LogLevels);
+	void set_local_level(const LogLevel);
 	/*! @fn set_local_level(const LogLevels&)
 	 *	@brief Local log level setter
 	 *
@@ -234,7 +234,7 @@ public:
 	 *   @warning local log level has more priority than global one
 	 */
 
-	LogLevels get_local_level() const;
+	LogLevel get_local_level() const;
 	/*! @fn get_local_level()
 	 *  @brief Local log level getter
 	 *

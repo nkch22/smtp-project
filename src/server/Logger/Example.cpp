@@ -73,7 +73,7 @@ int LocalLevel(int a)
 {
 	logger::Logger log;
 	log.set_local_level(
-		logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
+		DEBUG_LOG_LEVEL); // set local level to debug (no input parameters or return will be saved)
 	// Global log level won't be affected
 
 	log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
@@ -139,7 +139,7 @@ void ArgsWithoutLogging(int*, int b)
 
 int main()
 {
-	logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
+	logger::Logger::init(TRACE_LOG_LEVEL); // init logger with global trace log level
 	// every instance of Logger will have trace log level
 
 	NoArgsNoRet();

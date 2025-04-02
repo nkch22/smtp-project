@@ -4,6 +4,12 @@
 #include "SharedInclude.h"
 
 #define DEFAULT_FORMAT "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+#define DEFAULT_LOG_LEVEL logger::LogLevel{"PROD"}
+
+#define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get("NO")
+#define PROD_LOG_LEVEL logger_inner::GlobalLogLevel::get("PROD")
+#define DEBUG_LOG_LEVEL logger_inner::GlobalLogLevel::get("DEBUG")
+#define TRACE_LOG_LEVEL logger_inner::GlobalLogLevel::get("TRACE")
 
 #define INNER_DEFAULT_LEVEL -1
 #define INNER_DEFAULT_NAME ""

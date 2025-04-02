@@ -19,3 +19,5 @@
 
 #include "Enums.h"
 #include "../Macros/LoggerMacros.h"
+
+#include "LogLevels.h"

@@ -8,7 +8,7 @@ using namespace logger_inner;
 Logger::Logger(const std::source_location location) :
 	m_real{RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()} {};
 
-bool Logger::init(const LogLevels level, const std::string& save_path, const unsigned int amount, const bool is_config,
+bool Logger::init(const LogLevel level, const std::string& save_path, const unsigned int amount, const bool is_config,
 				  const bool do_flush)
 {
 	RealLogger* real = RealLogger::get_instance(level, save_path, amount, is_config, do_flush);
@@ -38,24 +38,24 @@ void Logger::log_message(const std::string& msg)
 	m_real->save_to_queue(msg, INFORMATION, m_location, m_local_level);
 }
 
-void Logger::set_global_level(const LogLevels _level)
+void Logger::set_global_level(const LogLevel _level)
 {
 	RealLogger::get_instance()->real_set_level(_level);
 }
-LogLevels Logger::get_global_level() const
+LogLevel Logger::get_global_level() const
 {
 	return m_real->real_get_level();
 }
 
 void Logger::log_return_nothing()
 {
-	if (m_local_level >= LOG_LEVEL_DEBUG)
+	if (m_local_level.get_int() >= 2)
 		m_real->save_to_queue("successfully executed", INFORMATION, m_location, m_local_level);
 }
 
 void Logger::log_func_start()
 {
-	if (m_local_level >= LOG_LEVEL_DEBUG) m_real->save_to_queue("started", INFORMATION, m_location, m_local_level);
+	if (m_local_level.get_int() >= 2) m_real->save_to_queue("started", INFORMATION, m_location, m_local_level);
 }
 
 void Logger::log_arguments()
@@ -64,12 +64,12 @@ void Logger::log_arguments()
 	m_buff.clear();
 }
 
-void Logger::set_local_level(const LogLevels level)
+void Logger::set_local_level(const LogLevel level)
 {
 	m_local_level = level;
 }
 
-LogLevels Logger::get_local_level() const
+LogLevel Logger::get_local_level() const
 {
 	return m_local_level;
 }

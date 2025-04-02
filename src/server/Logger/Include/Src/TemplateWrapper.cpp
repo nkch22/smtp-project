@@ -5,7 +5,7 @@
 using namespace logger_inner;
 
 void temp_wrap::wrap_return(const std::string& str, const std::source_location& m_location,
-								const logger::LogLevels local)
+								const logger::LogLevel local)
 {
 	RealLogger::get_instance()->save_to_queue({"returned: " + str}, logger::INFORMATION, m_location, local);
 }
