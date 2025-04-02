@@ -1,5 +1,7 @@
 #include "RealLogger.h"
 
+#define MESSAGE message, message, message, message, message, message, message, message, message
+
 using namespace logger_inner;
 using namespace logger;
 
@@ -13,7 +15,7 @@ RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const Fo
 	if (m_amount < 1)
 	{
 		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING,
-					  std::source_location::current(), m_level, m_global_format,std::this_thread::get_id());
+					  std::source_location::current(), m_level, m_global_format, std::this_thread::get_id());
 		m_amount = DEFAULT_AMOUNT;
 	}
 
@@ -21,16 +23,23 @@ RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const Fo
 
 	m_thr = std::thread{[this]
 						{
-							while (!m_end)
 							{
-								std::queue<Message> localQueue = m_queue.Extract();
-								while (!localQueue.empty())
+								std::unique_lock lock{m_mutex};
+								while (!m_end)
 								{
-									flush_message(localQueue.front());
-									localQueue.pop();
+									lock.unlock();
+
+									std::queue<Message> localQueue = m_queue.Extract();
+									while (!localQueue.empty())
+									{
+										flush_message(localQueue.front());
+										localQueue.pop();
+									}
+
+									lock.lock();
 								}
 							}
-							// process messages that left in the queue
+
 							auto message = m_queue.Pop();
 							while (message)
 							{
@@ -137,51 +146,8 @@ const LogLevel& RealLogger::real_get_level()
 
 void RealLogger::flush_message(const Message& message)
 {
-	/*std::string time = std::format("[{:%H.%M.%S-%d.%m.%y}]", std::chrono::system_clock::now());
-
-	std::string message_type;
-	switch (message.type)
-	{
-	case ERROR:
-		message_type = " E ";
-		break;
-	case WARNING:
-		message_type = " W ";
-		break;
-	case INFORMATION:
-		message_type = " I ";
-		break;
-	}
-
-	std::string level_str{"[" + std::to_string(message.level.get_int()) + "]"};
-
-	std::string func_name{"["};
-	func_name += message.location.function_name();
-	func_name += "]";
-
-	std::cout << DEFAULT_COLOR "[" << message.thr_id << "]" << time;
-
-	switch (message.type)
-	{
-	case ERROR:
-		std::cout << ERROR_COLOR;
-		break;
-	case WARNING:
-		std::cout << WARNING_COLOR;
-		break;
-	case INFORMATION:
-		std::cout << INFORMATION_COLOR;
-		break;
-	}
-
-	std::cout << message_type << DEFAULT_COLOR << level_str << func_name << " " << message.msg << "\n";
-
-	if (m_is_config) return;
-
-	m_file << "[" << message.thr_id << "]" << time << message_type << level_str << func_name << " "
-		   << message.msg << "\n";*/
-
-	std::string formatted = std::vformat(message.ft.c_str(), std::make_format_args(message));
+	// std::lock_guard lock{m_mutex};
+	std::string formatted = std::vformat(message.ft.c_str(), std::make_format_args(MESSAGE));
 
 	std::cout << formatted << std::endl;
 	if (m_is_config) return;

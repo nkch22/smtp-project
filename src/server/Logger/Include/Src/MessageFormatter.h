@@ -7,24 +7,14 @@ namespace logger_inner
 {
 using logger::Format;
 
-class Message
+struct Message
 {
-public:
 	std::string msg;
 	logger::MessageTypes type;
 	std::source_location location;
 	logger::LogLevel level;
 	std::string thr_id;
 	Format ft;
-
-	Message(const Message&);
-	Message(Message&&);
-
-	Message(const std::string& = "", logger::MessageTypes = logger::INFORMATION,
-			const std::source_location& = std::source_location::current(), const logger::LogLevel& = {},
-			const std::string& = "", const Format& = "");
-
-	void operator=(const Message&);
 };
 
 } // namespace logger_inner
@@ -44,29 +34,24 @@ public:
 		{
 		case 'i':
 			thr_id = true;
-			++it;
 			break;
 		case 'T':
 			time = true;
-			++it;
 			break;
 		case 't':
 			type = true;
-			++it;
 			break;
 		case 'l':
 			level = true;
-			++it;
 			break;
 		case 'L':
 			location = true;
-			++it;
 			break;
 		case 'm':
 			text = true;
-			++it;
 			break;
 		}
+		++it;
 
 		if (it != cxt.end() && *it != '}') throw std::format_error("Invalid format args.");
 

@@ -28,7 +28,7 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-#define DEFAULT_FORMAT "{:l}" 
+#define DEFAULT_FORMAT "[{:i}]{:t}[{:L}][{:m}]" 
 // "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
 
 /*! @def INNER_LOGGER_ACTION(value)
