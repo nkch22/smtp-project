@@ -34,9 +34,9 @@ RUN apt update && apt install -y libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/build/smtp_server /etc/smtp_server/
 
 # Expose necessary ports (adjust as needed)
-EXPOSE 25000
+EXPOSE 465
 
 WORKDIR /etc/smtp_server/
 
 # Run the server
-CMD ["./smtp_server"]
+ENTRYPOINT ["./smtp_server"]
