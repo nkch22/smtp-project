@@ -16,8 +16,8 @@ RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const un
 {
 	if (m_amount < 1)
 	{
-		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING,
-					  FUNCTION_NAME, m_level, m_global_format, std::this_thread::get_id());
+		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING, FUNCTION_NAME,
+					  m_level, m_level.get_format(), std::this_thread::get_id());
 		m_amount = DEFAULT_AMOUNT;
 	}
 
@@ -91,7 +91,7 @@ void RealLogger::file_init(const unsigned int amount)
 
 	if (error)
 		save_to_queue("invalid output path, default will be used", WARNING, FUNCTION_NAME, m_level,
-					  m_global_format, std::this_thread::get_id());
+					  m_level.get_format(), std::this_thread::get_id());
 }
 
 RealLogger* RealLogger::get_instance(const LogLevel level, const std::string& path,
@@ -111,8 +111,8 @@ void RealLogger::destroy()
 {
 	if (m_instance == nullptr) return;
 
-	m_instance->save_to_queue("logger is destroyed", INFORMATION, FUNCTION_NAME,
-							  m_instance->real_get_level(), m_instance->m_global_format, std::thread::id{});
+	m_instance->save_to_queue("logger is destroyed", INFORMATION, FUNCTION_NAME, m_instance->real_get_level(),
+							  m_instance->m_level.get_format(), std::thread::id{});
 
 	{
 		std::lock_guard guard{m_instance->m_mutex};
@@ -172,8 +172,8 @@ void RealLogger::handle_fatal_error()
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->save_to_queue(str, ERROR, FUNCTION_NAME, buff->real_get_level(),
-							buff->get_global_format(), std::thread::id{});
+		buff->save_to_queue(str, ERROR, FUNCTION_NAME, buff->real_get_level(), buff->m_level.get_format(),
+							std::thread::id{});
 	}
 
 	destroy();
@@ -212,14 +212,4 @@ void RealLogger::real_set_flush(const bool value)
 void RealLogger::add_custom_level(LogLevel& obj)
 {
 	m_level_map.add(obj);
-}
-
-void RealLogger::set_global_format(const Format& obj)
-{
-	m_global_format = obj;
-}
-
-const Format& RealLogger::get_global_format() const
-{
-	return m_global_format;
 }

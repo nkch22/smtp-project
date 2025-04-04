@@ -13,5 +13,5 @@ void temp_wrap::wrap_return(const std::string& str, const std::string& m_locatio
 void temp_wrap::wrap_warning(const std::string& str, const std::string& loc)
 {
 	auto buff = RealLogger::get_instance();
-	buff->save_to_queue(str, logger::WARNING, loc, buff->real_get_level(), buff->get_global_format());
+	buff->save_to_queue(str, logger::WARNING, loc, buff->real_get_level(), buff->real_get_level().get_format());
 }

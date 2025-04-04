@@ -33,7 +33,6 @@ private:
 
 	ThreadMap m_thr_map;
 	GlobalLogLevel m_level_map;
-	Format m_global_format;
 
 	RealLogger(const logger::LogLevel, const std::string&, const unsigned int, const bool, const bool);
 
@@ -71,10 +70,6 @@ public:
 	void real_set_flush(const bool);
 
 	void add_custom_level(LogLevel&);
-
-	void set_global_format(const Format&);
-
-	const Format& get_global_format() const;
 };
 
 } // namespace logger_inner

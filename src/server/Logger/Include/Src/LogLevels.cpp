@@ -62,7 +62,7 @@ void GlobalLogLevel::add(LogLevel& lv)
 
 	if (lv.get_int() == -1) lv.set_int(m_levels_map.size());
 
-	m_levels_map.emplace(lv.get_name(), std::move(lv));
+	m_levels_map.emplace(lv.get_name(), lv);
 }
 
 void GlobalLogLevel::edit(const std::string& key, const LogLevel& obj)
