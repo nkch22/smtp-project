@@ -165,7 +165,7 @@ public:
 	template<typename T>
 	void log_return(const T& value)
 	{
-		if (m_local_level.get_int() == 3)
+		if (m_local_level.get_level() == 3)
 		{
 			m_buff << value;
 			temp_wrap::wrap_return(m_buff.get(), m_location, m_local_level, m_local_format);
@@ -193,7 +193,7 @@ public:
 	template<typename T, typename... Args>
 	void log_arguments(const T& first, Args&... args)
 	{
-		if (m_local_level.get_int() == 3)
+		if (m_local_level.get_level() == 3)
 		{
 			log_argument(first);
 			log_arguments(std::forward<Args>(args)...);

@@ -89,7 +89,7 @@ public:
 				break;
 			}
 		}
-		if (level) formatted += std::to_string(obj.level.get_int());
+		if (level) formatted += std::to_string(obj.level.get_level());
 		if (location) formatted += obj.location;
 		if (text) formatted += obj.msg;
 
@@ -123,7 +123,7 @@ public:
 				break;
 			}
 		}
-		if (level) formatted += std::to_string(obj.level.get_int());
+		if (level) formatted += std::to_string(obj.level.get_level());
 		if (location) formatted += obj.location;
 		if (text) formatted += obj.msg;
 

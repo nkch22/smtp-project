@@ -15,7 +15,7 @@
 
 Config::Server Config::GetServer() const
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 	logger.log_return(m_server);
 
@@ -24,7 +24,7 @@ Config::Server Config::GetServer() const
 
 Config::Communication Config::GetCommunication() const
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 	logger.log_return(m_communication);
 
@@ -33,7 +33,7 @@ Config::Communication Config::GetCommunication() const
 
 Config::Logging Config::GetLogging() const
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 	logger.log_return(m_logging);
 
@@ -42,7 +42,7 @@ Config::Logging Config::GetLogging() const
 
 Config::Threads Config::GetThreads() const
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 	logger.log_return(m_threads);
 
@@ -51,7 +51,7 @@ Config::Threads Config::GetThreads() const
 
 Config::Config(const std::filesystem::path& file_path)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	try
@@ -77,7 +77,7 @@ Config::Config(const std::filesystem::path& file_path)
 
 void Config::ParseServer(const ISXJson::JSON& server_json)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	m_server.server_name = server_json["servername"].AsString();
@@ -90,7 +90,7 @@ void Config::ParseServer(const ISXJson::JSON& server_json)
 
 void Config::ParseCommunication(const ISXJson::JSON& comm_json)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	m_communication.blocking = (static_cast<int>(comm_json["blocking"].AsNumber()) != 0);
@@ -101,7 +101,7 @@ void Config::ParseCommunication(const ISXJson::JSON& comm_json)
 
 void Config::ParseLogging(const ISXJson::JSON& logger_json)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	m_logging.logs_directory = logger_json["logs_directory"].AsString();
@@ -113,7 +113,7 @@ void Config::ParseLogging(const ISXJson::JSON& logger_json)
 
 void Config::ParseTime(const ISXJson::JSON& time_json)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	m_threads.period_time = static_cast<int>(time_json["Period_time"].AsNumber());
@@ -123,7 +123,7 @@ void Config::ParseTime(const ISXJson::JSON& time_json)
 
 void Config::ParseThreadpool(const ISXJson::JSON& threadpool_json)
 {
-	logger::Logger logger;
+	LOGGER(logger);
 	logger.log_func_start();
 
 	m_threads.max_working_threads = static_cast<int>(threadpool_json["maxworkingthreads"].AsNumber());

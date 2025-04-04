@@ -44,11 +44,16 @@
 		FUNCTION_NAME                                                                                                  \
 	}
 
+#define LOGGER_IN_INIT_LIST                                                                                               \
+	logger::Logger {FUNCTION_NAME}
+
 #define CREATE_LEVEL_NAME(NAME) LEVEL_##NAME
 
 #define CREATE_CUSTOM_LOG_LEVEL(name, format)                                                                          \
-	static logger::LogLevel CREATE_LEVEL_NAME(name){#name, format};                                                    \
+	static logger::LogLevel CREATE_LEVEL_NAME(name){format};                                                    \
 	logger_inner::GlobalLogLevel::add(LEVEL_##name)
+
+#define GET_LOG_LEVEL(value) logger_inner::GlobalLogLevel::get(value)
 
 /*! @def INNER_LOGGER_ACTION(value)
  *	@brief Inner serialization for other macros

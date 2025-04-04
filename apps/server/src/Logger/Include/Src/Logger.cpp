@@ -50,13 +50,13 @@ const LogLevel& Logger::get_global_level() const
 
 void Logger::log_return_nothing()
 {
-	if (m_local_level.get_int() >= 2)
+	if (m_local_level.get_level() >= 2)
 		m_real->save_to_queue("successfully executed", INFORMATION, m_location, m_local_level, m_local_format);
 }
 
 void Logger::log_func_start()
 {
-	if (m_local_level.get_int() >= 2)
+	if (m_local_level.get_level() >= 2)
 		m_real->save_to_queue("started", INFORMATION, m_location, m_local_level, m_local_format);
 }
 

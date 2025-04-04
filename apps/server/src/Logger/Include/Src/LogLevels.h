@@ -3,15 +3,14 @@
 
 #include "SharedInclude.h"
 
-#define DEFAULT_LOG_LEVEL logger::LogLevel{"PROD"}
+#define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get(0)
+#define PROD_LOG_LEVEL logger_inner::GlobalLogLevel::get(1)
+#define DEBUG_LOG_LEVEL logger_inner::GlobalLogLevel::get(2)
+#define TRACE_LOG_LEVEL logger_inner::GlobalLogLevel::get(3)
 
-#define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get("NO")
-#define PROD_LOG_LEVEL logger_inner::GlobalLogLevel::get("PROD")
-#define DEBUG_LOG_LEVEL logger_inner::GlobalLogLevel::get("DEBUG")
-#define TRACE_LOG_LEVEL logger_inner::GlobalLogLevel::get("TRACE")
+#define DEFAULT_LOG_LEVEL PROD_LOG_LEVEL
 
 #define INNER_DEFAULT_LEVEL -1
-#define INNER_DEFAULT_NAME ""
 
 namespace logger
 {
@@ -21,21 +20,18 @@ class LogLevel
 {
 private:
 	int m_level;
-	std::string m_name;
 	Format m_format;
 public:
 	LogLevel(const LogLevel&);
 	LogLevel(LogLevel&&);
 
-	LogLevel(const std::string& name = INNER_DEFAULT_NAME, const Format& ft = DEFAULT_FORMAT, const int level = INNER_DEFAULT_LEVEL);
+	LogLevel(const Format& ft = DEFAULT_FORMAT, const int level = INNER_DEFAULT_LEVEL);
 	~LogLevel() = default;
 
-	void set_int(const int);
-	void set_name(const std::string&);
+	void set_level(const int);
 	void set_format(const Format&);
 
-	int get_int() const;
-	const std::string& get_name() const;
+	int get_level() const;
 	const Format& get_format() const;
 
 	void operator=(const LogLevel&);
@@ -51,20 +47,20 @@ using logger::LogLevel;
 class GlobalLogLevel
 {
 private:
-	using inner_map = std::unordered_map<std::string, LogLevel>;
+	using inner_map = std::unordered_map<int, LogLevel>;
 
 	static inner_map m_levels_map;
 
 public:
 	static void add(LogLevel&);
 
-	static void edit(const std::string&, const LogLevel&);
+	static void edit(const int, const LogLevel&);
 
-	static void erase(const std::string&);
+	static void erase(const int);
 
 	static int get_size();
 
-	static const LogLevel& get(const std::string&);
+	static const LogLevel& get(const int);
 };
 
 } // namespace logger_inner
