@@ -5,8 +5,8 @@
 using namespace logger;
 using namespace logger_inner;
 
-Logger::Logger(const std::source_location location) :
-	m_real{RealLogger::get_instance()}, m_location{location}, m_local_level{m_real->real_get_level()},
+Logger::Logger(const char* loc) :
+	m_real{RealLogger::get_instance()}, m_location{loc}, m_local_level{m_real->real_get_level()},
 	m_local_format{m_real->get_global_format()} {};
 
 bool Logger::init(const LogLevel level, const std::string& save_path, const Format& ft, const unsigned int amount,
@@ -17,7 +17,7 @@ bool Logger::init(const LogLevel level, const std::string& save_path, const Form
 
 	if (result)
 	{
-		Logger log;
+		LOGGER(log);
 		log.log_message("logger is successfully initialized");
 	}
 

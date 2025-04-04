@@ -28,8 +28,13 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-#define DEFAULT_FORMAT "[{:i}]{:t}[{:L}][{:m}]" 
+#define DEFAULT_FORMAT "from: {:L} | msg: {:m}" 
 // "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+
+#define FUNCTION_NAME __FUNCTION__
+
+#define LOGGER(NAME)                                                                                                   \
+	logger::Logger NAME {FUNCTION_NAME}
 
 /*! @def INNER_LOGGER_ACTION(value)
 *	@brief Inner serialization for other macros

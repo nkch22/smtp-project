@@ -11,7 +11,7 @@ struct Message
 {
 	std::string msg;
 	logger::MessageTypes type;
-	std::source_location location;
+	std::string location;
 	logger::LogLevel level;
 	std::string thr_id;
 	Format ft;
@@ -80,7 +80,7 @@ public:
 			}
 		}
 		if (level) formatted += std::to_string(obj.level.get_int());
-		if (location) formatted += obj.location.function_name();
+		if (location) formatted += obj.location;
 		if (text) formatted += obj.msg;
 
 		return std::ranges::copy(std::move(formatted), context.out()).out;

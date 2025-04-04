@@ -68,7 +68,7 @@ private:
 
 	Buffer m_buff;
 
-	const std::source_location m_location;
+	const std::string m_location;
 
 	LogLevel m_local_level;
 	Format m_local_format;
@@ -86,7 +86,7 @@ public:
 	Logger(Logger&&) = delete;
 	void operator=(const Logger&) = delete;
 
-	Logger(const std::source_location location = std::source_location::current());
+	Logger(const char*);
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
 	 *	@brief Default constructor
 	 *
