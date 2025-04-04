@@ -1,6 +1,9 @@
 #include "RealLogger.h"
 
-#define MESSAGE message, message, message, message, message, message, message, message, message
+#define MESSAGE message, message, message, message, message, message, message, message
+
+#define MESSAGE_COUT                                                                                                   \
+	message_cout, message_cout, message_cout, message_cout, message_cout, message_cout, message_cout, message_cout
 
 using namespace logger_inner;
 using namespace logger;
@@ -146,11 +149,15 @@ const LogLevel& RealLogger::real_get_level()
 
 void RealLogger::flush_message(const Message& message)
 {
-	// std::lock_guard lock{m_mutex};
-	std::string formatted = std::vformat(message.ft.c_str(), std::make_format_args(MESSAGE));
+	std::string for_file = std::vformat(message.ft.c_str(), std::make_format_args(MESSAGE));
 
-	std::cout << formatted << std::endl;
+	Message_cout message_cout{message.msg, message.type, message.location, message.level, message.thr_id, message.ft};
+	std::string for_cout = std::vformat(message_cout.ft.c_str(), std::make_format_args(MESSAGE_COUT));
+
+	std::cout << for_cout << std::endl;
 	if (m_is_config) return;
+
+	m_file << for_file << std::endl;
 }
 
 void RealLogger::handle_fatal_error()

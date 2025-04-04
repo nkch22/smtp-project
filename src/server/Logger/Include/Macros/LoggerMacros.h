@@ -28,7 +28,7 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-#define DEFAULT_FORMAT "from: {:L} | msg: {:m}" 
+#define DEFAULT_FORMAT "{:L} | {:t} | {:m}" 
 // "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
 
 #define FUNCTION_NAME __FUNCTION__
