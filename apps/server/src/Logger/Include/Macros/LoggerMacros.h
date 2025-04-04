@@ -2,8 +2,8 @@
 #include "SharedMacros.h"
 
 /*! @file LoggerMacros.h
-*	There are every logger macros
-*/
+ *	There are every logger macros
+ */
 
 #define INNER_LOGGER_ACTION(value) buff << '(' << #value << ':' << obj.value << ')';
 #define INNER_LOGGER_LOOP(...) FOR_EACH(INNER_LOGGER_ACTION, __VA_ARGS__)
@@ -28,16 +28,43 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
+// "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+#define FORMAT_NO ""
+#define FORMAT_PROD "[{:T}]{:t}| {:m}"
+#define FORMAT_DEBUG "[{:T}]{:t}[{:l}][{:L}]| {:m}"
+#define FORMAT_TRACE "[{:i}][{:T}]{:t}[{:l}][{:L}]| {:m}"
+
+#define DEFAULT_FORMAT FORMAT_PROD
+
+#define FUNCTION_NAME __FUNCTION__
+
+#define LOGGER(NAME)                                                                                                   \
+	logger::Logger NAME                                                                                                \
+	{                                                                                                                  \
+		FUNCTION_NAME                                                                                                  \
+	}
+
+#define LOGGER_IN_INIT_LIST                                                                                               \
+	logger::Logger {FUNCTION_NAME}
+
+#define CREATE_LEVEL_NAME(NAME) LEVEL_##NAME
+
+#define CREATE_CUSTOM_LOG_LEVEL(name, format)                                                                          \
+	static logger::LogLevel CREATE_LEVEL_NAME(name){format};                                                    \
+	logger_inner::GlobalLogLevel::add(LEVEL_##name)
+
+#define GET_LOG_LEVEL(value) logger_inner::GlobalLogLevel::get(value)
+
 /*! @def INNER_LOGGER_ACTION(value)
-*	@brief Inner serialization for other macros
-*/
+ *	@brief Inner serialization for other macros
+ */
 /*! @def INNER_LOGGER_LOOP(...)
-*	@brief Inner serialization for multiple objects
-*/
+ *	@brief Inner serialization for multiple objects
+ */
 /*! @def LOGGER_GET_PRIVATE(Type)
-*	@brief Defines operator<< for generation
-*/
-/*! @def MAKE_LOGGABLE(Type, ...) 
+ *	@brief Defines operator<< for generation
+ */
+/*! @def MAKE_LOGGABLE(Type, ...)
  *	@brief Generates overloaded operator<< for given class with given members
  */
 

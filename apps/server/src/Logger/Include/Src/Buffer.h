@@ -35,7 +35,7 @@ public:
 	template<typename T>
 	Buffer& operator<<(const T&)
 	{
-		temp_wrap::wrap_warning("Can't find overloaded operator", std::source_location::current());
+		temp_wrap::wrap_warning("Can't find overloaded operator", FUNCTION_NAME);
 		return *this;
 	}
 

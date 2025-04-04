@@ -51,7 +51,7 @@ MAKE_LOGGABLE(ExampleMacros, a, b,
 
 void NoArgsNoRet()
 {
-	logger::Logger log;	  // creates logger variable
+	LOGGER(log);	  // creates logger variable
 	log.log_func_start(); // saves function start without arguments
 
 	// some logic, that not need to be logged
@@ -60,7 +60,8 @@ void NoArgsNoRet()
 }
 int ArgsRet(int a)
 {
-	logger::Logger log;
+	LOGGER(log);
+	log.set_local_level(TRACE_LOG_LEVEL);
 	log.log_arguments(a); // saves function start with a parameter (might be more parameters)
 
 	int b = a++; // some logic, that not need to be logged
@@ -71,9 +72,9 @@ int ArgsRet(int a)
 
 int LocalLevel(int a)
 {
-	logger::Logger log;
+	LOGGER(log);
 	log.set_local_level(
-		logger::LOG_LEVEL_DEBUG); // set local level to debug (no input parameters or return will be saved)
+		DEBUG_LOG_LEVEL); // set local level to debug (no input parameters or return will be saved)
 	// Global log level won't be affected
 
 	log.log_arguments(a); // because of debug log level will be replaced with log_func_start()
@@ -86,7 +87,7 @@ int LocalLevel(int a)
 
 int MessageOutput(int a, int b)
 {
-	logger::Logger log;
+	LOGGER(log);
 	log.log_arguments(a, b);
 
 	int c = 0;
@@ -111,7 +112,7 @@ int MessageOutput(int a, int b)
 
 void CustomClassOperator(ExampleOperator& obj)
 {
-	logger::Logger log;
+	LOGGER(log);
 	log.log_arguments(obj); // if you have overloaded operator, just pass it to the method
 	// any type, that is not in default buffer operators, need to have overloaded one
 	//  if dont and you want to log it, method will throw exception
@@ -121,7 +122,7 @@ void CustomClassOperator(ExampleOperator& obj)
 
 void CustomClassMacros(ExampleMacros& obj)
 {
-	logger::Logger log;
+	LOGGER(log);
 	log.log_arguments(obj); // works petty much the same as overloaded operator, but you cant make you own overloading
 
 	log.log_return_nothing();
@@ -129,7 +130,7 @@ void CustomClassMacros(ExampleMacros& obj)
 
 void ArgsWithoutLogging(int*, int b)
 {
-	logger::Logger log;
+	LOGGER(log);
 
 	log.log_arguments(b); // you choose what to save
 	// if you dont want to log any parameters, than use log_func_start()
@@ -139,7 +140,7 @@ void ArgsWithoutLogging(int*, int b)
 
 int main()
 {
-	logger::Logger::init(logger::LOG_LEVEL_TRACE); // init logger with global trace log level
+	logger::Logger::init(); // init logger with global prod log level
 	// every instance of Logger will have trace log level
 
 	NoArgsNoRet();

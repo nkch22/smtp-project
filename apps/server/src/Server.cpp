@@ -5,9 +5,8 @@
 Server::Server(std::shared_ptr<asio::io_context> io_context, 
                std::shared_ptr<asio::ssl::context> ssl_context, 
                ContextGenerator context_generator,
-               const Port port)
-    : SMTP::Server{io_context, ssl_context, context_generator, port}
-    , log{}
+               const Port port) :
+	SMTP::Server{io_context, ssl_context, context_generator, port}, log{LOGGER_IN_INIT_LIST}
 {
 }
 

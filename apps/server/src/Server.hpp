@@ -22,5 +22,5 @@ public:
     void OnAccepted() override;
 private:
     std::shared_ptr<SMTP::SSL::SessionBase> CreateSession() override;
-    logger::Logger log;
+	logger::Logger log;
 };

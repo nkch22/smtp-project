@@ -3,8 +3,12 @@
 #include "Src/Buffer.h"
 #include "Src/LoggerWrapper.h"
 #include "Src/SharedInclude.h"
+#include "Src/ThreadMap.h"
 
+namespace logger_inner
+{
 class RealLogger;
+}
 
 /*!
  *	@file Logger.h
@@ -45,13 +49,13 @@ namespace logger
  *	@warning If class doesnt have operator, but it was passed to log_return or log_arguments, then it will log warning
  *
  * @attention You can use macros instead of overloading operator<<.
- * 
+ *
  * @section macros_example Example of macros for class Test with a and b members
  *	@code
  *		class Test{
  *			const int a = 5;
  *			const double b = 7.8;
- *			
+ *
  *			LOGGER_GET_PRIVATE(Test) //Defines operator<< for class Test
  *	    }
  *		MAKE_LOGGABLE(Test, a, b) //Creates operator<< for given class and members
@@ -60,13 +64,14 @@ namespace logger
 class Logger
 {
 private:
-	RealLogger* m_real;
+	logger_inner::RealLogger* m_real;
 
 	Buffer m_buff;
 
-	const std::source_location m_location;
+	const std::string m_location;
 
-	LogLevels m_local_level;
+	LogLevel m_local_level;
+	Format m_local_format;
 
 	template<typename T>
 	void log_argument(const T& value)
@@ -81,7 +86,7 @@ public:
 	Logger(Logger&&) = delete;
 	void operator=(const Logger&) = delete;
 
-	Logger(const std::source_location location = std::source_location::current());
+	Logger(const char*);
 	/*! @fn Logger(const std::source_location location = std::source_location::current())
 	 *	@brief Default constructor
 	 *
@@ -95,16 +100,9 @@ public:
 	 *	Trivial destructor
 	 */
 
-	static void destroy();
-	/*! @fn destroy()
-	 *	@brief Destroy method
-	 *
-	 *	Destroys global values
-	 */
-
-	static bool init(const LogLevels level = DEFAULT_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
-					 const bool do_flush = DEFAULT_FLUSH);
+	static bool init(const LogLevel level = DEFAULT_LOG_LEVEL, const std::string& save_path = DEFAULT_PATH,
+					 const unsigned int amount = DEFAULT_AMOUNT,
+					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
 	 *
@@ -148,7 +146,7 @@ public:
 	 *   Saves message with information flag
 	 */
 
-	static void set_global_level(const LogLevels);
+	static void set_global_level(const LogLevel);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
@@ -157,7 +155,7 @@ public:
 	 *  @warning local log level has more priority than global one
 	 */
 
-	LogLevels get_global_level() const;
+	const LogLevel& get_global_level() const;
 	/*! @fn get_global_level()
 	 *	@brief Global log level getter
 	 *
@@ -167,10 +165,10 @@ public:
 	template<typename T>
 	void log_return(const T& value)
 	{
-		if (m_local_level == LOG_LEVEL_TRACE)
+		if (m_local_level.get_level() == 3)
 		{
 			m_buff << value;
-			temp_wrap::wrap_return(m_buff.get(), m_location, m_local_level);
+			temp_wrap::wrap_return(m_buff.get(), m_location, m_local_level, m_local_format);
 			m_buff.clear();
 		}
 		else
@@ -195,7 +193,7 @@ public:
 	template<typename T, typename... Args>
 	void log_arguments(const T& first, Args&... args)
 	{
-		if (m_local_level == LOG_LEVEL_TRACE)
+		if (m_local_level.get_level() == 3)
 		{
 			log_argument(first);
 			log_arguments(std::forward<Args>(args)...);
@@ -219,7 +217,7 @@ public:
 		It saves message that function has successfully started
 	*/
 
-	void set_local_level(const LogLevels);
+	void set_local_level(const LogLevel);
 	/*! @fn set_local_level(const LogLevels&)
 	 *	@brief Local log level setter
 	 *
@@ -228,12 +226,15 @@ public:
 	 *   @warning local log level has more priority than global one
 	 */
 
-	LogLevels get_local_level() const;
+	const LogLevel& get_local_level() const;
 	/*! @fn get_local_level()
 	 *  @brief Local log level getter
 	 *
 	 *  @return Local log level value
 	 */
+
+	void set_local_format(const Format&);
+	const Format& get_local_format() const;
 
 	static void stop_config();
 	/*! @fn stop_config()
@@ -254,8 +255,8 @@ public:
 
 	static std::string get_output_path();
 	/*! @fn get_output_path()
-	*	@brief Output path getter
-	*/
+	 *	@brief Output path getter
+	 */
 
 	static void set_flush(const bool);
 	/*! @fn set_flush(const bool&)
