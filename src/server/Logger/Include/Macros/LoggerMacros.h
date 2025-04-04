@@ -28,8 +28,13 @@
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
 
-#define DEFAULT_FORMAT "{:L} | {:t} | {:m}" 
 // "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+#define FORMAT_NO ""
+#define FORMAT_PROD "[{:T}]{:t}| {:m}"
+#define FORMAT_DEBUG "[{:T}]{:t}[{:l}][{:L}]| {:m}"
+#define FORMAT_TRACE "[{:i}][{:T}]{:t}[{:l}][{:L}]| {:m}"
+
+#define DEFAULT_FORMAT FORMAT_PROD
 
 #define FUNCTION_NAME __FUNCTION__
 

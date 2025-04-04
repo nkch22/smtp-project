@@ -101,7 +101,7 @@ public:
 	 */
 
 	static bool init(const LogLevel level = DEFAULT_LOG_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const Format& = DEFAULT_FORMAT, const unsigned int amount = DEFAULT_AMOUNT,
+					 const unsigned int amount = DEFAULT_AMOUNT,
 					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
 	 *  @brief Singleton initialization method
@@ -265,7 +265,5 @@ public:
 	 *	@attention If flush was set to false, logger won't store any log messages
 	 */
 
-	static void set_global_format(const Format&);
-	static const Format& get_global_format();
 };
 } // namespace logger

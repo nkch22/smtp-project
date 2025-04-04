@@ -51,10 +51,10 @@ const bool LogLevel::operator==(const LogLevel& obj) const
 // Global log levels
 using namespace logger_inner;
 
-GlobalLogLevel::inner_map GlobalLogLevel::m_levels_map{{"NO", LogLevel{"NO", DEFAULT_FORMAT, 0}},
-													   {"PROD", LogLevel{"PROD", DEFAULT_FORMAT, 1}},
-													   {"DEBUG", LogLevel{"DEBUG", DEFAULT_FORMAT, 2}},
-													   {"TRACE", LogLevel{"TRACE", DEFAULT_FORMAT, 3}}};
+GlobalLogLevel::inner_map GlobalLogLevel::m_levels_map{{"NO", LogLevel{"NO", FORMAT_NO, 0}},
+													   {"PROD", LogLevel{"PROD", FORMAT_PROD, 1}},
+													   {"DEBUG", LogLevel{"DEBUG", FORMAT_DEBUG, 2}},
+													   {"TRACE", LogLevel{"TRACE", FORMAT_TRACE, 3}}};
 
 void GlobalLogLevel::add(LogLevel& lv)
 {

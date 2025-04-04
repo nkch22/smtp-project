@@ -7,12 +7,12 @@ using namespace logger_inner;
 
 Logger::Logger(const char* loc) :
 	m_real{RealLogger::get_instance()}, m_location{loc}, m_local_level{m_real->real_get_level()},
-	m_local_format{m_real->get_global_format()} {};
+	m_local_format{m_local_level.get_format()} {};
 
-bool Logger::init(const LogLevel level, const std::string& save_path, const Format& ft, const unsigned int amount,
+bool Logger::init(const LogLevel level, const std::string& save_path, const unsigned int amount,
 				  const bool is_config, const bool do_flush)
 {
-	RealLogger* real = RealLogger::get_instance(level, save_path, ft, amount, is_config, do_flush);
+	RealLogger* real = RealLogger::get_instance(level, save_path,  amount, is_config, do_flush);
 	bool result = real != nullptr;
 
 	if (result)
@@ -69,6 +69,7 @@ void Logger::log_arguments()
 void Logger::set_local_level(const LogLevel level)
 {
 	m_local_level = level;
+	m_local_format = m_local_level.get_format();
 }
 
 const LogLevel& Logger::get_local_level() const
@@ -104,14 +105,4 @@ std::string Logger::get_output_path()
 void Logger::set_flush(const bool value)
 {
 	RealLogger::get_instance()->real_set_flush(value);
-}
-
-void Logger::set_global_format(const Format& ft)
-{
-	RealLogger::get_instance()->set_global_format(ft);
-}
-
-const Format& Logger::get_global_format()
-{
-	return RealLogger::get_instance()->get_global_format();
 }

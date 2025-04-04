@@ -10,10 +10,9 @@ using namespace logger;
 
 RealLogger* RealLogger::m_instance = nullptr;
 
-RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const Format& ft, const unsigned int amount,
+RealLogger::RealLogger(const LogLevel _level, const std::string& _save, const unsigned int amount,
 					   const bool is_config, const bool do_flush) :
-	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount},
-	m_global_format{ft}
+	m_level{_level}, m_output_path{_save}, m_end{false}, m_do_flush{do_flush}, m_is_config{is_config}, m_amount{amount}
 {
 	if (m_amount < 1)
 	{
@@ -95,12 +94,12 @@ void RealLogger::file_init(const unsigned int amount)
 					  m_global_format, std::this_thread::get_id());
 }
 
-RealLogger* RealLogger::get_instance(const LogLevel level, const std::string& path, const Format& ft,
+RealLogger* RealLogger::get_instance(const LogLevel level, const std::string& path,
 									 const unsigned int amount, const bool is_config, const bool do_flush)
 {
 	if (m_instance == nullptr)
 	{
-		m_instance = new RealLogger{level, path, ft, amount, is_config, do_flush};
+		m_instance = new RealLogger{level, path, amount, is_config, do_flush};
 
 		atexit([] { destroy(); });
 		std::set_terminate(handle_fatal_error);

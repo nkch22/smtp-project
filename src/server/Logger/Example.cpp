@@ -61,6 +61,7 @@ void NoArgsNoRet()
 int ArgsRet(int a)
 {
 	LOGGER(log);
+	log.set_local_level(TRACE_LOG_LEVEL);
 	log.log_arguments(a); // saves function start with a parameter (might be more parameters)
 
 	int b = a++; // some logic, that not need to be logged
@@ -139,7 +140,7 @@ void ArgsWithoutLogging(int*, int b)
 
 int main()
 {
-	logger::Logger::init(TRACE_LOG_LEVEL ); // init logger with global trace log level
+	logger::Logger::init(); // init logger with global prod log level
 	// every instance of Logger will have trace log level
 
 	NoArgsNoRet();
