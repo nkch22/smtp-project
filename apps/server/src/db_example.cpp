@@ -6,7 +6,7 @@
 int main() {
     std::string cs = "postgresql://postgres:aerosmith@localhost:5432/smtp";
 
-    SMTP::Database::Database db(cs);
+    Database db(cs);
 
     std::cout<<"db created\n";
 
