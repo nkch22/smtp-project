@@ -146,6 +146,8 @@ public:
 	 *   Saves message with information flag
 	 */
 
+	void log_any(const std::string&, const logger_inner::MessageType&);
+
 	static void set_global_level(const LogLevel);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter

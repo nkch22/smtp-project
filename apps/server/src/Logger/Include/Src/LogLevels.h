@@ -3,15 +3,6 @@
 
 #include "SharedInclude.h"
 
-#define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get(0)
-#define PROD_LOG_LEVEL logger_inner::GlobalLogLevel::get(1)
-#define DEBUG_LOG_LEVEL logger_inner::GlobalLogLevel::get(2)
-#define TRACE_LOG_LEVEL logger_inner::GlobalLogLevel::get(3)
-
-#define DEFAULT_LOG_LEVEL PROD_LOG_LEVEL
-
-#define INNER_DEFAULT_LEVEL -1
-
 namespace logger
 {
 using Format = std::string;

@@ -1,6 +1,7 @@
 #pragma once
 #include <format>
 
+#include "MessageType.h"
 #include "SharedInclude.h"
 
 namespace logger_inner
@@ -10,7 +11,7 @@ using logger::Format;
 struct Message
 {
 	std::string msg;
-	logger::MessageTypes type;
+	logger_inner::MessageType type;
 	std::string location;
 	logger::LogLevel level;
 	std::string thr_id;
@@ -20,7 +21,7 @@ struct Message
 struct Message_cout
 {
 	std::string msg;
-	logger::MessageTypes type;
+	logger_inner::MessageType type;
 	std::string location;
 	logger::LogLevel level;
 	std::string thr_id;
@@ -74,21 +75,7 @@ public:
 
 		if (thr_id) formatted += obj.thr_id;
 		if (time) formatted += std::format("{:%H.%M.%S-%d.%m.%y}", std::chrono::system_clock::now());
-		if (type)
-		{
-			switch (obj.type)
-			{
-			case logger::ERROR:
-				formatted += " E ";
-				break;
-			case logger::WARNING:
-				formatted += " W ";
-				break;
-			case logger::INFORMATION:
-				formatted += " I ";
-				break;
-			}
-		}
+		if (type) formatted += obj.type.get_name();
 		if (level) formatted += std::to_string(obj.level.get_level());
 		if (location) formatted += obj.location;
 		if (text) formatted += obj.msg;
@@ -101,28 +88,13 @@ template<>
 class std::formatter<logger_inner::Message_cout> : public std::formatter<logger_inner::Message>
 {
 public:
-
 	auto format(const logger_inner::Message_cout& obj, auto& context) const
 	{
 		std::string formatted{DEFAULT_COLOR};
 
 		if (thr_id) formatted += obj.thr_id;
 		if (time) formatted += std::format("{:%H.%M.%S-%d.%m.%y}", std::chrono::system_clock::now());
-		if (type)
-		{
-			switch (obj.type)
-			{
-			case logger::ERROR:
-				formatted += ERROR_COLOR " E " DEFAULT_COLOR;
-				break;
-			case logger::WARNING:
-				formatted += WARNING_COLOR " W " DEFAULT_COLOR;
-				break;
-			case logger::INFORMATION:
-				formatted += INFORMATION_COLOR " I " DEFAULT_COLOR;
-				break;
-			}
-		}
+		if (type) formatted += obj.type.get_color() + obj.type.get_name() + DEFAULT_COLOR;
 		if (level) formatted += std::to_string(obj.level.get_level());
 		if (location) formatted += obj.location;
 		if (text) formatted += obj.msg;

@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <source_location>
-#include "Enums.h"
 #include "LogLevels.h"
 
 namespace temp_wrap

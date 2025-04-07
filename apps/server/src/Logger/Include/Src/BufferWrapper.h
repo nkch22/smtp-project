@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <source_location>
-#include "Enums.h"
 
 namespace temp_wrap
 {

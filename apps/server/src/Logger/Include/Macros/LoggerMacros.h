@@ -17,16 +17,24 @@
 		return buff;                                                                                                   \
 	}
 
-#define DEFAULT_LEVEL logger::LOG_LEVEL_PROD
 #define DEFAULT_AMOUNT 30
 #define DEFAULT_PATH ""
 #define DEFAULT_CONFIG false
 #define DEFAULT_FLUSH true
 
-#define DEFAULT_COLOR "\033[0m"
 #define ERROR_COLOR "\033[41m"
 #define WARNING_COLOR "\033[43m"
 #define INFORMATION_COLOR "\033[42m"
+#define DEFAULT_COLOR "\033[0m"
+
+#define NO_LOG_LEVEL logger_inner::GlobalLogLevel::get(0)
+#define PROD_LOG_LEVEL logger_inner::GlobalLogLevel::get(1)
+#define DEBUG_LOG_LEVEL logger_inner::GlobalLogLevel::get(2)
+#define TRACE_LOG_LEVEL logger_inner::GlobalLogLevel::get(3)
+
+#define DEFAULT_LOG_LEVEL PROD_LOG_LEVEL
+
+#define INNER_DEFAULT_LEVEL -1
 
 // "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
 #define FORMAT_NO ""
@@ -43,17 +51,23 @@
 	{                                                                                                                  \
 		FUNCTION_NAME                                                                                                  \
 	}
+#define LOGGER_IN_INIT_LIST                                                                                            \
+	logger::Logger                                                                                                     \
+	{                                                                                                                  \
+		FUNCTION_NAME                                                                                                  \
+	}
 
-#define LOGGER_IN_INIT_LIST                                                                                               \
-	logger::Logger {FUNCTION_NAME}
-
-#define CREATE_LEVEL_NAME(NAME) LEVEL_##NAME
-
-#define CREATE_CUSTOM_LOG_LEVEL(name, format)                                                                          \
-	static logger::LogLevel CREATE_LEVEL_NAME(name){format};                                                    \
+#define CREATE_LOG_LEVEL(name, format)                                                                                 \
+	static logger::LogLevel name{format};                                                                              \
 	logger_inner::GlobalLogLevel::add(LEVEL_##name)
 
 #define GET_LOG_LEVEL(value) logger_inner::GlobalLogLevel::get(value)
+
+#define CREATE_TYPE(name, short_name, color)                                                                           \
+	static logger_inner::MessageType name                                                                              \
+	{                                                                                                                  \
+		short_name, color                                                                                              \
+	}
 
 /*! @def INNER_LOGGER_ACTION(value)
  *	@brief Inner serialization for other macros

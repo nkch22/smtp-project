@@ -16,7 +16,7 @@
 #include <queue>
 #include <string>
 
-#include "Enums.h"
+#include "MessageType.h"
 #include "../Macros/LoggerMacros.h"
 
 #include "LogLevels.h"

@@ -2,6 +2,7 @@
 
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
 #include "MessageFormatter.h"
+#include "MessageType.h"
 #include "SharedInclude.h"
 #include "ThreadMap.h"
 
@@ -51,7 +52,7 @@ public:
 
 	static void destroy();
 
-	void save_to_queue(const std::string&, const logger::MessageTypes, const std::string&, const logger::LogLevel&,
+	void save_to_queue(const std::string&, const logger_inner::MessageType&, const std::string&, const logger::LogLevel&,
 					   const Format&, std::thread::id id = std::this_thread::get_id());
 
 	void real_set_level(const logger::LogLevel&);
