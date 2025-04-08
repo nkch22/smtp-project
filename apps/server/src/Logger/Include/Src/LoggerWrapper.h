@@ -1,8 +1,13 @@
 #pragma once
 #include <string>
 #include <source_location>
-#include "Enums.h"
 #include "LogLevels.h"
+
+/*!
+ *	@file LoggerWrapper.h
+ *	@brief File, to avoid circular includes
+ *
+ */
 
 namespace temp_wrap
 {

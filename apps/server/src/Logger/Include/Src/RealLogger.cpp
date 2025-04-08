@@ -16,7 +16,7 @@ RealLogger::RealLogger(const LogLevel& _level, const std::string& _save, const u
 {
 	if (m_amount < 1)
 	{
-		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", WARNING, FUNCTION_NAME,
+		save_to_queue("logs amount cannot be less than 1, Default value will be used instead", warning, FUNCTION_NAME,
 					  m_level, m_level.get_format(), std::this_thread::get_id());
 		m_amount = DEFAULT_AMOUNT;
 	}
@@ -90,7 +90,7 @@ void RealLogger::file_init(const unsigned int amount)
 	m_output_path = buff_name;
 
 	if (error)
-		save_to_queue("invalid output path, default will be used", WARNING, FUNCTION_NAME, m_level,
+		save_to_queue("invalid output path, default will be used", warning, FUNCTION_NAME, m_level,
 					  m_level.get_format(), std::this_thread::get_id());
 }
 
@@ -111,7 +111,7 @@ void RealLogger::destroy()
 {
 	if (m_instance == nullptr) return;
 
-	m_instance->save_to_queue("logger is destroyed", INFORMATION, FUNCTION_NAME, m_instance->real_get_level(),
+	m_instance->save_to_queue("logger is destroyed", info, FUNCTION_NAME, m_instance->real_get_level(),
 							  m_instance->m_level.get_format(), std::thread::id{});
 
 	{
@@ -126,7 +126,7 @@ void RealLogger::destroy()
 	m_instance = nullptr;
 }
 
-void RealLogger::save_to_queue(const std::string& str, const MessageTypes type, const std::string& location,
+void RealLogger::save_to_queue(const std::string& str, const MessageType& type, const std::string& location,
 							   const LogLevel& level, const Format& ft, std::thread::id id)
 {
 	if (!m_do_flush || level.get_level() == 0) return;
@@ -172,7 +172,7 @@ void RealLogger::handle_fatal_error()
 	{
 		std::string str{"Fatal error: "};
 		str += ex.what();
-		buff->save_to_queue(str, ERROR, FUNCTION_NAME, buff->real_get_level(), buff->m_level.get_format(),
+		buff->save_to_queue(str, error, FUNCTION_NAME, buff->real_get_level(), buff->m_level.get_format(),
 							std::thread::id{});
 	}
 

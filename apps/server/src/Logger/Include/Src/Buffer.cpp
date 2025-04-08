@@ -9,8 +9,6 @@ Buffer::Buffer(const Buffer& obj) : m_real_buff{obj.m_real_buff} {};
 Buffer::Buffer() : Buffer{""} {}
 Buffer::Buffer(const std::string& str) : m_real_buff{str} {}
 
-Buffer::~Buffer() {}
-
 std::string Buffer::get() const
 {
 	return m_real_buff;

@@ -9,6 +9,7 @@ Logger::Logger(const char* loc) :
 	m_real{RealLogger::get_instance()}, m_location{loc}, m_local_level{m_real->real_get_level()},
 	m_local_format{m_local_level.get_format()} {};
 
+
 bool Logger::init(const LogLevel level, const std::string& save_path, const unsigned int amount,
 				  const bool is_config, const bool do_flush)
 {
@@ -26,17 +27,21 @@ bool Logger::init(const LogLevel level, const std::string& save_path, const unsi
 
 void Logger::log_error(const std::string& msg)
 {
-	m_real->save_to_queue(msg, ERROR, m_location, m_local_level, m_local_format);
+	m_real->save_to_queue(msg, error, m_location, m_local_level, m_local_format);
 }
 
 void Logger::log_warning(const std::string& msg)
 {
-	m_real->save_to_queue(msg, WARNING, m_location, m_local_level, m_local_format);
+	m_real->save_to_queue(msg, warning, m_location, m_local_level, m_local_format);
 }
 
 void Logger::log_message(const std::string& msg)
 {
-	m_real->save_to_queue(msg, INFORMATION, m_location, m_local_level, m_local_format);
+	m_real->save_to_queue(msg, info, m_location, m_local_level, m_local_format);
+}
+
+void Logger::log_any(const std::string& msg, const MessageType& type) {
+	m_real->save_to_queue(msg, type, m_location, m_local_level, m_local_format);
 }
 
 void Logger::set_global_level(const LogLevel _level)
@@ -51,18 +56,18 @@ const LogLevel& Logger::get_global_level() const
 void Logger::log_return_nothing()
 {
 	if (m_local_level.get_level() >= 2)
-		m_real->save_to_queue("successfully executed", INFORMATION, m_location, m_local_level, m_local_format);
+		m_real->save_to_queue("successfully executed", info, m_location, m_local_level, m_local_format);
 }
 
 void Logger::log_func_start()
 {
 	if (m_local_level.get_level() >= 2)
-		m_real->save_to_queue("started", INFORMATION, m_location, m_local_level, m_local_format);
+		m_real->save_to_queue("started", info, m_location, m_local_level, m_local_format);
 }
 
 void Logger::log_arguments()
 {
-	m_real->save_to_queue({"arguments: " + m_buff.get()}, INFORMATION, m_location, m_local_level, m_local_format);
+	m_real->save_to_queue({"arguments: " + m_buff.get()}, info, m_location, m_local_level, m_local_format);
 	m_buff.clear();
 }
 

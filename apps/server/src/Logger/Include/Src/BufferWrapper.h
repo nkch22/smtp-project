@@ -1,7 +1,12 @@
 #pragma once
 #include <string>
 #include <source_location>
-#include "Enums.h"
+
+/*!
+ *	@file BufferWrapper.h
+ *	@brief File, to avoid circular includes
+ *
+ */
 
 namespace temp_wrap
 {
