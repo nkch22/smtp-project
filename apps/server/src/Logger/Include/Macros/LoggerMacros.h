@@ -2,7 +2,20 @@
 #include "SharedMacros.h"
 
 /*! @file LoggerMacros.h
- *	There are every logger macros
+ *	@brief There are every logger macros
+ *	
+ *	This file contains every logger macros
+ *	
+ *	About format keys:
+ * 
+ *		{:i} - thread id
+ *		{:T} - time
+ *		{:t} - message type (error, warning etc)
+ *		{:l} - log level
+ *		{:L} - location (function or method name)
+ *		{:m} - given message text
+ * 
+ *
  */
 
 #define INNER_LOGGER_ACTION(value) buff << '(' << #value << ':' << obj.value << ')';
@@ -36,7 +49,7 @@
 
 #define INNER_DEFAULT_LEVEL -1
 
-// "[{:i}] [{:T}] {:t} [{:l}] [{:L}] [{:m}]"
+
 #define FORMAT_NO ""
 #define FORMAT_PROD "[{:T}]{:t}| {:m}"
 #define FORMAT_DEBUG "[{:T}]{:t}[{:l}][{:L}]| {:m}"
