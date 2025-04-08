@@ -82,9 +82,6 @@
  *	@brief Generates overloaded operator<< for given class with given members
  */
 
-/*! @def DEFAULT_LEVEL
- *	@brief Default log level
- */
 /*! @def DEFAULT_AMOUNT
  *	@brief Default logs amount
  */
@@ -109,4 +106,73 @@
  */
 /*! @def INFORMATION_COLOR
  *	@brief Information console color
+ */
+
+/*! @def NO_LOG_LEVEL
+ *	@brief No log level getter
+ */
+/*! @def PROD_LOG_LEVEL
+ *	@brief Production log level getter
+ */
+/*! @def DEBUG_LOG_LEVEL
+ *	@brief Debug log level getter
+ */
+/*! @def TRACE_LOG_LEVEL
+ *	@brief Trace log level getter
+ */
+/*! @def DEFAULT_LOG_LEVEL
+ *	@brief Default log level
+ */
+
+/*! @def INNER_DEFAULT_LEVEL
+ *	@brief Default int level (for inner logger use only)
+ */
+
+/*! @def FORMAT_NO
+ *	@brief Format for no log level
+ */
+/*! @def FORMAT_PROD
+ *	@brief Format for prod log level
+ */
+/*! @def FORMAT_DEBUG
+ *	@brief Format for debug log level
+ */
+/*! @def FORMAT_TRACE
+ *	@brief Format for trace log level
+ */
+/*! @def DEFAULT_FORMAT
+ *	@brief Default format for logger (by default - prod)
+ */
+
+/*! @def FUNCTION_NAME
+ *	@brief Alias for function name getter
+ */
+
+/*! @def LOGGER(NAME)
+ *	@brief In method (or function) logger creator
+ * 
+ *  Creates instance of logger with given @a name
+ */
+/*!@def LOGGER_IN_INIT_LIST
+ *	@brief In initialization list logger creator
+ * */
+
+/*! @def CREATE_LOG_LEVEL(name, format)
+ *	@brief Custom log level creator
+ * 
+ *	Creates static LogLevel instance with given @a name and @a format
+ * 
+ *	Makes registration in log levels map after creation
+ */
+
+/*! @def GET_LOG_LEVEL(value)
+ *	@brief Log level getter
+ *	
+ *	@return stored log level from map with given key
+ */
+
+/*! @def CREATE_TYPE(name, short_name, color)
+ *	@brief Custom message type creator
+ *
+ *	Creates static MessageType instance with given @a name, in log @a short_name and @a color
  */
