@@ -1,7 +1,7 @@
 #include "Include/Logger.h"
 
 int main() {
-	logger::Logger::init(TRACE_LOG_LEVEL, DEFAULT_PATH, DEFAULT_FORMAT ,DEFAULT_AMOUNT, true);
+	logger::Logger::init(TRACE_LOG_LEVEL, DEFAULT_PATH ,DEFAULT_AMOUNT, true);
 	//set config flag to true
 	//it prevents logger from writing logs into file, because file is not initialized yet
 

@@ -72,7 +72,7 @@
 
 #define CREATE_LOG_LEVEL(name, format)                                                                                 \
 	static logger::LogLevel name{format};                                                                              \
-	logger_inner::GlobalLogLevel::add(LEVEL_##name)
+	logger_inner::GlobalLogLevel::add(name)
 
 #define GET_LOG_LEVEL(value) logger_inner::GlobalLogLevel::get(value)
 
