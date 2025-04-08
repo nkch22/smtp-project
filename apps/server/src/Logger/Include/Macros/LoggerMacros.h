@@ -79,7 +79,9 @@
  *	@brief Defines operator<< for generation
  */
 /*! @def MAKE_LOGGABLE(Type, ...)
- *	@brief Generates overloaded operator<< for given class with given members
+ *	@brief Overloaded serialization operator generator
+ * 
+ *	Generates overloaded operator<< for given class with given members
  */
 
 /*! @def DEFAULT_AMOUNT

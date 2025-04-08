@@ -87,7 +87,7 @@ public:
 	void operator=(const Logger&) = delete;
 
 	Logger(const char*);
-	/*! @fn Logger(const std::source_location location = std::source_location::current())
+	/*! @fn Logger(const char*)
 	 *	@brief Default constructor
 	 *
 	 *	It stores location where it was created
@@ -95,21 +95,15 @@ public:
 
 	~Logger() = default;
 	/*! @fn ~Logger()
-	 *	@brief Default destructor
-	 *
-	 *	Trivial destructor
+	 *	@brief Trivial destructor
 	 */
 
-	static bool init(const LogLevel level = DEFAULT_LOG_LEVEL, const std::string& save_path = DEFAULT_PATH,
-					 const unsigned int amount = DEFAULT_AMOUNT,
-					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
-	/*! @fn init(const unsigned short& level, const std::string& save_path, const unsigned int& amount)
-	 *  @brief Singleton initialization method
+	/*! @brief Singleton initialization method
 	 *
-	 *	@important @a level - is global log level on start, default value = 1
+	 *	@important @a level - is global log level on start, default value = PROD_LOG_LEVEL
 	 *	@important @a save_path - is path to output directory,	default value = ""
 	 *	@important @a amount - is amount of how many logs can be in log folder, default value = 30
-	 *	@important @a is_config - is flag to stop printing messages to console and file, default value = false
+	 *	@important @a is_config - is flag to stop printing messages and delay file creation, default value = false
 	 *	@important @a do_flush - is flag to stop storing any messages (if set to false), default value = true
 	 *
 	 *	It will save message of successful initialization
@@ -122,6 +116,9 @@ public:
 	 *
 	 *	@return initialization state (true or false)
 	 */
+	static bool init(const LogLevel level = DEFAULT_LOG_LEVEL, const std::string& save_path = DEFAULT_PATH,
+					 const unsigned int amount = DEFAULT_AMOUNT,
+					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 
 	void log_error(const std::string&);
 	/*! @fn log_error(const std::string&)
@@ -146,13 +143,17 @@ public:
 	 *   Saves message with information flag
 	 */
 
+	/*! @brief It saves text
+	 *   Saves message with given flag
+	 */
 	void log_any(const std::string&, const logger_inner::MessageType&);
+	
 
 	static void set_global_level(const LogLevel);
 	/*! @fn set_global_level(const LogLevels&)
 	 *	@brief Global log level setter
 	 *
-	 *	It checks value to be valid log level, and then set global log level to that value
+	 *  Sets global log level to that value
 	 *
 	 *  @warning local log level has more priority than global one
 	 */
@@ -235,7 +236,9 @@ public:
 	 *  @return Local log level value
 	 */
 
+	/*! @brief Local format setter*/
 	void set_local_format(const Format&);
+	/*! @brief Local format getter*/
 	const Format& get_local_format() const;
 
 	static void stop_config();

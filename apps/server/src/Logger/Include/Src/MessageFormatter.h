@@ -4,9 +4,19 @@
 #include "MessageType.h"
 #include "SharedInclude.h"
 
+/*! @file MessageFormatter.h
+* @brief File, that formats and declares messages
+*/
+
 namespace logger_inner
 {
 using logger::Format;
+
+/*! @struct Message
+*	@brief Logger message
+* 
+*	It is used to store everything that is needed to flush and format message
+*/
 
 struct Message
 {
@@ -17,6 +27,12 @@ struct Message
 	std::string thr_id;
 	Format ft;
 };
+
+/*! @struct Message_cout
+ *	@brief Logger message for cout
+ *
+ *	It is used to flush and format message for cout
+ */
 
 struct Message_cout
 {

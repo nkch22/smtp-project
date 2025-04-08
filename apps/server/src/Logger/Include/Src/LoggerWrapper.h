@@ -3,6 +3,12 @@
 #include <source_location>
 #include "LogLevels.h"
 
+/*!
+ *	@file LoggerWrapper.h
+ *	@brief File, to avoid circular includes
+ *
+ */
+
 namespace temp_wrap
 {
 

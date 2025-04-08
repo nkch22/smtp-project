@@ -2,6 +2,12 @@
 #include <string>
 #include <source_location>
 
+/*!
+ *	@file BufferWrapper.h
+ *	@brief File, to avoid circular includes
+ *
+ */
+
 namespace temp_wrap
 {
 

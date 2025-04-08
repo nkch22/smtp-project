@@ -20,3 +20,7 @@
 #include "../Macros/LoggerMacros.h"
 
 #include "LogLevels.h"
+
+/*! @file SharedInclude.h
+*	@brief Common includes in logger module
+*/
