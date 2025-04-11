@@ -11,7 +11,7 @@
 
 MessageRepoPq::MessageRepoPq(std::string connection_str): conn(connection_str) {}
 
-bool MessageRepoPq::CreateMessage(Message msg) {
+bool MessageRepoPq::CreateMessage(const Message& msg) {
     pqxx::work tx{conn};
     std::string query_str = MessageQueryString::insert_message(msg);
     try {
@@ -37,7 +37,7 @@ std::vector<std::optional<Message>> MessageRepoPq::GetMessages() {
     return messages;
 }
 
-std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(User user) {
+std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(const User& user) {
     //this function only checks if id is valid
     pqxx::work tx{conn};
     auto check = tx.exec(UserQueryString::select_by_id(user.id));
@@ -55,7 +55,7 @@ std::vector<std::optional<Message>> MessageRepoPq::GetMessagesFrom(User user) {
     return messages;
 }
 
-std::vector<std::optional<Message>> MessageRepoPq::GetMessagesTo(User user) {
+std::vector<std::optional<Message>> MessageRepoPq::GetMessagesTo(const User& user) {
     //this function only checks if id is valid
     pqxx::work tx{conn};
     auto check = tx.exec(UserQueryString::select_by_id(user.id));
