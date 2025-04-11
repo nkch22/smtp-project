@@ -8,7 +8,7 @@
 
 namespace MessageQueryString {
     std::string insert_message(Message message) {
-        return "insert into messages(sender, recipient, content) values ("+std::to_string(message.from.id) + ", "+std::to_string(message.to.id)+", "+message.content+")";
+        return "insert into messages(sender, recipient, content) values ("+std::to_string(message.from.id) + ", "+std::to_string(message.to.id)+", '"+message.content+"')";
     }
 
     std::string select_messages() {
