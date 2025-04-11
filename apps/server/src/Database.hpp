@@ -27,8 +27,8 @@ public:
     bool RemoveUser(const IUser& user) override;
 
     bool CreateMail(const IMail& message) override;
-    std::vector<std::optional<IMail*>> GetReceivedMails(const IUser& user);
-    std::vector<std::optional<IMail*>> GetSentMails(const IUser& user);
+    std::vector<std::optional<IMail*>> GetReceivedMails(const IUser& user) override;
+    std::vector<std::optional<IMail*>> GetSentMails(const IUser& user) override;
 private:
     std::shared_ptr<UserRepo> users;
     std::shared_ptr<MessageRepo> mails;
