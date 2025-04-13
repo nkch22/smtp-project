@@ -29,17 +29,17 @@ bool Logger::init(const LogLevel level, const std::string& save_path, const unsi
 	return result;
 }
 
-constexpr void Logger::log_error(const std::string& msg)
+void Logger::log_error(const std::string& msg)
 {
 	m_real->save_to_queue(msg, error, m_location, m_local_level, m_local_format);
 }
 
-constexpr void Logger::log_warning(const std::string& msg)
+void Logger::log_warning(const std::string& msg)
 {
 	m_real->save_to_queue(msg, warning, m_location, m_local_level, m_local_format);
 }
 
-constexpr void Logger::log_message(const std::string& msg)
+void Logger::log_message(const std::string& msg)
 {
 	m_real->save_to_queue(msg, info, m_location, m_local_level, m_local_format);
 }

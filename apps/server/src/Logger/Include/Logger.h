@@ -126,7 +126,7 @@ public:
 					 const unsigned int amount = DEFAULT_AMOUNT,
 					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 
-	constexpr void log_error(const std::string&);
+	void log_error(const std::string&);
 	/*! @fn log_error(const std::string&)
 	 *	@brief It saves error
 	 *
@@ -135,14 +135,14 @@ public:
 	 *	@attention It won`t stop function execution!
 	 */
 
-	constexpr void log_warning(const std::string&);
+	void log_warning(const std::string&);
 	/*! @fn log_warning(const std::string&)
 	 *  @brief It saves warning
 	 *
 	 *  Saves message with warning flag
 	 */
 
-	constexpr void log_message(const std::string&);
+	void log_message(const std::string&);
 	/*! @fn log_message(const std::string&)
 	 *  @brief It saves message
 	 *

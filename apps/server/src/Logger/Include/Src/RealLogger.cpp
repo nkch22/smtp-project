@@ -130,7 +130,9 @@ void RealLogger::destroy()
 void RealLogger::save_to_queue(const std::string& str, const MessageType& type, const std::string& location,
 							   const LogLevel& level, const Format& ft, std::thread::id id)
 {
-	if (!m_do_flush || level.get_level() == 0 || m_instance == nullptr) return;
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
+	if (!m_do_flush || level.get_level() == 0) return;
 
 	m_thr_map.add(id);
 	m_queue.Push(Message{str, type, location, level, m_thr_map.get(id), ft});
