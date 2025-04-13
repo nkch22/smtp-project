@@ -10,6 +10,10 @@ Logger::Logger(const char* loc) :
 	m_local_format{m_local_level.get_format()} {};
 
 
+void Logger::destroy() {
+	RealLogger::destroy();
+}
+
 bool Logger::init(const LogLevel level, const std::string& save_path, const unsigned int amount,
 				  const bool is_config, const bool do_flush)
 {
@@ -25,17 +29,17 @@ bool Logger::init(const LogLevel level, const std::string& save_path, const unsi
 	return result;
 }
 
-void Logger::log_error(const std::string& msg)
+constexpr void Logger::log_error(const std::string& msg)
 {
 	m_real->save_to_queue(msg, error, m_location, m_local_level, m_local_format);
 }
 
-void Logger::log_warning(const std::string& msg)
+constexpr void Logger::log_warning(const std::string& msg)
 {
 	m_real->save_to_queue(msg, warning, m_location, m_local_level, m_local_format);
 }
 
-void Logger::log_message(const std::string& msg)
+constexpr void Logger::log_message(const std::string& msg)
 {
 	m_real->save_to_queue(msg, info, m_location, m_local_level, m_local_format);
 }

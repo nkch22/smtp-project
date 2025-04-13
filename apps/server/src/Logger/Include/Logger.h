@@ -98,6 +98,11 @@ public:
 	 *	@brief Trivial destructor
 	 */
 
+	/*! @brief Singleton destroy method
+		Destroys inner logger singleton
+	*/
+	static void destroy();
+
 	/*! @brief Singleton initialization method
 	 *
 	 *	@important @a level - is global log level on start, default value = PROD_LOG_LEVEL
@@ -120,7 +125,7 @@ public:
 					 const unsigned int amount = DEFAULT_AMOUNT,
 					 const bool is_config = DEFAULT_CONFIG, const bool do_flush = DEFAULT_FLUSH);
 
-	void log_error(const std::string&);
+	constexpr void log_error(const std::string&);
 	/*! @fn log_error(const std::string&)
 	 *	@brief It saves error
 	 *
@@ -129,14 +134,14 @@ public:
 	 *	@attention It won`t stop function execution!
 	 */
 
-	void log_warning(const std::string&);
+	constexpr void log_warning(const std::string&);
 	/*! @fn log_warning(const std::string&)
 	 *  @brief It saves warning
 	 *
 	 *  Saves message with warning flag
 	 */
 
-	void log_message(const std::string&);
+	constexpr void log_message(const std::string&);
 	/*! @fn log_message(const std::string&)
 	 *  @brief It saves message
 	 *
