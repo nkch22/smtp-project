@@ -48,4 +48,5 @@ target_link_libraries(smtp_server
     json
     config
     initializer
+    db
 )

@@ -26,6 +26,10 @@ public:
     virtual bool CreateUser(const IUser& user) = 0;
     virtual bool UpdateUser(const IUser& user) = 0;
     virtual bool RemoveUser(const IUser& user) = 0;
+
+    virtual bool CreateMail(const IMail& message) = 0;
+    virtual std::vector<std::optional<IMail*>> GetReceivedMails(const IUser& user) = 0;
+    virtual std::vector<std::optional<IMail*>> GetSentMails(const IUser& user) = 0;
 };
 
 }

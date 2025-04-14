@@ -1,25 +1,36 @@
 #pragma once
 
-#include "SharedInclude.h"
 #include "Concurrency/UnboundedBlockingMPMCQueue.h"
+#include "MessageFormatter.h"
+#include "MessageType.h"
+#include "SharedInclude.h"
+#include "ThreadMap.h"
+
+/*! @file RealLogger.h
+*	@brief Implements all logger logic
+*/
+
+namespace logger_inner
+{
+using logger::Format;
+
+/*! @class RealLogger
+*	@brief Singleton logger implementation
+* 
+*	Class Logger uses this class to perform every logging operation
+*	@warning There is no need to use this class directly, it is for inner use only
+* 
+*	It uses inner queue to store messages and worker thread to flush messages from queue
+*/
 
 class RealLogger
 {
 private:
-	struct Message
-	{
-		std::string msg;
-		logger::MessageTypes type;
-		std::source_location location;
-		logger::LogLevels level;
-		std::thread::id thr_id;
-	};
-
 	using Queue = concurrency::UnboundedBlockingMPMCQueue<Message>;
 
 	static RealLogger* m_instance;
 
-	logger::LogLevels m_level;
+	logger::LogLevel m_level;
 	std::string m_output_path;
 	std::ofstream m_file;
 
@@ -34,7 +45,10 @@ private:
 	Queue m_queue;
 	std::thread m_thr;
 
-	RealLogger(const logger::LogLevels, const std::string&, const unsigned int, const bool, const bool);
+	ThreadMap m_thr_map;
+	GlobalLogLevel m_level_map;
+
+	RealLogger(const logger::LogLevel&, const std::string&, const unsigned int, const bool, const bool);
 
 	~RealLogger() = default;
 
@@ -45,27 +59,55 @@ public:
 	RealLogger(const RealLogger&) = delete;
 	RealLogger(RealLogger&&) = delete;
 
-	static RealLogger* get_instance(const logger::LogLevels = DEFAULT_LEVEL, const std::string& = DEFAULT_PATH,
+	/*! @brief Usable constructor
+	*	
+	*	It is implementation for init Logger method
+	*/
+	static RealLogger* get_instance(const logger::LogLevel& = DEFAULT_LOG_LEVEL, const std::string& = DEFAULT_PATH,
 									const unsigned int amount = DEFAULT_AMOUNT, const bool is_config = DEFAULT_CONFIG,
 									const bool do_flush = DEFAULT_FLUSH);
 
+	/*! @brief Destructor
+	*	It joins worker thread and deletes allocated memory
+	*/
 	static void destroy();
 
-	void save_to_queue(const std::string&, const logger::MessageTypes, const std::source_location&,
-					   const logger::LogLevels level, std::thread::id id = std::this_thread::get_id());
+	/*! @brief Main method to log something
+	*	Saves given message to inner queue for further flushing
+	*/
+	void save_to_queue(const std::string&, const logger_inner::MessageType&, const std::string&, const logger::LogLevel&,
+					   const Format&, std::thread::id id = std::this_thread::get_id());
 
-	void real_set_level(const logger::LogLevels);
-	logger::LogLevels real_get_level();
+	/*! @brief Global log level setter*/
+	void real_set_level(const logger::LogLevel&);
+	/*! @brief Global log level getter*/
+	const logger::LogLevel& real_get_level();
 
+	/*! @brief Flushing method
+	*	Performs actual flushing logic
+	*	@warning it must be called only inside of inner worker thread
+	*/
 	void flush_message(const Message&);
 
+	/*!@brief Fatal error handler
+	*	It will log unhandled exception
+	*	@warning it will work only if logger is successfully initialized
+	*/
 	static void handle_fatal_error();
 
+	/*! @brief Method to stop config mode*/
 	void real_stop_config();
 
+	/*! @brief Output directory setter
+	*	@warning Can be used only in config mode
+	*/
 	void set_output(const std::string&);
 
-	std::string get_path() const;
+	/*! @brief Output directory getter*/
+	const std::string& get_path() const;
 
+	/*! @brief Flush setter*/
 	void real_set_flush(const bool);
 };
+
+} // namespace logger_inner

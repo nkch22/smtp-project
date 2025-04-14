@@ -16,7 +16,7 @@ void Initializer::Init(const std::filesystem::path& configPath)
 
 bool Initializer::StartLoggerWithDefaults()
 {
-	return logger::Logger::init(logger::LOG_LEVEL_TRACE, DEFAULT_PATH, DEFAULT_AMOUNT, true);
+	return logger::Logger::init(TRACE_LOG_LEVEL, DEFAULT_PATH, DEFAULT_AMOUNT, true);
 }
 
 Config Initializer::LoadConfig(const std::filesystem::path& configPath)
@@ -37,7 +37,7 @@ void Initializer::InitLogger(const Config& config)
 {
 	Config::Logging logger_config = config.GetLogging();
 
-	logger::Logger::set_global_level(static_cast<logger::LogLevels>(logger_config.log_level));
+	logger::Logger::set_global_level(GET_LOG_LEVEL(logger_config.log_level));
 	logger::Logger::set_output_dir(logger_config.logs_directory);
 
 	logger::Logger::stop_config();
