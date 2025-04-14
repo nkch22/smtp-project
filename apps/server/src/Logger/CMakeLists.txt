@@ -6,3 +6,5 @@ target_link_libraries(logger_example logger_shared)
 
 add_executable(logger_config_example "ConfigExample.cpp")
 target_link_libraries(logger_config_example logger_shared)
+
+add_subdirectory(Tests)

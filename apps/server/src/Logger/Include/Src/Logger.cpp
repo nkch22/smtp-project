@@ -10,6 +10,10 @@ Logger::Logger(const char* loc) :
 	m_local_format{m_local_level.get_format()} {};
 
 
+void Logger::destroy() {
+	RealLogger::destroy();
+}
+
 bool Logger::init(const LogLevel level, const std::string& save_path, const unsigned int amount,
 				  const bool is_config, const bool do_flush)
 {

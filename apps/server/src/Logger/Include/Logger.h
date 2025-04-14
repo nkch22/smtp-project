@@ -30,7 +30,7 @@ namespace logger
  *
  *	@warning init() method will delete Logger singleton AFTER program ends or crashes
  *
- *	@warning Using saving methods without previous init() call in any other place is undefined behavior
+ *	@warning Using saving methods without previous init() call in any other place throws runtime_error
  *
  *  @warning By setting flush value to false, Logger will stop storing any log messages
  *
@@ -60,6 +60,7 @@ namespace logger
  *	    }
  *		MAKE_LOGGABLE(Test, a, b) //Creates operator<< for given class and members
  *	@endcode
+ * 
  */
 class Logger
 {
@@ -97,6 +98,11 @@ public:
 	/*! @fn ~Logger()
 	 *	@brief Trivial destructor
 	 */
+
+	/*! @brief Singleton destroy method
+		Destroys inner logger singleton
+	*/
+	static void destroy();
 
 	/*! @brief Singleton initialization method
 	 *

@@ -104,6 +104,7 @@ RealLogger* RealLogger::get_instance(const LogLevel& level, const std::string& p
 		atexit([] { destroy(); });
 		std::set_terminate(handle_fatal_error);
 	}
+
 	return m_instance;
 }
 
@@ -129,6 +130,8 @@ void RealLogger::destroy()
 void RealLogger::save_to_queue(const std::string& str, const MessageType& type, const std::string& location,
 							   const LogLevel& level, const Format& ft, std::thread::id id)
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	if (!m_do_flush || level.get_level() == 0) return;
 
 	m_thr_map.add(id);
@@ -137,11 +140,15 @@ void RealLogger::save_to_queue(const std::string& str, const MessageType& type, 
 
 void RealLogger::real_set_level(const LogLevel& _level)
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	std::lock_guard guard{m_mutex};
 	m_level = _level;
 }
 const LogLevel& RealLogger::real_get_level()
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	std::lock_guard guard{m_mutex};
 	return m_level;
 }
@@ -183,6 +190,7 @@ void RealLogger::handle_fatal_error()
 
 void RealLogger::real_stop_config()
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
 	if (!m_is_config) return;
 
 	file_init(m_amount);
@@ -195,16 +203,22 @@ void RealLogger::real_stop_config()
 
 void RealLogger::set_output(const std::string& path)
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	std::lock_guard guard{m_mutex};
 	m_output_path = path;
 }
 
 const std::string& RealLogger::get_path() const
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	return m_output_path;
 }
 
 void RealLogger::real_set_flush(const bool value)
 {
+	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
+
 	m_do_flush = value;
 }
