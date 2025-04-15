@@ -26,11 +26,9 @@ RealLogger::RealLogger(const LogLevel& _level, const std::string& _save, const u
 	m_thr = std::thread{[this]
 						{
 							{
-								std::unique_lock lock{m_mutex};
+
 								while (!m_end)
 								{
-									lock.unlock();
-
 									std::queue<Message> localQueue = m_queue.Extract();
 									while (!localQueue.empty())
 									{
@@ -38,7 +36,6 @@ RealLogger::RealLogger(const LogLevel& _level, const std::string& _save, const u
 										localQueue.pop();
 									}
 
-									lock.lock();
 								}
 							}
 
@@ -94,8 +91,8 @@ void RealLogger::file_init(const unsigned int amount)
 					  m_level.get_format(), std::this_thread::get_id());
 }
 
-RealLogger* RealLogger::get_instance(const LogLevel& level, const std::string& path,
-									 const unsigned int amount, const bool is_config, const bool do_flush)
+RealLogger* RealLogger::get_instance(const LogLevel& level, const std::string& path, const unsigned int amount,
+									 const bool is_config, const bool do_flush)
 {
 	if (m_instance == nullptr)
 	{
@@ -115,10 +112,7 @@ void RealLogger::destroy()
 	m_instance->save_to_queue("logger is destroyed", info, FUNCTION_NAME, m_instance->real_get_level(),
 							  m_instance->m_level.get_format(), std::thread::id{});
 
-	{
-		std::lock_guard guard{m_instance->m_mutex};
-		m_instance->m_end = 1;
-	}
+	m_instance->m_end = 1;
 
 	m_instance->m_queue.Close();
 	m_instance->m_thr.join();
@@ -142,14 +136,12 @@ void RealLogger::real_set_level(const LogLevel& _level)
 {
 	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
 
-	std::lock_guard guard{m_mutex};
 	m_level = _level;
 }
 const LogLevel& RealLogger::real_get_level()
 {
 	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
 
-	std::lock_guard guard{m_mutex};
 	return m_level;
 }
 
@@ -195,10 +187,7 @@ void RealLogger::real_stop_config()
 
 	file_init(m_amount);
 
-	{
-		std::lock_guard lock{m_mutex};
-		m_is_config = 0;
-	}
+	m_is_config = 0;
 }
 
 void RealLogger::set_output(const std::string& path)
@@ -213,6 +202,7 @@ const std::string& RealLogger::get_path() const
 {
 	if (m_instance == nullptr) throw std::runtime_error{"Logger is not initialized"};
 
+	std::lock_guard<std::mutex> guard{m_instance->m_mutex};
 	return m_output_path;
 }
 

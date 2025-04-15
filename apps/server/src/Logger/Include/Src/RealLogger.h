@@ -5,6 +5,7 @@
 #include "MessageType.h"
 #include "SharedInclude.h"
 #include "ThreadMap.h"
+#include <atomic>
 
 /*! @file RealLogger.h
 *	@brief Implements all logger logic
@@ -36,11 +37,11 @@ private:
 
 	std::mutex m_mutex;
 
-	bool m_end;
-	bool m_do_flush;
-	bool m_is_config;
+	std::atomic<bool> m_end;
+	std::atomic<bool> m_do_flush;
+	std::atomic<bool> m_is_config;
 
-	unsigned int m_amount;
+	std::atomic<unsigned int> m_amount;
 
 	Queue m_queue;
 	std::thread m_thr;
