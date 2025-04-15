@@ -1,0 +1,1 @@
+target_sources(smtp_test PRIVATE smtp_test.cpp database_test.cpp)

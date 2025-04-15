@@ -1,0 +1,6 @@
+*.log
+Dockerfile
+build
+docker-compose.yml
+CMakeUserPresets.json
+*.md

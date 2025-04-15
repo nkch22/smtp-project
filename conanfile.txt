@@ -1,0 +1,12 @@
+[requires]
+asio/1.32.0
+openssl/3.1.3
+spdlog/1.15.1
+libpq/16.8
+nlohmann_json/3.11.3
+base64/0.5.2
+gtest/1.16.0
+
+[generators]
+CMakeDeps
+CMakeToolchain

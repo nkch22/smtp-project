@@ -1,6 +1,11 @@
 # Build directories
-/build
+build/
+config/
+tools/certificates
 
+.env
+CMakeUserPresets.json
+.vscode
 # CLion specific
 .idea
 cmake-build-debug
@@ -443,4 +448,6 @@ FodyWeavers.xsd
 
 #output folders
 out/
-output/
+
+#documentation folder
+html/

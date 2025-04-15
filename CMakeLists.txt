@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.20)
 
-project(smtp_proc)
+project(smtp_server)
 
-include(cmake/Ccache.cmake)
 include(cmake/CompileOptions.cmake)
-include(cmake/Sanitize.cmake)
-include(cmake/Development.cmake)
-include(cmake/CheckCompiler.cmake)
-include(cmake/Logging.cmake)
 include(cmake/InstallThirdParty.cmake)
 
+add_executable(smtp_server)
 add_subdirectory(src)
+
 add_subdirectory(tests)

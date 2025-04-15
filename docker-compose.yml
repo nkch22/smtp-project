@@ -1,0 +1,30 @@
+services:
+  smtp-database:
+    container_name: smtp-database
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - smtp-data:/var/lib/postgresql/data
+    env_file:
+      - "config/database.env"
+    networks:
+      - smtp-network
+
+  smtp-server:
+    container_name: smtp-server
+    build: .
+    ports:
+      - 465:465
+    depends_on:
+      - smtp-database
+    networks:
+      - smtp-network
+
+volumes:
+  smtp-data:
+
+networks:
+  smtp-network:
+    driver: bridge
