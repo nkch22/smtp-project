@@ -7,7 +7,7 @@ namespace SMTP
 {
 bool AuthPlain::Authenticate(ISocket& socket, const std::string& username, const std::string& password)
 {
-	std::string auth = "\0" + username + "\0" + password;
+	std::string auth = '\0' + username + '\0' + password;
 	std::string encoded_auth = base64_encode(auth);
 
 	socket.Send("AUTH PLAIN " + encoded_auth + "\r\n");

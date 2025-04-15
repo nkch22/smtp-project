@@ -51,13 +51,10 @@ bool Client::Register(const std::string& username, const std::string& password)
 {
 	if (!m_socket) throw std::runtime_error("Client not initialized");
 
-	if (!m_authenticator->Authenticate(*m_socket, m_username, m_password))
-	{
-		// TODO: register user here!
-		return true;
-	}
+	set_username(username);
+	set_password(password);
 
-	return false;
+	return m_authenticator->Authenticate(*m_socket, m_username, m_password);
 }
 
 void Client::Connect(const std::string& server, uint16_t port)
